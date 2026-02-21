@@ -1,21 +1,45 @@
 # Cloud-Bench
 
-[![Benchmarks](https://github.com/fabianwimberger/cloud-bench/actions/workflows/benchmark.yml/badge.svg)](https://github.com/fabianwimberger/cloud-bench/actions/workflows/benchmark.yml)
-[![Validate](https://github.com/fabianwimberger/cloud-bench/actions/workflows/validate.yml/badge.svg)](https://github.com/fabianwimberger/cloud-bench/actions/workflows/validate.yml)
+[![Validate](https://github.com/fabianwimberger/cloud-bench/actions/workflows/validate.yml/badge.svg)](https://github.com/fabianwimberger/cloud-bench/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Cloud instance benchmarking suite comparing CPU, memory, and disk performance across instance types with cost analysis.
 
 Powered by [sysbench](https://github.com/akopytov/sysbench) and [fio](https://github.com/axboe/fio).
 
+## Why This Project?
+
+Cloud instance pricing and performance characteristics vary significantly between providers and instance types. $20/month can get you vastly different compute capabilities depending on your choice. This project provides reproducible, data-driven benchmarks to make informed infrastructure decisions based on actual performance rather than marketing specifications.
+
+**Goals:**
+- Compare instance types objectively using standardized benchmarks
+- Factor in cost to determine real value (performance per dollar)
+- Provide reproducible results that can be independently verified
+
+## Features
+
+- **Multi-provider support** — currently Hetzner Cloud, extensible for AWS, GCP, Azure
+- **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
+- **Cost analysis** — performance per dollar across instance types
+- **Interactive dashboard** — React-based visualization of results
+- **Automated infrastructure** — Terraform for provisioning, Ansible for execution
+- **Security-first** — fresh SSH keys per run, automatic cleanup
+
 ## Quick Start
 
 ```bash
-export HCLOUD_TOKEN="your-token"
-./scripts/run-local.sh
-```
+# Clone and configure
+git clone https://github.com/fabianwimberger/cloud-bench.git
+cd cloud-bench
 
-Or run via GitHub Actions: **Actions → Run Benchmarks**
+# Set your API token
+export HCLOUD_TOKEN="your-token"
+
+# Run benchmarks locally
+./scripts/run-local.sh
+
+# Or run via GitHub Actions: Actions → Run Benchmarks
+```
 
 ## How It Works
 
@@ -23,19 +47,15 @@ Or run via GitHub Actions: **Actions → Run Benchmarks**
 Terraform → Ansible (sysbench/fio) → Python (scoring) → React Dashboard
 ```
 
-**Methodology:** 5 runs per test, median value used. Scores normalized 0-100. Weights: CPU 40%, Memory 35%, Disk 25%.
-
-## Requirements
-
-- Terraform 1.10+
-- Ansible 11.4+
-- Python 3.13+
-- Node.js 22+
-- Hetzner Cloud API token
+**Methodology:**
+- 5 runs per test, median value used for consistency
+- Scores normalized 0-100 per category
+- Weights: CPU 40%, Memory 35%, Disk 25%
+- Cost-efficiency calculated from monthly price and composite score
 
 ## Configuration
 
-Edit `config/instances.yaml` to add/remove instances — no code changes needed.
+Edit `config/instances.yaml` to add/remove instances:
 
 ```yaml
 providers:
@@ -52,12 +72,6 @@ providers:
           monthly_eur: 3.59
 ```
 
-## Cost
-
-~10 minutes per run, costs a few cents. Infrastructure is destroyed automatically even if benchmarks fail.
-
-**Protection:** Cost estimation before each run (blocks >$5 or >10 instances), orphan cleanup every 6 hours.
-
 ## Project Structure
 
 | Component | Location |
@@ -72,10 +86,19 @@ providers:
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
-- Auto-cleanup via `if: always()`
+- Auto-cleanup via `if: always()` — infrastructure destroyed even if benchmarks fail
+- Cost guard — estimation before each run blocks expensive configurations
 
-See [docs/setup-guide.md](docs/setup-guide.md) for full setup instructions.
+## Cost
+
+~10 minutes per run, costs a few cents. Infrastructure is destroyed automatically even if benchmarks fail.
+
+**Protection:**
+- Cost estimation before each run (blocks >$5 or >10 instances)
+- Orphan cleanup every 6 hours
 
 ## License
 
-MIT — see [LICENSE](LICENSE) file. Benchmarking tools: sysbench & fio (GPL).
+MIT License — see [LICENSE](LICENSE) file.
+
+Benchmarking tools: sysbench & fio (GPL).
