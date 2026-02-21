@@ -216,15 +216,33 @@ jobs:
         run: |
           pip install ansible==${{ env.ANSIBLE_VERSION }}
 
+      - name: Allow benchmark runner IP in Hetzner firewalls
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          RUNNER_IP=$(curl -s https://api.ipify.org)
+          echo "Benchmark runner IP: $RUNNER_IP"
+
+          FIREWALL_IDS=$(curl -s -H "Authorization: Bearer $HCLOUD_TOKEN" \
+            "https://api.hetzner.cloud/v1/firewalls?label_selector=run_id=${{ env.RUN_ID }}" \
+            | jq -r '.firewalls[].id')
+
+          for FW_ID in $FIREWALL_IDS; do
+            RULES=$(curl -s -H "Authorization: Bearer $HCLOUD_TOKEN" \
+              "https://api.hetzner.cloud/v1/firewalls/$FW_ID" \
+              | jq '.firewall.rules')
+            NEW_RULE=$(jq -n --arg ip "$RUNNER_IP/32" \
+              '{direction:"in",protocol:"tcp",port:"22",source_ips:[$ip]}')
+            UPDATED_RULES=$(echo "$RULES" | jq --argjson r "$NEW_RULE" '. + [$r]')
+            curl -s -X POST \
+              -H "Authorization: Bearer $HCLOUD_TOKEN" \
+              -H "Content-Type: application/json" \
+              "https://api.hetzner.cloud/v1/firewalls/$FW_ID/actions/set_rules" \
+              -d "{\"rules\": $UPDATED_RULES}" | jq -r '.action.status'
+          done
+
       - name: Wait for instances to be ready
         run: |
-          # Wait for all instances to be accessible via SSH
-          ansible all -i inventory.ini -m ping --private-key ~/.ssh/cloud_bench \
-            -e "ansible_python_interpreter=auto" \
-            --ssh-common-args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
-            --wait-for-connection --timeout=300 2>&1 | tee ping-result.txt || true
-
-          # Verify connectivity with retries
           for i in $(seq 1 30); do
             echo "Attempt $i: Checking SSH connectivity..."
             if ansible all -i inventory.ini -m raw -a "echo ready" \
