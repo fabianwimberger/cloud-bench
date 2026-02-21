@@ -237,7 +237,7 @@ jobs:
         run: |
           export RUN_ID="${{ env.RUN_ID }}"
           export ANSIBLE_HOST_KEY_CHECKING=False
-          ansible-playbook -i inventory.ini playbooks/benchmark.yml \
+          ansible-playbook -i ../inventory.ini playbooks/benchmark.yml \
             --private-key ~/.ssh/cloud_bench \
             --extra-vars "run_id=${{ env.RUN_ID }}" \
             -vv
