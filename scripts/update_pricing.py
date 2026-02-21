@@ -134,7 +134,7 @@ def main():
         print(f"[ERROR] Config file not found: {args.config}")
         sys.exit(1)
 
-    print(f"Fetching pricing from Hetzner API...")
+    print("Fetching pricing from Hetzner API...")
     try:
         server_types = fetch_server_types(args.token)
         print(f"[OK] Fetched {len(server_types)} server types\n")

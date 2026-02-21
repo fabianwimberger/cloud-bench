@@ -394,7 +394,7 @@ def main():
 
         with open(os.path.join(args.output, 'benchmark-data.json'), 'w') as f:
             json.dump(summary_data, f, indent=2, default=str)
-        print(f"  [OK] benchmark-data.json")
+        print("  [OK] benchmark-data.json")
 
         with open(os.path.join(args.output, detail_file), 'w') as f:
             json.dump(detail_data, f, indent=2, default=str)
@@ -402,22 +402,22 @@ def main():
 
         with open(os.path.join(args.output, 'summary.md'), 'w') as f:
             f.write(summary_md)
-        print(f"  [OK] summary.md")
+        print("  [OK] summary.md")
 
         csv_cols = ['instance_type', 'vcpu', 'ram_gb', 'disk_gb',
                    'price_monthly', 'single_core_score', 'multi_core_score',
                    'memory_score', 'disk_score', 'overall_score', 'cpu_value_monthly']
         df.to_csv(os.path.join(args.output, 'benchmark-results.csv'), columns=csv_cols, index=False)
-        print(f"  [OK] benchmark-results.csv")
+        print("  [OK] benchmark-results.csv")
 
         update_manifest(args.output, summary_file, detail_file, metadata)
-        print(f"  [OK] manifest.json")
+        print("  [OK] manifest.json")
 
-        print(f"\nTop performers:")
+        print("\nTop performers:")
         for i, row in df.sort_values('overall_score', ascending=False).head(3).iterrows():
             print(f"  {row['display_name']}: {row['overall_score']:.0f} (EUR{row['price_monthly']}/mo)")
 
-        print(f"\nBest value:")
+        print("\nBest value:")
         for i, row in df.sort_values('cpu_value_monthly', ascending=False).head(3).iterrows():
             print(f"  {row['display_name']}: {row['cpu_value_monthly']:.1f} CPU pts/EUR")
 

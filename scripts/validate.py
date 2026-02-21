@@ -4,7 +4,6 @@
 import argparse
 import json
 import os
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -188,7 +187,7 @@ def validate_python():
     if scripts_dir.exists():
         sys.path.insert(0, str(scripts_dir))
         try:
-            import process_results
+            import process_results  # noqa: F401
             print_success("process_results.py can be imported")
         except Exception as e:
             print_error(f"Cannot import process_results.py: {e}")
@@ -377,8 +376,8 @@ def main():
     print(f"Working directory: {os.getcwd()}")
     
     # Check prerequisites first
-    missing_tools = check_prerequisites()
-    
+    check_prerequisites()
+
     # Run validation steps
     validation_steps = {
         'terraform': validate_terraform,
