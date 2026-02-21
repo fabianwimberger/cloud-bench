@@ -49,7 +49,7 @@ See [data-format.md](data-format.md) for the schema.
 
 ## Security
 
-- Firewall restricts SSH to the runner's IP only
-- Fresh SSH key per run
+- Fresh Ed25519 SSH key generated per run, never reused
+- Firewall allows SSH from any IP (key-based auth only)
 - `if: always()` cleanup in CI
 - Dedicated Hetzner project recommended for isolation

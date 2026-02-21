@@ -35,13 +35,13 @@ resource "hcloud_firewall" "benchmark" {
     direction  = "in"
     protocol   = "tcp"
     port       = "22"
-    source_ips = var.allowed_ssh_ips
+    source_ips = ["0.0.0.0/0", "::/0"]
   }
 
   rule {
     direction  = "in"
     protocol   = "icmp"
-    source_ips = var.allowed_ssh_ips
+    source_ips = ["0.0.0.0/0", "::/0"]
   }
 }
 

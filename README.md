@@ -71,8 +71,7 @@ providers:
 
 ## Security
 
-- Firewall restricts SSH to runner IP only
-- Fresh Ed25519 SSH key per run
+- Fresh Ed25519 SSH key generated per run, never reused
 - Auto-cleanup via `if: always()`
 
 See [docs/setup-guide.md](docs/setup-guide.md) for full setup instructions.
