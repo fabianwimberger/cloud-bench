@@ -164,14 +164,14 @@ jobs:
           terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
       - name: Upload Terraform State
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: terraform-state
           path: terraform/terraform.tfstate
           retention-days: 1
 
       - name: Upload Ansible Inventory
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ansible-inventory
           path: ansible/inventory.ini
@@ -243,7 +243,7 @@ jobs:
             -vv
 
       - name: Upload Raw Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: benchmark-raw-results
           path: ansible/results/*.json
@@ -288,7 +288,7 @@ jobs:
           echo "${delimiter}" >> $GITHUB_OUTPUT
 
       - name: Upload Processed Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: benchmark-processed
           path: frontend/public/data/
