@@ -282,9 +282,10 @@ jobs:
       - name: Generate Summary
         id: summary
         run: |
-          echo "content<<EOF" >> $GITHUB_OUTPUT
+          delimiter="$(openssl rand -hex 8)"
+          echo "content<<${delimiter}" >> $GITHUB_OUTPUT
           cat frontend/public/data/summary.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
 
       - name: Upload Processed Results
         uses: actions/upload-artifact@v4
