@@ -1,9 +1,11 @@
-# Cloud-Bench
+# Cloud Bench
 
-[![Validate](https://github.com/fabianwimberger/cloud-bench/actions/workflows/validate.yml/badge.svg)](https://github.com/fabianwimberger/cloud-bench/actions)
+[![CI](https://github.com/fabianwimberger/cloud-bench/actions/workflows/validate.yml/badge.svg)](https://github.com/fabianwimberger/cloud-bench/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Cloud instance benchmarking suite comparing CPU, memory, and disk performance across instance types with cost analysis.
+**[Live Results →](https://fabianwimberger.github.io/cloud-bench/)**
+
+A cloud instance benchmarking suite comparing CPU, memory, and disk performance across instance types with cost analysis.
 
 Powered by [sysbench](https://github.com/akopytov/sysbench) and [fio](https://github.com/axboe/fio).
 
@@ -101,4 +103,6 @@ providers:
 
 MIT License — see [LICENSE](LICENSE) file.
 
-Benchmarking tools: sysbench & fio (GPL).
+### Benchmark Tools
+
+This project uses [sysbench](https://github.com/akopytov/sysbench) and [fio](https://github.com/axboe/fio), both licensed under the GPL.
