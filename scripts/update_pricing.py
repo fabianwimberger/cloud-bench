@@ -33,6 +33,7 @@ def fetch_server_types(token: str) -> list[dict]:
                 time.sleep(RETRY_DELAY * (attempt + 1))
             else:
                 raise
+    raise RuntimeError("Max retries exceeded")
 
 
 def parse_pricing(server_type: dict) -> Optional[dict]:

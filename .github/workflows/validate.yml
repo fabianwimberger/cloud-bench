@@ -71,7 +71,7 @@ jobs:
       - run: |
           pip install -r scripts/requirements.txt
           pip install -r tests/requirements-test.txt
-          pip install ruff mypy
+          pip install ruff mypy types-PyYAML types-requests
 
       - name: Lint with ruff
         run: ruff check scripts/ tests/

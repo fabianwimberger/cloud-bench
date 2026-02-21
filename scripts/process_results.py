@@ -6,6 +6,8 @@ import glob
 import os
 import sys
 import argparse
+from typing import Optional
+
 import yaml
 from datetime import datetime
 
@@ -77,7 +79,7 @@ def load_results(input_dir: str) -> list[dict]:
 
 
 def get_instance_type_from_key(
-    key: str, config: dict = None, provider: str = None
+    key: str, config: Optional[dict] = None, provider: Optional[str] = None
 ) -> str:
     key_lower = key.lower()
 
