@@ -7,7 +7,9 @@ import json
 import yaml
 
 
-def estimate_cost(provider: str, instances_input: str, config_path: str = "config/instances.yaml") -> dict:
+def estimate_cost(
+    provider: str, instances_input: str, config_path: str = "config/instances.yaml"
+) -> dict:
     """Calculate estimated cost for a benchmark run."""
     with open(config_path) as f:
         config = yaml.safe_load(f)
@@ -26,8 +28,7 @@ def estimate_cost(provider: str, instances_input: str, config_path: str = "confi
     USD_RATE = 1.08
 
     total_cost_eur = sum(
-        i.get("pricing", {}).get("hourly_eur", 0) * RUNTIME_HOURS
-        for i in to_benchmark
+        i.get("pricing", {}).get("hourly_eur", 0) * RUNTIME_HOURS for i in to_benchmark
     )
     total_cost_usd = total_cost_eur * USD_RATE
 

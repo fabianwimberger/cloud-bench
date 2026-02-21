@@ -19,13 +19,11 @@ RETRY_DELAY = 2
 def fetch_server_types(token: str) -> list[dict]:
     """Fetch all server types from Hetzner API with retry."""
     headers = {"Authorization": f"Bearer {token}"}
-    
+
     for attempt in range(MAX_RETRIES):
         try:
             response = requests.get(
-                f"{HCLOUD_API}/server_types",
-                headers=headers,
-                timeout=30
+                f"{HCLOUD_API}/server_types", headers=headers, timeout=30
             )
             response.raise_for_status()
             return response.json()["server_types"]
@@ -69,7 +67,9 @@ def get_architecture(server_type: dict) -> str:
     return "Intel"
 
 
-def update_config(config_path: str, server_types: list[dict], dry_run: bool = False) -> dict:
+def update_config(
+    config_path: str, server_types: list[dict], dry_run: bool = False
+) -> dict:
     """Update instances.yaml with fetched pricing."""
     with open(config_path) as f:
         config = yaml.safe_load(f)
@@ -108,10 +108,12 @@ def update_config(config_path: str, server_types: list[dict], dry_run: bool = Fa
     if not dry_run and updated > 0:
         config["_metadata"] = {
             "last_pricing_update": datetime.now().isoformat(),
-            "source": "Hetzner Cloud API"
+            "source": "Hetzner Cloud API",
         }
         with open(config_path, "w") as f:
-            yaml.dump(config, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+            yaml.dump(
+                config, f, default_flow_style=False, sort_keys=False, allow_unicode=True
+            )
         print(f"[OK] Saved to {config_path}")
     elif dry_run:
         print("[DRY RUN] No changes saved")
@@ -120,10 +122,18 @@ def update_config(config_path: str, server_types: list[dict], dry_run: bool = Fa
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Update instance pricing from Hetzner API")
-    parser.add_argument("--config", "-c", default="config/instances.yaml", help="Config file path")
-    parser.add_argument("--token", "-t", default=os.getenv("HCLOUD_TOKEN"), help="Hetzner API token")
-    parser.add_argument("--dry-run", "-n", action="store_true", help="Show changes without saving")
+    parser = argparse.ArgumentParser(
+        description="Update instance pricing from Hetzner API"
+    )
+    parser.add_argument(
+        "--config", "-c", default="config/instances.yaml", help="Config file path"
+    )
+    parser.add_argument(
+        "--token", "-t", default=os.getenv("HCLOUD_TOKEN"), help="Hetzner API token"
+    )
+    parser.add_argument(
+        "--dry-run", "-n", action="store_true", help="Show changes without saving"
+    )
     args = parser.parse_args()
 
     if not args.token:
