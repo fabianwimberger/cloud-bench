@@ -27,6 +27,11 @@
         state: directory
         mode: '0755'
 
+    - name: Wait for dpkg lock to be released
+      shell: while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 3; done
+      changed_when: false
+      timeout: 120
+
     - name: Install required packages
       apt:
         name:
@@ -36,6 +41,10 @@
           - jq
         state: present
         update_cache: yes
+      register: apt_result
+      until: apt_result is not failed
+      retries: 5
+      delay: 10
 
     - name: Validate required tools are available
       command: "{{ item }}"
