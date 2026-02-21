@@ -1,0 +1,73 @@
+name: Update Pricing
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 6 AM UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no changes)'
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  update-pricing:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install requests pyyaml
+
+      - name: Check pricing
+        id: check
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            python scripts/update_pricing.py --dry-run | tee pricing_output.txt
+          else
+            python scripts/update_pricing.py | tee pricing_output.txt
+          fi
+          
+          if grep -q "\[UPDATED\]" pricing_output.txt; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.check.outputs.changed == 'true' && github.event.inputs.dry_run != 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update instance pricing from Hetzner API'
+          title: 'chore: Update instance pricing'
+          body: |
+            Automated pricing update from Hetzner Cloud API.
+            
+            Changes detected in `config/instances.yaml`.
+            
+            Please review and merge if pricing looks correct.
+          branch: chore/update-pricing
+          delete-branch: true
+          add-paths: config/instances.yaml
+
+      - name: Summary
+        run: |
+          echo "## Pricing Update Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat pricing_output.txt >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

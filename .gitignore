@@ -1,0 +1,74 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!terraform.tfvars.example
+.terraform.lock.hcl
+*.tfplan
+*.tfplan.*
+
+# Ansible
+*.retry
+*.vault
+ansible/inventory.ini
+ansible/results/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Frontend data directory (allow .gitkeep)
+frontend/public/data/*.json
+!frontend/public/data/.gitkeep
+frontend/public/data/*.csv
+frontend/public/data/*.md
+
+# Results
+results/*.json
+!results/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key
+secrets/
+
+# Coverage
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Test artifacts
+.pytest_cache/
+.hypothesis/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log

@@ -1,0 +1,263 @@
+name: Validate
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**/README.md'
+      - 'docs/**'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  TF_VERSION: "1.10.5"
+  NODE_VERSION: "22.14.0"
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+      - name: Terraform Format Check
+        working-directory: terraform
+        run: terraform fmt -check -recursive
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init -backend=false
+      - name: Terraform Validate
+        working-directory: terraform
+        run: terraform validate
+
+  ansible:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install ansible
+      - name: Ansible Syntax Check
+        working-directory: ansible
+        run: |
+          echo "[localhost]" > inventory.ini
+          echo "localhost ansible_connection=local" >> inventory.ini
+          ansible-playbook --syntax-check -i inventory.ini playbooks/benchmark.yml
+
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: |
+          pip install -r scripts/requirements.txt
+          pip install -r tests/requirements-test.txt
+      - run: python3 -m py_compile scripts/process_results.py
+      - run: python3 -m pytest tests/ -v --tb=short
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - working-directory: frontend
+        run: npm ci
+      - working-directory: frontend
+        run: npm run build
+
+  security-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Check Python dependencies
+        run: |
+          pip install safety
+          safety check -r scripts/requirements.txt -r tests/requirements-test.txt || {
+            echo "::error::Python security vulnerabilities detected. Review and update dependencies."
+            exit 1
+          }
+
+      - name: Check npm dependencies
+        working-directory: frontend
+        run: |
+          # Fail build on high/critical vulnerabilities
+          npm audit --audit-level=high
+        # Note: Some npm vulnerabilities may be in transitive deps with no fix available.
+        # If you need to allow known false positives, add --production to exclude dev deps
+
+  validate-script:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      
+      - name: Install dependencies
+        run: |
+          pip install -r scripts/requirements.txt
+          pip install -r tests/requirements-test.txt
+          pip install ansible
+      
+      - name: Run unified validate script
+        run: python scripts/validate.py --skip github
+
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [terraform, ansible, python, frontend, security-scan]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - run: |
+          pip install -r scripts/requirements.txt
+          pip install -r tests/requirements-test.txt
+          cd frontend && npm ci && cd ..
+
+      - name: Create Mock Results
+        run: |
+          mkdir -p results
+          cat > results/cx23-mock.json << 'EOF'
+          {
+            "run_id": "test-mock",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "system": {
+              "provider": "hetzner",
+              "instance_type": "cx23"
+            },
+            "provider_attributes": {
+              "arch": "x86_64",
+              "os": "Ubuntu 24.04",
+              "kernel": "6.8.0",
+              "vcpu": 2,
+              "memory_mb": 4096,
+              "hostname": "test-cx23"
+            },
+            "cpu": {
+              "test": "sysbench-cpu",
+              "runs": 5,
+              "single_thread_events": 350,
+              "multi_thread_events": 700,
+              "threads": 2
+            },
+            "memory": {
+              "test": "sysbench-memory",
+              "runs": 5,
+              "read_mib_per_sec": 8500,
+              "write_mib_per_sec": 6500,
+              "total_throughput_mib": 15000
+            },
+            "disk": {
+              "test": "fio-randread",
+              "runs": 5,
+              "read_iops": 15000
+            }
+          }
+          EOF
+
+          cat > results/cax11-mock.json << 'EOF'
+          {
+            "run_id": "test-mock",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "system": {
+              "provider": "hetzner",
+              "instance_type": "cax11"
+            },
+            "provider_attributes": {
+              "arch": "aarch64",
+              "os": "Ubuntu 24.04",
+              "kernel": "6.8.0",
+              "vcpu": 2,
+              "memory_mb": 4096,
+              "hostname": "test-cax11"
+            },
+            "cpu": {
+              "test": "sysbench-cpu",
+              "runs": 5,
+              "single_thread_events": 600,
+              "multi_thread_events": 1200,
+              "threads": 2
+            },
+            "memory": {
+              "test": "sysbench-memory",
+              "runs": 5,
+              "read_mib_per_sec": 5000,
+              "write_mib_per_sec": 4000,
+              "total_throughput_mib": 9000
+            },
+            "disk": {
+              "test": "fio-randread",
+              "runs": 5,
+              "read_iops": 18000
+            }
+          }
+          EOF
+
+      - name: Test Result Processing
+        run: |
+          python3 scripts/process_results.py \
+            --input results/ \
+            --output frontend/public/data/ \
+            --config config/instances.yaml \
+            --region fsn1 \
+            --provider hetzner
+
+      - name: Verify Output Files
+        run: |
+          for f in benchmark-data.json benchmark-results.csv summary.md manifest.json; do
+            test -f "frontend/public/data/$f" || (echo "$f missing" && exit 1)
+          done
+          python3 -c "import json; json.load(open('frontend/public/data/benchmark-data.json'))"
+
+      - name: Build Frontend with Real Data
+        working-directory: frontend
+        run: npm run build

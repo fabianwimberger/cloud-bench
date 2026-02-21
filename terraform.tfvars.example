@@ -1,0 +1,7 @@
+# Copy to terraform.tfvars and fill in your values
+
+run_id = "local"
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+
+# Get token from: https://console.hetzner.cloud/projects/[PROJECT]/security/tokens
+hcloud_token = "your-hetzner-api-token"

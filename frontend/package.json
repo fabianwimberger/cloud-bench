@@ -1,0 +1,25 @@
+{
+  "name": "cloud-bench-dashboard",
+  "version": "1.0.0",
+  "description": "Cloud-Bench Results Dashboard",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "audit": "npm audit --audit-level=high",
+    "audit:fix": "npm audit fix"
+  },
+  "dependencies": {
+    "chart.js": "4.4.8",
+    "react": "19.2.4",
+    "react-chartjs-2": "5.3.0",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.12",
+    "@types/react-dom": "19.0.6",
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "7.3.1"
+  }
+}

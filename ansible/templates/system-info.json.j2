@@ -1,0 +1,18 @@
+{
+  "schema_version": "2.0",
+  "provider": "{{ provider | default('unknown') }}",
+  "instance_type": "{{ instance_type | default('unknown') }}",
+  "timestamp": "{{ ansible_date_time.iso8601 }}",
+  "provider_attributes": {
+    "arch": "{{ ansible_architecture }}",
+    "os": "{{ ansible_distribution }} {{ ansible_distribution_version }}",
+    "kernel": "{{ ansible_kernel }}",
+    "vcpu": {{ ansible_processor_vcpus }},
+    "memory_mb": {{ ansible_memtotal_mb }},
+    "hostname": "{{ inventory_hostname }}"
+  },
+  "benchmark_config": {
+    "runs": {{ num_runs }},
+    "aggregation": "median"
+  }
+}

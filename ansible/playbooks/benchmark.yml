@@ -1,0 +1,284 @@
+---
+- name: Run CPU, RAM and Disk Benchmarks (5 runs, median)
+  hosts: all
+  gather_facts: yes
+  become: yes
+
+  vars:
+    benchmark_dir: /opt/cloud-bench
+    results_dir: "{{ benchmark_dir }}/results"
+    run_id: "{{ lookup('env', 'RUN_ID') | default('local', true) }}"
+    num_runs: 5
+    ansible_ssh_retries: 5
+    ansible_ssh_timeout: 60
+
+    # Benchmark parameters (configurable)
+    sysbench_cpu_prime: 20000
+    sysbench_memory_size: 1G
+    fio_size: 512M
+    fio_block_size: 4k
+    fio_iodepth: 32
+    fio_runtime: 20
+
+  pre_tasks:
+    - name: Ensure benchmark directory exists
+      file:
+        path: "{{ results_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Install required packages
+      apt:
+        name:
+          - bc
+          - sysbench
+          - fio
+          - jq
+        state: present
+        update_cache: yes
+
+    - name: Validate required tools are available
+      command: "{{ item }}"
+      register: tool_check
+      failed_when: false
+      loop:
+        - sysbench --version
+        - fio --version
+        - jq --version
+
+    - name: Fail if required tools are missing
+      fail:
+        msg: "Required tool {{ item.item }} is not installed"
+      when: item.rc != 0
+      loop: "{{ tool_check.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Save system information
+      template:
+        src: ../templates/system-info.json.j2
+        dest: "{{ results_dir }}/system-info.json"
+        mode: '0644'
+
+  tasks:
+    - block:
+        - name: Run CPU single-thread benchmark {{ num_runs }} times
+          shell: |
+            set -e
+            for i in $(seq 1 {{ num_runs }}); do
+              timeout 300 sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} --threads=1 run \
+                | grep "events per second" | awk '{print $4}'
+            done > "{{ results_dir }}/cpu-single-raw.txt"
+          changed_when: true
+          register: cpu_single_run
+          retries: 2
+          delay: 5
+          until: cpu_single_run.rc == 0
+
+        - name: Verify CPU single-thread results
+          stat:
+            path: "{{ results_dir }}/cpu-single-raw.txt"
+          register: cpu_single_file
+          failed_when: not cpu_single_file.stat.exists
+
+        - name: Calculate CPU single-thread median
+          shell: |
+            set -e
+            median_idx=$(( ({{ num_runs }} + 1) / 2 ))
+            sort -n "{{ results_dir }}/cpu-single-raw.txt" | sed -n "${median_idx}p"
+          register: cpu_single_median
+          changed_when: true
+
+        - name: Validate CPU single-thread median
+          fail:
+            msg: "CPU single-thread median is empty or invalid"
+          when: cpu_single_median.stdout | length == 0
+
+        - name: Run CPU multi-thread benchmark {{ num_runs }} times
+          shell: |
+            set -e
+            for i in $(seq 1 {{ num_runs }}); do
+              sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} --threads={{ ansible_processor_vcpus }} run \
+                | grep "events per second" | awk '{print $4}'
+            done > "{{ results_dir }}/cpu-multi-raw.txt"
+          changed_when: true
+
+        - name: Calculate CPU multi-thread median
+          shell: |
+            set -e
+            median_idx=$(( ({{ num_runs }} + 1) / 2 ))
+            sort -n "{{ results_dir }}/cpu-multi-raw.txt" | sed -n "${median_idx}p"
+          register: cpu_multi_median
+          changed_when: true
+
+        - name: Validate CPU multi-thread median
+          fail:
+            msg: "CPU multi-thread median is empty or invalid"
+          when: cpu_multi_median.stdout | length == 0
+
+        - name: Save CPU results
+          template:
+            src: ../templates/cpu.json.j2
+            dest: "{{ results_dir }}/cpu.json"
+            mode: '0644'
+
+        - name: Run RAM read benchmark {{ num_runs }} times
+          shell: |
+            set -e
+            for i in $(seq 1 {{ num_runs }}); do
+              sysbench memory --memory-oper=read --memory-total-size={{ sysbench_memory_size }} --threads={{ ansible_processor_vcpus }} run \
+                | grep "transferred" | sed -n 's/.*(\([0-9.]*\) MiB\/sec.*/\1/p' | head -1
+            done > "{{ results_dir }}/mem-read-raw.txt"
+          changed_when: true
+
+        - name: Calculate RAM read median
+          shell: |
+            set -e
+            median_idx=$(( ({{ num_runs }} + 1) / 2 ))
+            sort -n "{{ results_dir }}/mem-read-raw.txt" | sed -n "${median_idx}p"
+          register: mem_read_median
+          changed_when: true
+
+        - name: Validate RAM read median
+          fail:
+            msg: "RAM read median is empty or invalid"
+          when: mem_read_median.stdout | length == 0
+
+        - name: Run RAM write benchmark {{ num_runs }} times
+          shell: |
+            set -e
+            for i in $(seq 1 {{ num_runs }}); do
+              sysbench memory --memory-oper=write --memory-total-size={{ sysbench_memory_size }} --threads={{ ansible_processor_vcpus }} run \
+                | grep "transferred" | sed -n 's/.*(\([0-9.]*\) MiB\/sec.*/\1/p' | head -1
+            done > "{{ results_dir }}/mem-write-raw.txt"
+          changed_when: true
+
+        - name: Calculate RAM write median
+          shell: |
+            set -e
+            median_idx=$(( ({{ num_runs }} + 1) / 2 ))
+            sort -n "{{ results_dir }}/mem-write-raw.txt" | sed -n "${median_idx}p"
+          register: mem_write_median
+          changed_when: true
+
+        - name: Validate RAM write median
+          fail:
+            msg: "RAM write median is empty or invalid"
+          when: mem_write_median.stdout | length == 0
+
+        - name: Save RAM results
+          template:
+            src: ../templates/memory.json.j2
+            dest: "{{ results_dir }}/memory.json"
+            mode: '0644'
+
+        - name: Run Disk I/O benchmark {{ num_runs }} times
+          shell: |
+            set -e
+            for i in $(seq 1 {{ num_runs }}); do
+              timeout 120 fio --name=randread --ioengine=libaio --iodepth={{ fio_iodepth }} \
+                  --rw=randread --bs={{ fio_block_size }} --direct=1 --size={{ fio_size }} \
+                  --numjobs=1 --runtime={{ fio_runtime }} \
+                  --group_reporting --output-format=json \
+                  | jq '.jobs[0].read.iops'
+            done > "{{ results_dir }}/disk-iops-raw.txt"
+          changed_when: true
+          register: disk_iops_raw
+          retries: 2
+          delay: 5
+          until: disk_iops_raw.rc == 0
+
+        - name: Calculate Disk IOPS median
+          shell: |
+            set -e
+            median_idx=$(( ({{ num_runs }} + 1) / 2 ))
+            sort -n "{{ results_dir }}/disk-iops-raw.txt" | sed -n "${median_idx}p"
+          register: disk_iops_median
+          changed_when: true
+
+        - name: Validate Disk IOPS median
+          fail:
+            msg: "Disk IOPS median is empty or invalid"
+          when: disk_iops_median.stdout | length == 0
+
+        - name: Save Disk results
+          template:
+            src: ../templates/disk.json.j2
+            dest: "{{ results_dir }}/disk.json"
+            mode: '0644'
+
+        - name: Validate all result files exist
+          stat:
+            path: "{{ results_dir }}/{{ item }}"
+          register: result_files
+          loop:
+            - system-info.json
+            - cpu.json
+            - memory.json
+            - disk.json
+
+        - name: Fail if any result file is missing
+          fail:
+            msg: "Required result file {{ item.item }} does not exist"
+          when: not item.stat.exists
+          loop: "{{ result_files.results }}"
+          loop_control:
+            label: "{{ item.item }}"
+
+        - name: Combine all benchmark results
+          shell: |
+            jq -n \
+              --arg run_id "{{ run_id }}" \
+              --arg hostname "{{ inventory_hostname }}" \
+              --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+              --argjson runs {{ num_runs }} \
+              --slurpfile system "{{ results_dir }}/system-info.json" \
+              --slurpfile cpu "{{ results_dir }}/cpu.json" \
+              --slurpfile memory "{{ results_dir }}/memory.json" \
+              --slurpfile disk "{{ results_dir }}/disk.json" \
+              '{
+                run_id: $run_id,
+                hostname: $hostname,
+                timestamp: $timestamp,
+                benchmark_runs: $runs,
+                aggregation: "median",
+                system: $system[0],
+                cpu: $cpu[0],
+                memory: $memory[0],
+                disk: $disk[0]
+              }' > "{{ results_dir }}/benchmark.json"
+          changed_when: true
+
+        - name: Validate final JSON
+          command: jq empty "{{ results_dir }}/benchmark.json"
+          changed_when: false
+
+        - name: Fetch results from remote
+          fetch:
+            src: "{{ results_dir }}/benchmark.json"
+            dest: "../results/{{ instance_type }}-{{ run_id }}.json"
+            flat: yes
+
+      rescue:
+        - name: Rescue - Save partial results
+          shell: |
+            ls -la "{{ results_dir }}" 2>/dev/null || echo "No results directory"
+          ignore_errors: yes
+
+        - name: Rescue - Cleanup on failure
+          file:
+            path: "{{ results_dir }}"
+            state: absent
+          ignore_errors: yes
+
+        - name: Fail with message
+          fail:
+            msg: "Benchmark playbook failed. Check logs above for details."
+
+  post_tasks:
+    - name: Cleanup benchmark files
+      file:
+        path: "{{ results_dir }}"
+        state: absent
+      when: cleanup_results | default(true) | bool
+      ignore_errors: yes

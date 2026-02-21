@@ -1,0 +1,5 @@
+{
+  "test": "fio-randread",
+  "runs": {{ num_runs }},
+  "read_iops": {{ disk_iops_median.stdout | default(0) | float }}
+}

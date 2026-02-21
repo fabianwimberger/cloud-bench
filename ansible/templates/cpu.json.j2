@@ -1,0 +1,7 @@
+{
+  "test": "sysbench-cpu",
+  "runs": {{ num_runs }},
+  "single_thread_events": {{ cpu_single_median.stdout | default(0) | float }},
+  "multi_thread_events": {{ cpu_multi_median.stdout | default(0) | float }},
+  "threads": {{ ansible_processor_vcpus }}
+}

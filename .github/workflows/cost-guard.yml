@@ -1,0 +1,87 @@
+name: Cost Guard & Pre-flight Check
+
+on:
+  workflow_call:
+    inputs:
+      provider:
+        required: true
+        type: string
+      instances:
+        required: true
+        type: string
+    outputs:
+      estimated_cost_usd:
+        description: 'Estimated cost for this run'
+        value: ${{ jobs.check.outputs.estimated_cost_usd }}
+      instance_count:
+        description: 'Number of instances to benchmark'
+        value: ${{ jobs.check.outputs.instance_count }}
+      should_run:
+        description: 'Whether the benchmark should proceed'
+        value: ${{ jobs.check.outputs.should_run }}
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      estimated_cost_usd: ${{ steps.calculate.outputs.cost_usd }}
+      instance_count: ${{ steps.calculate.outputs.count }}
+      should_run: ${{ steps.gate.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Calculate Estimated Cost
+        id: calculate
+        run: |
+          RESULT=$(python scripts/estimate_cost.py \
+            --provider "${{ inputs.provider }}" \
+            --instances "${{ inputs.instances }}")
+          
+          echo "cost_usd=$(echo $RESULT | jq -r .cost_usd)" >> $GITHUB_OUTPUT
+          echo "count=$(echo $RESULT | jq -r .count)" >> $GITHUB_OUTPUT
+          
+          echo "Estimated cost: ~\$(echo $RESULT | jq -r .cost_usd) USD for $(echo $RESULT | jq -r .count) instances"
+
+      - name: Cost Gate
+        id: gate
+        run: |
+          COST_USD=${{ steps.calculate.outputs.cost_usd }}
+          COUNT=${{ steps.calculate.outputs.count }}
+          MAX_COST_USD=5.00
+          MAX_INSTANCES=10
+          
+          SHOULD_RUN="true"
+          
+          if (( $(echo "$COST_USD > $MAX_COST_USD" | bc -l) )); then
+            echo "::error::Estimated cost \$$COST_USD exceeds limit of \$$MAX_COST_USD"
+            SHOULD_RUN="false"
+          fi
+          
+          if [[ $COUNT -gt $MAX_INSTANCES ]]; then
+            echo "::error::Instance count $COUNT exceeds limit of $MAX_INSTANCES"
+            SHOULD_RUN="false"
+          fi
+          
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          
+          echo "## Cost Guard Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Instances**: $COUNT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Estimated Cost**: ~\$$COST_USD USD" >> $GITHUB_STEP_SUMMARY
+          echo "- **Proceed**: $SHOULD_RUN" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "$SHOULD_RUN" == "false" ]]; then
+            echo "::error::Benchmark blocked by cost guard. Reduce instances or increase limits."
+            exit 1
+          fi

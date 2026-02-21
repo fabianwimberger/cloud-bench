@@ -1,0 +1,7 @@
+{
+  "test": "sysbench-memory",
+  "runs": {{ num_runs }},
+  "read_mib_per_sec": {{ mem_read_median.stdout | default(0) | float }},
+  "write_mib_per_sec": {{ mem_write_median.stdout | default(0) | float }},
+  "total_throughput_mib": {{ (mem_read_median.stdout | default(0) | float) + (mem_write_median.stdout | default(0) | float) }}
+}

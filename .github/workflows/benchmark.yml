@@ -1,0 +1,461 @@
+name: Run Benchmarks
+
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: 'Cloud provider'
+        required: true
+        default: 'hetzner'
+        type: choice
+        options:
+          - hetzner
+
+      instances:
+        description: 'Instance IDs (comma-separated, or "all")'
+        required: true
+        default: 'all'
+
+      default_region:
+        description: 'Default region'
+        required: true
+        default: 'fsn1'
+        type: choice
+        options:
+          - fsn1
+          - nbg1
+          - hel1
+          - ash
+          - hil
+
+      instance_regions:
+        description: 'Instance-specific regions (JSON: {"cx23":"nbg1"})'
+        required: false
+        default: '{}'
+      
+      skip_cost_guard:
+        description: 'Skip cost estimation (not recommended)'
+        type: boolean
+        default: false
+
+concurrency:
+  group: benchmark
+  cancel-in-progress: true
+
+env:
+  TF_VERSION: "1.10.5"
+  ANSIBLE_VERSION: "11.4.0"
+  NODE_VERSION: "22.14.0"
+  PYTHON_VERSION: "3.13"
+  RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+
+jobs:
+  cost-guard:
+    if: ${{ !inputs.skip_cost_guard }}
+    uses: ./.github/workflows/cost-guard.yml
+    with:
+      provider: ${{ github.event.inputs.provider }}
+      instances: ${{ github.event.inputs.instances }}
+  provision:
+    needs: [cost-guard]
+    if: ${{ always() && (needs.cost-guard.result == 'success' || inputs.skip_cost_guard) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      runner_ip: ${{ steps.get_ip.outputs.ip }}
+      instances_arg: ${{ steps.instances.outputs.arg }}
+      ssh_key_b64: ${{ steps.export_key.outputs.key_b64 }}
+      ssh_pub_key: ${{ steps.export_key.outputs.pub_key }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Inputs
+        env:
+          TOKEN_SET: ${{ secrets.HCLOUD_TOKEN != '' }}
+          INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
+        run: |
+          if [ "$TOKEN_SET" != "true" ]; then
+            echo "::error::HCLOUD_TOKEN secret is required"
+            exit 1
+          fi
+          if [ -n "$INSTANCE_REGIONS" ] && [ "$INSTANCE_REGIONS" != "{}" ]; then
+            if ! echo "$INSTANCE_REGIONS" | jq empty 2>/dev/null; then
+              echo "::error::instance_regions must be valid JSON"
+              exit 1
+            fi
+          fi
+
+      - name: Get Runner Public IP
+        id: get_ip
+        run: |
+          # Get the current GitHub Actions runner's public IP with fallback services
+          IP_SERVICES=(
+            "https://api.ipify.org"
+            "https://icanhazip.com"
+            "https://ifconfig.me"
+            "https://ipecho.net/plain"
+          )
+
+          RUNNER_IP=""
+          for service in "${IP_SERVICES[@]}"; do
+            echo "Trying $service..."
+            RUNNER_IP=$(curl -s --max-time 5 "$service" 2>/dev/null) && break
+            echo "  Failed, trying next service..."
+          done
+
+          if [ -z "$RUNNER_IP" ]; then
+            echo "::error::Failed to detect runner IP address from any service"
+            exit 1
+          fi
+
+          # Validate IP format
+          if ! [[ "$RUNNER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid IP format: $RUNNER_IP"
+            exit 1
+          fi
+
+          echo "ip=${RUNNER_IP}" >> $GITHUB_OUTPUT
+          echo "Runner IP: ${RUNNER_IP}"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Generate SSH Key Pair
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t ed25519 -f ~/.ssh/cloud_bench -N "" -C "cloud-bench@github-actions"
+          chmod 600 ~/.ssh/cloud_bench
+          echo "SSH_PRIVATE_KEY_FILE=~/.ssh/cloud_bench" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Determine Instances
+        id: instances
+        run: |
+          INSTANCES_ARG=$(./scripts/parse-instances.sh "${{ github.event.inputs.instances }}")
+          if [ $? -ne 0 ]; then
+            echo "::error::Invalid instance IDs: only alphanumeric characters, hyphens, underscores, and commas are allowed"
+            exit 1
+          fi
+          echo "arg=$INSTANCES_ARG" >> $GITHUB_OUTPUT
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: |
+          terraform apply -auto-approve \
+            -var="run_id=${{ env.RUN_ID }}" \
+            -var="cloud_provider=${{ github.event.inputs.provider }}" \
+            -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
+            -var="default_region=${{ github.event.inputs.default_region }}" \
+            -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN }}" \
+            -var="ssh_public_key_path=~/.ssh/cloud_bench.pub" \
+            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
+            -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
+
+      - name: Generate Ansible Inventory
+        working-directory: terraform
+        run: |
+          terraform output -raw ansible_inventory > ../ansible/inventory.ini
+
+      - name: Upload Terraform State
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-state
+          path: terraform/terraform.tfstate
+          retention-days: 1
+
+      - name: Upload Ansible Inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: ansible-inventory
+          path: ansible/inventory.ini
+          retention-days: 1
+
+      - name: Export SSH Key to Job Output
+        id: export_key
+        run: |
+          # Encode key to base64 for safe passing between jobs
+          echo "key_b64=$(base64 -w 0 ~/.ssh/cloud_bench)" >> $GITHUB_OUTPUT
+          echo "pub_key=$(cat ~/.ssh/cloud_bench.pub)" >> $GITHUB_OUTPUT
+
+  benchmark:
+    needs: provision
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Ansible Inventory
+        uses: actions/download-artifact@v4
+        with:
+          name: ansible-inventory
+
+      - name: Setup SSH Key
+        env:
+          SSH_KEY_B64: ${{ needs.provision.outputs.ssh_key_b64 }}
+          SSH_PUB_KEY: ${{ needs.provision.outputs.ssh_pub_key }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY_B64" | base64 -d > ~/.ssh/cloud_bench
+          chmod 600 ~/.ssh/cloud_bench
+          echo "$SSH_PUB_KEY" > ~/.ssh/cloud_bench.pub
+          chmod 644 ~/.ssh/cloud_bench.pub
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+
+      - name: Install Ansible
+        run: |
+          pip install ansible==${{ env.ANSIBLE_VERSION }}
+
+      - name: Wait for instances to be ready
+        run: |
+          # Wait for all instances to be accessible via SSH
+          ansible all -i inventory.ini -m ping --private-key ~/.ssh/cloud_bench \
+            -e "ansible_python_interpreter=auto" \
+            --ssh-common-args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+            --wait-for-connection --timeout=300 2>&1 | tee ping-result.txt || true
+
+          # Verify connectivity with retries
+          for i in $(seq 1 30); do
+            echo "Attempt $i: Checking SSH connectivity..."
+            if ansible all -i inventory.ini -m raw -a "echo ready" \
+              --private-key ~/.ssh/cloud_bench \
+              -e "ansible_python_interpreter=auto" \
+              --ssh-common-args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 2>/dev/null | grep -q "ready"; then
+              echo "All instances are ready!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Instances did not become ready in time"
+          exit 1
+
+      - name: Run Ansible Playbook
+        working-directory: ansible
+        run: |
+          export RUN_ID="${{ env.RUN_ID }}"
+          export ANSIBLE_HOST_KEY_CHECKING=False
+          ansible-playbook -i inventory.ini playbooks/benchmark.yml \
+            --private-key ~/.ssh/cloud_bench \
+            --extra-vars "run_id=${{ env.RUN_ID }}" \
+            -vv
+
+      - name: Upload Raw Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-raw-results
+          path: results/*.json
+          retention-days: 30
+
+  process:
+    needs: benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      summary: ${{ steps.summary.outputs.content }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Results
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-raw-results
+          path: results/
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+
+      - name: Process Results
+        run: |
+          pip install -r scripts/requirements.txt
+          python scripts/process_results.py \
+            --input results/ \
+            --output frontend/public/data/ \
+            --config config/instances.yaml \
+            --region "${{ github.event.inputs.default_region }}" \
+            --provider "${{ github.event.inputs.provider }}"
+
+      - name: Generate Summary
+        id: summary
+        run: |
+          echo "content<<EOF" >> $GITHUB_OUTPUT
+          cat frontend/public/data/summary.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Upload Processed Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-processed
+          path: frontend/public/data/
+          retention-days: 90
+
+  cleanup:
+    needs: [provision, benchmark, process]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get Runner Public IP
+        id: get_ip
+        run: |
+          # Get the current GitHub Actions runner's public IP with fallback services
+          IP_SERVICES=(
+            "https://api.ipify.org"
+            "https://icanhazip.com"
+            "https://ifconfig.me"
+            "https://ipecho.net/plain"
+          )
+
+          RUNNER_IP=""
+          for service in "${IP_SERVICES[@]}"; do
+            echo "Trying $service..."
+            RUNNER_IP=$(curl -s --max-time 5 "$service" 2>/dev/null) && break
+            echo "  Failed, trying next service..."
+          done
+
+          if [ -z "$RUNNER_IP" ]; then
+            echo "::error::Failed to detect runner IP address from any service"
+            exit 1
+          fi
+
+          echo "ip=${RUNNER_IP}" >> $GITHUB_OUTPUT
+          echo "Runner IP for cleanup: ${RUNNER_IP}"
+
+      - name: Download Terraform State
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-state
+          path: terraform/
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Destroy
+        working-directory: terraform
+        run: |
+          terraform destroy -auto-approve \
+            -var="run_id=${{ env.RUN_ID }}" \
+            -var="cloud_provider=${{ github.event.inputs.provider }}" \
+            -var="enabled_instances=${{ needs.provision.outputs.instances_arg }}" \
+            -var="default_region=${{ github.event.inputs.default_region }}" \
+            -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN }}" \
+            -var="ssh_public_key_path=/dev/null" \
+            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
+            -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
+
+      - name: Verify Cleanup
+        if: always()
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          echo "Verifying cleanup..."
+
+          # Install hcloud CLI
+          HCLOUD_VERSION=$(curl -s https://api.github.com/repos/hetznercloud/cli/releases/latest | jq -r '.tag_name' | sed 's/^v//')
+          curl -fsSL "https://github.com/hetznercloud/cli/releases/download/v${HCLOUD_VERSION}/hcloud-linux-amd64.tar.gz" | tar -xz
+          
+          # Check for remaining resources with this run_id
+          SERVERS=$(./hcloud server list -o json | jq -r ".[] | select(.name | contains(\"${{ env.RUN_ID }}\")) | .name")
+          
+          if [[ -n "$SERVERS" ]]; then
+            echo "::error::CRITICAL: Servers still exist after cleanup:"
+            echo "$SERVERS"
+            echo "Manual intervention required!"
+            exit 1
+          else
+            echo "[OK] All resources cleaned up successfully"
+          fi
+
+  deploy:
+    needs: process
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Processed Results
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-processed
+          path: frontend/public/data/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: frontend/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  summary:
+    needs: [process, cleanup]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Post Results Summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const summary = `${{ needs.process.outputs.summary }}`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Benchmark Results\n\n**Provider**: ${{ github.event.inputs.provider }}\n**Region**: ${{ github.event.inputs.default_region }}\n\n${summary}`
+            });
+
+      - name: Job Summary
+        run: |
+          echo "## Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run ID**: ${{ env.RUN_ID }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Provider**: ${{ github.event.inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region**: ${{ github.event.inputs.default_region }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Instances**: ${{ github.event.inputs.instances }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View detailed results at: https://${{ github.repository_owner }}.github.io/cloud-bench/" >> $GITHUB_STEP_SUMMARY
