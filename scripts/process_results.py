@@ -365,7 +365,7 @@ def generate_markdown_summary(df: pd.DataFrame) -> str:
             f"{i}. **{row['display_name']}** - {row['cpu_value_monthly']:.1f} CPU points/EUR"
         )
 
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n"
 
 
 def update_manifest(
