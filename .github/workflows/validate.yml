@@ -1,11 +1,9 @@
 name: Validate
 
 on:
-  pull_request:
-    paths-ignore:
-      - '**/README.md'
-      - 'docs/**'
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -16,33 +14,42 @@ env:
 
 jobs:
   terraform:
+    name: Terraform
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
+
       - name: Terraform Format Check
         working-directory: terraform
         run: terraform fmt -check -recursive
+
       - name: Terraform Init
         working-directory: terraform
         run: terraform init -backend=false
+
       - name: Terraform Validate
         working-directory: terraform
         run: terraform validate
 
   ansible:
+    name: Ansible
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
       - run: pip install ansible
+
       - name: Ansible Syntax Check
         working-directory: ansible
         run: |
@@ -51,33 +58,52 @@ jobs:
           ansible-playbook --syntax-check -i inventory.ini playbooks/benchmark.yml
 
   python:
+    name: Python
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
       - run: |
           pip install -r scripts/requirements.txt
           pip install -r tests/requirements-test.txt
-      - run: python3 -m py_compile scripts/process_results.py
-      - run: python3 -m pytest tests/ -v --tb=short
+          pip install ruff mypy
+
+      - name: Lint with ruff
+        run: ruff check scripts/ tests/
+
+      - name: Format check with ruff
+        run: ruff format --check scripts/ tests/
+
+      - name: Type check with mypy
+        run: mypy scripts/ --ignore-missing-imports
+
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
 
   frontend:
+    name: Frontend
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
       - working-directory: frontend
         run: npm ci
+
       - working-directory: frontend
         run: npm run build
 
-  security-scan:
+  security:
+    name: Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -114,51 +140,20 @@ jobs:
 
       - name: Check npm dependencies
         working-directory: frontend
-        run: |
-          # Fail build on high/critical vulnerabilities
-          npm audit --audit-level=high
-        # Note: Some npm vulnerabilities may be in transitive deps with no fix available.
-        # If you need to allow known false positives, add --production to exclude dev deps
-
-  validate-script:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '${{ env.PYTHON_VERSION }}'
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-      
-      - name: Install dependencies
-        run: |
-          pip install -r scripts/requirements.txt
-          pip install -r tests/requirements-test.txt
-          pip install ansible
-      
-      - name: Run unified validate script
-        run: python scripts/validate.py --skip github
+        run: npm audit --audit-level=high
 
   integration:
+    name: Integration
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [terraform, ansible, python, frontend, security-scan]
+    needs: [terraform, ansible, python, frontend, security]
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -171,7 +166,7 @@ jobs:
       - name: Create Mock Results
         run: |
           mkdir -p results
-          cat > results/cx23-mock.json << 'EOF'
+          cat > results/cx23-mock.json << 'MOCKEOF'
           {
             "run_id": "test-mock",
             "timestamp": "2026-01-01T00:00:00Z",
@@ -207,9 +202,9 @@ jobs:
               "read_iops": 15000
             }
           }
-          EOF
+          MOCKEOF
 
-          cat > results/cax11-mock.json << 'EOF'
+          cat > results/cax11-mock.json << 'MOCKEOF'
           {
             "run_id": "test-mock",
             "timestamp": "2026-01-01T00:00:00Z",
@@ -245,7 +240,7 @@ jobs:
               "read_iops": 18000
             }
           }
-          EOF
+          MOCKEOF
 
       - name: Test Result Processing
         run: |
