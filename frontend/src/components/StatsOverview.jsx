@@ -11,11 +11,12 @@ function StatsOverview({ data }) {
   const cheapest = ranking.reduce((cheap, current) =>
     current.price_monthly < cheap.price_monthly ? current : cheap
   )
+  const fastestCpu = ranking.reduce((fastest, current) =>
+    (current.metrics?.cpu_single_events || 0) > (fastest.metrics?.cpu_single_events || 0) ? current : fastest
+  )
 
-  const provider = metadata.provider || 'Cloud'
-  const providerDisplay = provider.charAt(0).toUpperCase() + provider.slice(1)
   const currency = metadata.currency || 'EUR'
-  const currencySymbol = currency === 'EUR' ? 'EUR' : currency
+  const currencySymbol = currency === 'EUR' ? '€' : currency
 
   const stats = [
     {
@@ -26,30 +27,38 @@ function StatsOverview({ data }) {
     {
       label: 'Top Performance',
       value: bestPerformance.instance_type,
-      subtext: `${bestPerformance.overall_score.toFixed(0)}/100`
+      subtext: `${bestPerformance.overall_score.toFixed(0)}/100 overall`
+    },
+    {
+      label: 'Fastest CPU',
+      value: fastestCpu.instance_type,
+      subtext: `${Math.round(fastestCpu.metrics?.cpu_single_events || 0).toLocaleString()} events/sec`
     },
     {
       label: 'Cheapest',
-      value: `${currencySymbol}${cheapest.price_monthly}`,
-      subtext: cheapest.instance_type
+      value: `${currencySymbol}${cheapest.price_monthly.toFixed(2)}`,
+      subtext: `${cheapest.instance_type} / month`
     },
     {
-      label: 'Instances Tested',
+      label: 'Instances',
       value: ranking.length,
-      subtext: providerDisplay
+      subtext: 'Tested configurations'
+    },
+    {
+      label: 'Region',
+      value: (metadata.region || 'unknown').toUpperCase(),
+      subtext: metadata.provider || 'Unknown provider'
     },
   ]
 
   return (
-    <div className="grid grid-4">
+    <div className="grid grid-3" style={{ marginBottom: '1rem' }}>
       {stats.map((stat, index) => (
         <div key={index} className="stat-card">
           <div className="value">{stat.value}</div>
           <div className="label">{stat.label}</div>
           {stat.subtext && (
-            <small style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
-              {stat.subtext}
-            </small>
+            <div className="subtext">{stat.subtext}</div>
           )}
         </div>
       ))}

@@ -255,6 +255,7 @@ def create_instance_summary(row: pd.Series) -> dict:
         if isinstance(row["provider_attributes"], dict)
         else {}
     )
+    metrics = row.get("metrics", {})
     return {
         "id": row["instance_type"],
         "name": row["display_name"],
@@ -264,6 +265,12 @@ def create_instance_summary(row: pd.Series) -> dict:
             "memory": row["memory_score"],
             "disk": row["disk_score"],
             "overall": row["overall_score"],
+        },
+        "metrics": {
+            "cpu_single_events": metrics.get("cpu_single_raw", 0),
+            "cpu_multi_events": metrics.get("cpu_multi_raw", 0),
+            "memory_mib_per_sec": metrics.get("mem_throughput_raw", 0),
+            "disk_iops": metrics.get("disk_iops_raw", 0),
         },
         "pricing": {
             "hourly": row["price_hourly"],

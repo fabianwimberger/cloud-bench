@@ -58,6 +58,13 @@ function transformData(data) {
       disk_score: inst.scores?.disk || 0,
       overall_score: inst.scores?.overall || 0,
       cpu_value_monthly: inst.value || 0,
+      // Include raw metrics
+      metrics: inst.metrics || {
+        cpu_single_events: 0,
+        cpu_multi_events: 0,
+        memory_mib_per_sec: 0,
+        disk_iops: 0,
+      }
     })),
     charts: {
       single_core: { labels, values: charts.single_core || [] },
@@ -98,6 +105,7 @@ function App() {
     window.addEventListener('unhandledrejection', handleUnhandledRejection)
     return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection)
   }, [])
+  
   const [selectedRunId, setSelectedRunId] = useState('latest')
   
   const [filters, setFilters] = useState({
@@ -109,7 +117,6 @@ function App() {
   })
   
   const [selectedForComparison, setSelectedForComparison] = useState([])
-  const [showComparison, setShowComparison] = useState(false)
 
   useEffect(() => {
     loadInitialData()
@@ -233,43 +240,43 @@ function App() {
 
   return (
     <div className="app">
+      <Header metadata={data?.metadata} />
+      
       <div className="container">
         {error && (
-          <div className="card" style={{ marginBottom: '20px', border: '1px solid #f59e0b', backgroundColor: '#fffbeb' }}>
-            <p style={{ margin: 0, color: '#92400e' }}>
+          <div className="card" style={{ marginBottom: '1rem', borderColor: 'var(--color-warning)', backgroundColor: 'rgba(245, 158, 11, 0.1)' }}>
+            <p style={{ margin: 0, color: 'var(--color-warning)' }}>
               Error loading data: {error}
             </p>
           </div>
         )}
 
         {manifest && manifest.runs && manifest.runs.length > 1 && (
-          <div className="card" style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <div>
-                <label style={{ marginRight: '8px', fontWeight: 'bold' }}>Run:</label>
-                <select
-                  value={selectedRunId}
-                  onChange={(e) => handleRunChange(e.target.value)}
-                  style={{ padding: '6px 12px', borderRadius: '4px', border: '1px solid #d1d5db' }}
-                >
-                  <option value="latest">Latest ({manifest.runs[0]?.region?.toUpperCase()})</option>
-                  {manifest.runs.map((run) => (
-                    <option key={run.id} value={run.id}>
-                      {new Date(run.timestamp).toLocaleString()} ({run.provider?.toUpperCase()} / {run.region?.toUpperCase()})
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="run-selector">
+            <div className="filter-group">
+              <label>Run</label>
+              <select
+                className="filter-select"
+                value={selectedRunId}
+                onChange={(e) => handleRunChange(e.target.value)}
+                style={{ minWidth: '280px' }}
+              >
+                <option value="latest">Latest ({manifest.runs[0]?.region?.toUpperCase()})</option>
+                {manifest.runs.map((run) => (
+                  <option key={run.id} value={run.id}>
+                    {new Date(run.timestamp).toLocaleString()} ({run.provider?.toUpperCase()} / {run.region?.toUpperCase()})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              <div style={{ marginLeft: 'auto', fontSize: '0.9em', color: '#6b7280' }}>
-                {manifest.runs.length} historical run{manifest.runs.length !== 1 ? 's' : ''} available
-                {loading && <span style={{ marginLeft: '10px' }}>Loading...</span>}
-              </div>
+            <div style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+              {manifest.runs.length} historical run{manifest.runs.length !== 1 ? 's' : ''}
+              {loading && <span style={{ marginLeft: '10px' }}>Loading...</span>}
             </div>
           </div>
         )}
 
-        <Header metadata={data?.metadata} />
         <StatsOverview data={data} />
         
         <InstanceFilter 
