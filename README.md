@@ -6,10 +6,6 @@
 
 A cloud instance benchmarking suite comparing CPU, memory, and disk performance across instance types with cost analysis.
 
-Powered by [sysbench](https://github.com/akopytov/sysbench) and [fio](https://github.com/axboe/fio).
-
-**[→ View Live Results](https://fabianwimberger.github.io/cloud-bench/)**
-
 ## Why This Project?
 
 Cloud instance pricing and performance characteristics vary significantly between providers and instance types. $20/month can get you vastly different compute capabilities depending on your choice. This project provides reproducible, data-driven benchmarks to make informed infrastructure decisions based on actual performance rather than marketing specifications.
