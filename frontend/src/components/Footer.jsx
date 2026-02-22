@@ -2,12 +2,15 @@ function Footer({ metadata }) {
   const provider = metadata?.provider || 'cloud'
   const providerLower = provider.toLowerCase()
 
-  // Provider URLs mapping - extend this when adding new providers
+  // Provider URLs mapping - extensible for new providers
   const providerUrls = {
     hetzner: 'https://www.hetzner.com/cloud',
     aws: 'https://aws.amazon.com/ec2/',
     gcp: 'https://cloud.google.com/compute',
     azure: 'https://azure.microsoft.com/en-us/products/virtual-machines',
+    digitalocean: 'https://www.digitalocean.com/products/droplets',
+    linode: 'https://www.linode.com/products/compute/',
+    vultr: 'https://www.vultr.com/products/cloud-compute/',
   }
 
   const providerUrl = providerUrls[providerLower]
@@ -16,7 +19,7 @@ function Footer({ metadata }) {
   return (
     <footer className="footer">
       <p>
-        Benchmarking {providerDisplay} instances
+        Cloud instance performance benchmarks
       </p>
       <p style={{ marginTop: '0.5rem' }}>
         <a href="https://github.com/fabianwimberger/cloud-bench" target="_blank" rel="noopener noreferrer">

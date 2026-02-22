@@ -2,12 +2,9 @@
 
 [![CI](https://github.com/fabianwimberger/cloud-bench/actions/workflows/validate.yml/badge.svg)](https://github.com/fabianwimberger/cloud-bench/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-**[Live Results →](https://fabianwimberger.github.io/cloud-bench/)**
+[![Live Results](https://img.shields.io/badge/Live%20Results-View%20Dashboard-blue)](https://fabianwimberger.github.io/cloud-bench/)
 
 A cloud instance benchmarking suite comparing CPU, memory, and disk performance across instance types with cost analysis.
-
-Powered by [sysbench](https://github.com/akopytov/sysbench) and [fio](https://github.com/axboe/fio).
 
 ## Why This Project?
 
@@ -76,14 +73,26 @@ providers:
 
 ## Project Structure
 
-| Component | Location |
-|-----------|----------|
-| Instance configs | `config/instances.yaml` |
-| Infrastructure | `terraform/` |
-| Benchmarks | `ansible/playbooks/benchmark.yml` |
-| Result processing | `scripts/process_results.py` |
-| Dashboard | `frontend/` |
-| Documentation | `docs/` |
+```
+cloud-bench/
+├── ansible/              # Benchmark playbooks
+│   └── playbooks/
+│       └── benchmark.yml
+├── config/               # Instance configurations
+│   └── instances.yaml
+├── docs/                 # Documentation
+│   ├── architecture.md
+│   ├── configuration.md
+│   └── data-format.md
+├── frontend/             # React dashboard
+│   └── src/
+├── scripts/              # Helper scripts
+│   ├── process_results.py
+│   └── run-local.sh
+├── terraform/            # Infrastructure provisioning
+│   └── modules/
+└── tests/                # Test suite
+```
 
 ## Security
 
@@ -103,6 +112,11 @@ providers:
 
 MIT License — see [LICENSE](LICENSE) file.
 
-### Benchmark Tools
+### Third-Party Licenses
 
-This project uses [sysbench](https://github.com/akopytov/sysbench) and [fio](https://github.com/axboe/fio), both licensed under the GPL.
+This project uses the following open-source components:
+
+| Component | License | Source |
+|-----------|---------|--------|
+| sysbench | [GPL v2+](https://github.com/akopytov/sysbench/blob/master/COPYING) | https://github.com/akopytov/sysbench |
+| fio | [GPL v2](https://github.com/axboe/fio/blob/master/COPYING) | https://github.com/axboe/fio |
