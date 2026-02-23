@@ -28,7 +28,7 @@ def estimate_cost(
     USD_RATE = 1.08
 
     total_cost_eur = sum(
-        i.get("pricing", {}).get("hourly_eur", 0) * RUNTIME_HOURS for i in to_benchmark
+        i.get("pricing", {}).get("hourly", 0) * RUNTIME_HOURS for i in to_benchmark
     )
     total_cost_usd = total_cost_eur * USD_RATE
 

@@ -29,13 +29,6 @@ const DataAPI = {
   }
 }
 
-function normalizeArch(raw) {
-  if (!raw) return 'X86'
-  const lower = raw.toLowerCase()
-  if (lower.includes('arm') || lower.includes('aarch')) return 'ARM64'
-  return 'X86'
-}
-
 function parseExprFilter(expr, value) {
   if (!expr || expr.trim() === '') return true
   const match = expr.trim().match(/^([<>]=?|=)?\s*(\d+\.?\d*)$/)
@@ -67,7 +60,7 @@ function transformData(data) {
     ranking: instances.map(inst => ({
       instance_type: inst.id,
       display_name: inst.name,
-      arch: normalizeArch(inst.specs?.arch),
+      arch: inst.specs?.arch || 'X86',
       vcpu: inst.specs?.vcpu || 0,
       ram_gb: inst.specs?.ram_gb || 0,
       disk_gb: inst.specs?.disk_gb || 0,
@@ -222,12 +215,6 @@ function App() {
       .map((r, i) => filteredTypes.has(r.instance_type) ? i : -1)
       .filter(i => i !== -1)
 
-    const archMap = Object.fromEntries(
-      filteredRanking.map(r => [r.instance_type, r.arch])
-    )
-
-    const fmtLabel = (type, arch) => `${type.toUpperCase()} (${arch})`
-
     const sortByValue = (labels, values) => {
       const pairs = labels.map((l, i) => [l, values[i]])
       pairs.sort((a, b) => b[1] - a[1])
@@ -238,10 +225,12 @@ function App() {
     }
 
     const buildChart = (chartKey) => {
-      const rawLabels = filteredIndices.map(i => data.charts[chartKey].labels[i])
-      const rawValues = filteredIndices.map(i => data.charts[chartKey].values[i])
-      const namedLabels = rawLabels.map(type => fmtLabel(type, archMap[type] || ''))
-      return sortByValue(namedLabels, rawValues)
+      const values = filteredIndices.map(i => data.charts[chartKey].values[i])
+      const labels = filteredIndices.map(i => {
+        const inst = data.ranking[i]
+        return `${inst.instance_type} (${inst.arch})`
+      })
+      return sortByValue(labels, values)
     }
 
     return {

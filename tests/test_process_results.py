@@ -144,11 +144,11 @@ class TestNormalizeResults(unittest.TestCase):
                         {
                             "id": "cx11",
                             "name": "CX11",
-                            "arch": "Intel",
+                            "arch": "X86",
                             "vcpu": 1,
                             "ram_gb": 2,
                             "disk_gb": 20,
-                            "pricing": {"hourly_eur": 0.0048, "monthly_eur": 3.49},
+                            "pricing": {"hourly": 0.0048, "monthly": 3.49},
                         }
                     ]
                 }
@@ -188,6 +188,8 @@ class TestCalculateScores(unittest.TestCase):
                     },
                     "price_hourly": 0.0048,
                     "price_monthly": 3.49,
+                    "display_name": "CX11 (X86)",
+                    "provider_attributes": {"arch": "X86"},
                 },
                 {
                     "instance_type": "CPX11",
@@ -199,6 +201,8 @@ class TestCalculateScores(unittest.TestCase):
                     },
                     "price_hourly": 0.0066,
                     "price_monthly": 4.89,
+                    "display_name": "CPX11 (X86)",
+                    "provider_attributes": {"arch": "X86"},
                 },
             ]
         )
@@ -252,7 +256,7 @@ class TestGenerateSummaryData(unittest.TestCase):
             [
                 {
                     "instance_type": "CX11",
-                    "display_name": "CX11 (Intel)",
+                    "display_name": "CX11 (X86)",
                     "vcpu": 1,
                     "ram_gb": 2,
                     "disk_gb": 20,
@@ -266,7 +270,7 @@ class TestGenerateSummaryData(unittest.TestCase):
                     "value_monthly": 150,
                     "cpu_value_monthly": 150,
                     "metrics": {},
-                    "provider_attributes": {"arch": "x86_64"},
+                    "provider_attributes": {"arch": "X86"},
                 }
             ]
         )
@@ -323,11 +327,11 @@ class TestExtensibility(unittest.TestCase):
                         {
                             "id": "t3-micro",
                             "name": "T3 Micro",
-                            "arch": "Intel",
+                            "arch": "X86",
                             "vcpu": 2,
                             "ram_gb": 1,
                             "disk_gb": 0,
-                            "pricing": {"hourly_eur": 0.0104, "monthly_eur": 7.60},
+                            "pricing": {"hourly": 0.0104, "monthly": 7.60},
                         }
                     ]
                 }

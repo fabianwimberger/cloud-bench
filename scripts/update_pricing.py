@@ -53,8 +53,8 @@ def parse_pricing(server_type: dict) -> Optional[dict]:
         return None
 
     return {
-        "hourly_eur": float(hourly_gross),
-        "monthly_eur": float(monthly_gross),
+        "hourly": float(hourly_gross),
+        "monthly": float(monthly_gross),
     }
 
 
@@ -63,9 +63,7 @@ def get_architecture(server_type: dict) -> str:
     name = server_type.get("name", "").lower()
     if "cax" in name:
         return "ARM64"
-    if "cpx" in name:
-        return "AMD EPYC"
-    return "Intel"
+    return "X86"
 
 
 def update_config(
@@ -95,14 +93,14 @@ def update_config(
 
         old_pricing = inst.get("pricing", {})
         if (
-            old_pricing.get("hourly_eur") != pricing["hourly_eur"]
-            or old_pricing.get("monthly_eur") != pricing["monthly_eur"]
+            old_pricing.get("hourly") != pricing["hourly"]
+            or old_pricing.get("monthly") != pricing["monthly"]
         ):
             inst["pricing"] = pricing
             updated += 1
-            print(f"  [UPDATED] {inst_id}: €{pricing['monthly_eur']}/mo")
+            print(f"  [UPDATED] {inst_id}: €{pricing['monthly']}/mo")
         else:
-            print(f"  [OK] {inst_id}: €{pricing['monthly_eur']}/mo (unchanged)")
+            print(f"  [OK] {inst_id}: €{pricing['monthly']}/mo (unchanged)")
 
     print(f"\nSummary: {updated} updated")
 
