@@ -1,16 +1,10 @@
+import { useState } from 'react'
 import ScoreBar from './ScoreBar'
 
-function formatNumber(num, decimals = 0) {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(decimals) + 'M'
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(decimals) + 'K'
-  }
-  return num.toFixed(decimals)
-}
-
 function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections }) {
+  const [sortKey, setSortKey] = useState(null)
+  const [sortDir, setSortDir] = useState('desc')
+
   if (!ranking || ranking.length === 0) {
     return (
       <div className="card">
@@ -34,6 +28,35 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
 
   const canSelectMore = selectedForComparison.length < maxSelections
 
+  const getNestedValue = (obj, key) => {
+    if (key.startsWith('metrics.')) {
+      return obj.metrics?.[key.slice(8)] ?? 0
+    }
+    return obj[key] ?? 0
+  }
+
+  const sorted = sortKey
+    ? [...ranking].sort((a, b) => {
+        const av = getNestedValue(a, sortKey)
+        const bv = getNestedValue(b, sortKey)
+        if (typeof av === 'string') {
+          return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av)
+        }
+        return sortDir === 'asc' ? av - bv : bv - av
+      })
+    : ranking
+
+  const handleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('desc')
+    }
+  }
+
+  const indicator = (key) => sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''
+
   return (
     <div className="card">
       <div className="section-header">
@@ -46,34 +69,34 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
           </div>
         )}
       </div>
-      
+
       <div className="table-container">
         <table className="comparison-table">
           <thead>
             <tr>
               <th style={{ width: '40px' }}></th>
-              <th>Instance</th>
-              <th>Architecture</th>
-              <th className="cell-numeric">vCPUs</th>
-              <th className="cell-numeric">Memory</th>
-              <th className="cell-numeric">Disk</th>
-              <th className="cell-numeric">CPU Single</th>
-              <th className="cell-numeric">CPU Multi</th>
-              <th className="cell-numeric">Memory</th>
-              <th className="cell-numeric">Disk IOPS</th>
-              <th className="cell-numeric">Hourly</th>
-              <th className="cell-numeric">Monthly</th>
-              <th className="cell-numeric">Value</th>
+              <th className="sortable" onClick={() => handleSort('instance_type')}>Instance{indicator('instance_type')}</th>
+              <th className="sortable" onClick={() => handleSort('arch')}>Arch (x86/ARM){indicator('arch')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('vcpu')}>vCPUs{indicator('vcpu')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('ram_gb')}>Memory{indicator('ram_gb')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('disk_gb')}>Disk{indicator('disk_gb')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('metrics.cpu_single_events')}>CPU Single{indicator('metrics.cpu_single_events')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('metrics.cpu_multi_events')}>CPU Multi{indicator('metrics.cpu_multi_events')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('metrics.memory_mib_per_sec')}>Memory{indicator('metrics.memory_mib_per_sec')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('metrics.disk_iops')}>Disk IOPS{indicator('metrics.disk_iops')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('price_hourly')}>Hourly{indicator('price_hourly')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('price_monthly')}>Monthly{indicator('price_monthly')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('cpu_value_monthly')}>Value{indicator('cpu_value_monthly')}</th>
             </tr>
           </thead>
           <tbody>
-            {ranking.map((instance) => {
+            {sorted.map((instance) => {
               const isSelected = selectedForComparison.includes(instance.instance_type)
               const canSelect = isSelected || canSelectMore
               const metrics = instance.metrics || {}
-              
+
               return (
-                <tr 
+                <tr
                   key={instance.instance_type}
                   className={isSelected ? 'selected' : ''}
                 >
@@ -101,13 +124,13 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
                       <ScoreBar value={instance.single_core_score} />
-                      <span>{formatNumber(metrics.cpu_single_events || 0)}</span>
+                      <span>{Math.round(metrics.cpu_single_events || 0).toLocaleString()}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
                       <ScoreBar value={instance.multi_core_score} />
-                      <span>{formatNumber(metrics.cpu_multi_events || 0)}</span>
+                      <span>{Math.round(metrics.cpu_multi_events || 0).toLocaleString()}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
@@ -119,7 +142,7 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
                       <ScoreBar value={instance.disk_score} />
-                      <span>{formatNumber(metrics.disk_iops || 0)}</span>
+                      <span>{Math.round(metrics.disk_iops || 0).toLocaleString()}</span>
                     </div>
                   </td>
                   <td className="price-cell cell-numeric">
@@ -137,9 +160,9 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
           </tbody>
         </table>
       </div>
-      
+
       <p className="table-note">
-        <strong>Value</strong> = CPU Score per {currencySymbol} per Month (higher is better). 
+        <strong>Value</strong> = CPU Score per {currencySymbol} per Month (higher is better).
         Click checkboxes to compare up to {maxSelections} instances.
       </p>
     </div>
