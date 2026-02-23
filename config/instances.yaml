@@ -42,3 +42,33 @@ providers:
         pricing:
           hourly_eur: 0.0100
           monthly_eur: 7.19
+
+      - id: cx32
+        name: "CX32"
+        arch: "Intel"
+        vcpu: 4
+        ram_gb: 8
+        disk_gb: 80
+        pricing:
+          hourly_eur: 0.0100
+          monthly_eur: 7.19
+
+      - id: cax21
+        name: "CAX21"
+        arch: "ARM64"
+        vcpu: 4
+        ram_gb: 8
+        disk_gb: 80
+        pricing:
+          hourly_eur: 0.0110
+          monthly_eur: 7.90
+
+      - id: cpx32
+        name: "CPX32"
+        arch: "AMD EPYC"
+        vcpu: 4
+        ram_gb: 8
+        disk_gb: 160
+        pricing:
+          hourly_eur: 0.0180
+          monthly_eur: 12.90
