@@ -1,5 +1,6 @@
 providers:
   hetzner:
+    currency: EUR
     regions:
       nbg1:
         name: Nuremberg
@@ -14,22 +15,22 @@ providers:
     instances:
     - id: cx23
       name: CX23
-      arch: Intel
+      arch: X86
       vcpu: 2
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly_eur: 0.00576
-        monthly_eur: 3.588
+        hourly: 0.00576
+        monthly: 3.588
     - id: cx33
       name: CX33
-      arch: Intel
+      arch: X86
       vcpu: 4
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly_eur: 0.0096
-        monthly_eur: 5.988
+        hourly: 0.0096
+        monthly: 5.988
     - id: cax11
       name: CAX11
       arch: ARM64
@@ -37,8 +38,8 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly_eur: 0.00636
-        monthly_eur: 3.948
+        hourly: 0.00636
+        monthly: 3.948
     - id: cax21
       name: CAX21
       arch: ARM64
@@ -46,44 +47,44 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly_eur: 0.01152
-        monthly_eur: 7.188
+        hourly: 0.01152
+        monthly: 7.188
     - id: cpx22
       name: CPX22
-      arch: AMD EPYC
+      arch: X86
       vcpu: 2
       ram_gb: 4
       disk_gb: 80
       pricing:
-        hourly_eur: 0.01152
-        monthly_eur: 7.188
+        hourly: 0.01152
+        monthly: 7.188
     - id: cpx32
       name: CPX32
-      arch: AMD EPYC
+      arch: X86
       vcpu: 4
       ram_gb: 8
       disk_gb: 160
       pricing:
-        hourly_eur: 0.02016
-        monthly_eur: 12.588
+        hourly: 0.02016
+        monthly: 12.588
     - id: ccx13
       name: CCX13
-      arch: Intel (Dedicated)
+      arch: X86
       vcpu: 2
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly_eur: 0.02508
-        monthly_eur: 15.588
+        hourly: 0.02508
+        monthly: 15.588
     - id: ccx23
       name: CCX23
-      arch: Intel (Dedicated)
+      arch: X86
       vcpu: 4
       ram_gb: 16
       disk_gb: 160
       pricing:
-        hourly_eur: 0.05004
-        monthly_eur: 31.188
+        hourly: 0.05004
+        monthly: 31.188
 _metadata:
   last_pricing_update: '2026-02-23T16:23:59.169879'
   source: Hetzner Cloud API

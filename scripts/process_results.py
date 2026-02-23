@@ -154,7 +154,7 @@ def normalize_results(
         attrs = r.get("provider_attributes", {})
         if not attrs:
             attrs = {
-                "arch": system.get("arch", inst_config.get("arch", "Unknown")),
+                "arch": system.get("arch", inst_config.get("arch", "")),
                 "os": system.get("os", "Unknown"),
                 "kernel": system.get("kernel"),
                 "vcpu": system.get("vcpu", inst_config.get("vcpu", 0)),
@@ -171,8 +171,8 @@ def normalize_results(
                 "vcpu": inst_config.get("vcpu", attrs.get("vcpu", 0)),
                 "ram_gb": inst_config.get("ram_gb", 0),
                 "disk_gb": inst_config.get("disk_gb", 0),
-                "price_hourly": pricing.get("hourly_eur", 0),
-                "price_monthly": pricing.get("monthly_eur", 0),
+                "price_hourly": pricing.get("hourly", 0),
+                "price_monthly": pricing.get("monthly", 0),
                 "metrics": {
                     "cpu_single_raw": cpu.get("single_thread_events", 0),
                     "cpu_multi_raw": cpu.get("multi_thread_events", 0),
@@ -291,12 +291,14 @@ def create_instance_summary(row: pd.Series) -> dict:
             "vcpu": row["vcpu"],
             "ram_gb": row["ram_gb"],
             "disk_gb": row["disk_gb"],
-            "arch": provider_attrs.get("arch", "Unknown"),
+            "arch": normalize_arch(provider_attrs.get("arch", "")),
         },
     }
 
 
-def generate_summary_data(df: pd.DataFrame, provider: str, region: str) -> dict:
+def generate_summary_data(
+    df: pd.DataFrame, provider: str, region: str, currency: str = "EUR"
+) -> dict:
     if df.empty:
         return {}
 
@@ -308,7 +310,7 @@ def generate_summary_data(df: pd.DataFrame, provider: str, region: str) -> dict:
         "metadata": {
             "generated_at": datetime.now().isoformat(),
             "run_count": len(df),
-            "currency": "EUR",
+            "currency": currency,
             "provider": provider,
             "region": region,
         },
@@ -328,7 +330,9 @@ def generate_summary_data(df: pd.DataFrame, provider: str, region: str) -> dict:
     }
 
 
-def generate_detail_data(df: pd.DataFrame, provider: str, region: str) -> dict:
+def generate_detail_data(
+    df: pd.DataFrame, provider: str, region: str, currency: str = "EUR"
+) -> dict:
     if df.empty:
         return {}
 
@@ -346,7 +350,7 @@ def generate_detail_data(df: pd.DataFrame, provider: str, region: str) -> dict:
         "metadata": {
             "generated_at": datetime.now().isoformat(),
             "run_count": len(df),
-            "currency": "EUR",
+            "currency": currency,
             "provider": provider,
             "region": region,
         },
@@ -456,12 +460,18 @@ def main():
 
         df = calculate_scores(df)
 
+        currency = (
+            config.get("providers", {})
+            .get(args.provider, {})
+            .get("currency", "EUR")
+        )
+
         timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
         summary_file = f"summary-{timestamp}.json"
         detail_file = f"detail-{timestamp}.json"
 
-        summary_data = generate_summary_data(df, args.provider, args.region)
-        detail_data = generate_detail_data(df, args.provider, args.region)
+        summary_data = generate_summary_data(df, args.provider, args.region, currency)
+        detail_data = generate_detail_data(df, args.provider, args.region, currency)
         summary_md = generate_markdown_summary(df)
 
         metadata = {

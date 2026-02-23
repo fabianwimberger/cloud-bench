@@ -192,6 +192,16 @@ a:hover {
   grid-template-columns: repeat(4, 1fr);
 }
 
+.chart-wide {
+  grid-column: span 2;
+}
+
+.chart-cell {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+}
+
 @media (max-width: 1200px) {
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
@@ -201,10 +211,6 @@ a:hover {
 @media (max-width: 900px) {
   .grid-3 {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .chart-wide {
-    grid-column: span 2;
   }
 }
 
@@ -216,16 +222,6 @@ a:hover {
   .chart-wide {
     grid-column: span 1;
   }
-}
-
-.chart-wide {
-  grid-column: span 2;
-}
-
-.chart-cell {
-  position: relative;
-  min-width: 0;
-  overflow: hidden;
 }
 
 /* Stat Card - Dense data display */
