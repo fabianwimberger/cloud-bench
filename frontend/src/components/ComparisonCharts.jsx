@@ -115,7 +115,7 @@ function ComparisonCharts({ charts }) {
         <div style={{ height: '220px' }}>
           <canvas ref={diskRef}></canvas>
         </div>
-        <div style={{ height: '220px', gridColumn: 'span 2' }}>
+        <div className="chart-wide" style={{ height: '220px' }}>
           <canvas ref={valueRef}></canvas>
         </div>
       </div>
