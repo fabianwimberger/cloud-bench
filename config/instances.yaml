@@ -19,8 +19,8 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly_eur: 0.006
-        monthly_eur: 3.59
+        hourly_eur: 0.00576
+        monthly_eur: 3.588
     - id: cx33
       name: CX33
       arch: Intel
@@ -28,8 +28,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly_eur: 0.010
-        monthly_eur: 5.99
+        hourly_eur: 0.0096
+        monthly_eur: 5.988
     - id: cax11
       name: CAX11
       arch: ARM64
@@ -37,8 +37,8 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly_eur: 0.006
-        monthly_eur: 3.95
+        hourly_eur: 0.00636
+        monthly_eur: 3.948
     - id: cax21
       name: CAX21
       arch: ARM64
@@ -46,8 +46,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly_eur: 0.012
-        monthly_eur: 7.19
+        hourly_eur: 0.01152
+        monthly_eur: 7.188
     - id: cpx22
       name: CPX22
       arch: AMD EPYC
@@ -55,8 +55,8 @@ providers:
       ram_gb: 4
       disk_gb: 80
       pricing:
-        hourly_eur: 0.012
-        monthly_eur: 7.19
+        hourly_eur: 0.01152
+        monthly_eur: 7.188
     - id: cpx32
       name: CPX32
       arch: AMD EPYC
@@ -64,8 +64,8 @@ providers:
       ram_gb: 8
       disk_gb: 160
       pricing:
-        hourly_eur: 0.020
-        monthly_eur: 12.59
+        hourly_eur: 0.02016
+        monthly_eur: 12.588
     - id: ccx13
       name: CCX13
       arch: Intel (Dedicated)
@@ -73,8 +73,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly_eur: 0.023
-        monthly_eur: 14.39
+        hourly_eur: 0.02508
+        monthly_eur: 15.588
     - id: ccx23
       name: CCX23
       arch: Intel (Dedicated)
@@ -82,8 +82,8 @@ providers:
       ram_gb: 16
       disk_gb: 160
       pricing:
-        hourly_eur: 0.046
-        monthly_eur: 28.79
+        hourly_eur: 0.05004
+        monthly_eur: 31.188
 _metadata:
-  last_pricing_update: '2026-02-23T16:04:30.634560'
+  last_pricing_update: '2026-02-23T16:23:59.169879'
   source: Hetzner Cloud API
