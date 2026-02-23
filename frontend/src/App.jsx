@@ -190,33 +190,41 @@ function App() {
 
   const filteredCharts = useMemo(() => {
     if (!data?.charts || !filteredRanking.length) return null
-    
+
     const filteredTypes = new Set(filteredRanking.map(r => r.instance_type))
     const filteredIndices = data.ranking
       .map((r, i) => filteredTypes.has(r.instance_type) ? i : -1)
       .filter(i => i !== -1)
-    
-    return {
-      single_core: {
-        labels: filteredIndices.map(i => data.charts.single_core.labels[i]),
-        values: filteredIndices.map(i => data.charts.single_core.values[i])
-      },
-      multi_core: {
-        labels: filteredIndices.map(i => data.charts.multi_core.labels[i]),
-        values: filteredIndices.map(i => data.charts.multi_core.values[i])
-      },
-      memory: {
-        labels: filteredIndices.map(i => data.charts.memory.labels[i]),
-        values: filteredIndices.map(i => data.charts.memory.values[i])
-      },
-      disk: {
-        labels: filteredIndices.map(i => data.charts.disk.labels[i]),
-        values: filteredIndices.map(i => data.charts.disk.values[i])
-      },
-      value: {
-        labels: filteredIndices.map(i => data.charts.value.labels[i]),
-        values: filteredIndices.map(i => data.charts.value.values[i])
+
+    const archMap = Object.fromEntries(
+      filteredRanking.map(r => [r.instance_type, r.arch])
+    )
+
+    const fmtLabel = (type, arch) =>
+      `${type.toUpperCase()} (${arch === 'aarch64' ? 'ARM64' : 'x86'})`
+
+    const sortByValue = (labels, values) => {
+      const pairs = labels.map((l, i) => [l, values[i]])
+      pairs.sort((a, b) => b[1] - a[1])
+      return {
+        labels: pairs.map(p => p[0]),
+        values: pairs.map(p => p[1])
       }
+    }
+
+    const buildChart = (chartKey) => {
+      const rawLabels = filteredIndices.map(i => data.charts[chartKey].labels[i])
+      const rawValues = filteredIndices.map(i => data.charts[chartKey].values[i])
+      const namedLabels = rawLabels.map(type => fmtLabel(type, archMap[type] || ''))
+      return sortByValue(namedLabels, rawValues)
+    }
+
+    return {
+      single_core: buildChart('single_core'),
+      multi_core: buildChart('multi_core'),
+      memory: buildChart('memory'),
+      disk: buildChart('disk'),
+      value: buildChart('value')
     }
   }, [data?.charts, data?.ranking, filteredRanking])
 
