@@ -85,5 +85,5 @@ providers:
         hourly_eur: 0.046
         monthly_eur: 28.79
 _metadata:
-  last_pricing_update: '2026-02-23T07:15:36.443714'
+  last_pricing_update: '2026-02-23T16:04:30.634560'
   source: Hetzner Cloud API
