@@ -100,22 +100,22 @@ function ComparisonCharts({ charts }) {
   if (!charts) return null
 
   return (
-    <div className="card">
+    <div className="card" style={{ overflow: 'hidden' }}>
       <h2 className="card-title">Performance Charts</h2>
       <div className="grid grid-3" style={{ marginTop: '1rem' }}>
-        <div style={{ height: '220px' }}>
+        <div className="chart-cell" style={{ height: '220px' }}>
           <canvas ref={singleRef}></canvas>
         </div>
-        <div style={{ height: '220px' }}>
+        <div className="chart-cell" style={{ height: '220px' }}>
           <canvas ref={multiRef}></canvas>
         </div>
-        <div style={{ height: '220px' }}>
+        <div className="chart-cell" style={{ height: '220px' }}>
           <canvas ref={memoryRef}></canvas>
         </div>
-        <div style={{ height: '220px' }}>
+        <div className="chart-cell" style={{ height: '220px' }}>
           <canvas ref={diskRef}></canvas>
         </div>
-        <div className="chart-wide" style={{ height: '220px' }}>
+        <div className="chart-cell chart-wide" style={{ height: '220px' }}>
           <canvas ref={valueRef}></canvas>
         </div>
       </div>

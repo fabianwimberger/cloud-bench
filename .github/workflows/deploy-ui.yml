@@ -1,0 +1,68 @@
+name: Deploy UI
+
+on:
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "22.14.0"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      actions: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Find latest successful benchmark run
+        id: find_run
+        run: |
+          RUN_ID=$(gh run list \
+            --workflow=benchmark.yml \
+            --status=success \
+            --limit=1 \
+            --json databaseId \
+            --jq '.[0].databaseId')
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
+            echo "::error::No successful benchmark run found"
+            exit 1
+          fi
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "Using benchmark data from run $RUN_ID"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Download benchmark data
+        run: |
+          gh run download ${{ steps.find_run.outputs.run_id }} \
+            --name benchmark-processed \
+            --dir frontend/public/data/
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: frontend/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

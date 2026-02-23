@@ -16,6 +16,16 @@ import pandas as pd
 SCHEMA_VERSION = "2.0"
 
 
+def normalize_arch(arch: str) -> str:
+    """Normalize architecture to X86 or ARM64."""
+    if not arch:
+        return "X86"
+    lower = arch.lower()
+    if "arm" in lower or "aarch" in lower:
+        return "ARM64"
+    return "X86"
+
+
 def load_config(config_path: str) -> dict:
     with open(config_path, "r") as f:
         return yaml.safe_load(f)
@@ -157,7 +167,7 @@ def normalize_results(
             {
                 "instance_key": key,
                 "instance_type": inst_type.upper(),
-                "display_name": f"{inst_type.upper()} ({inst_config.get('arch', 'Unknown')})",
+                "display_name": f"{inst_type.upper()} ({normalize_arch(inst_config.get('arch', ''))})",
                 "vcpu": inst_config.get("vcpu", attrs.get("vcpu", 0)),
                 "ram_gb": inst_config.get("ram_gb", 0),
                 "disk_gb": inst_config.get("disk_gb", 0),
@@ -291,7 +301,7 @@ def generate_summary_data(df: pd.DataFrame, provider: str, region: str) -> dict:
         return {}
 
     df_sorted = df.sort_values("overall_score", ascending=False)
-    labels = df_sorted["display_name"].tolist()
+    labels = df_sorted["instance_type"].tolist()
 
     return {
         "schema_version": SCHEMA_VERSION,
