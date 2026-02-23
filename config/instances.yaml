@@ -39,6 +39,33 @@ providers:
       pricing:
         hourly_eur: 0.01152
         monthly_eur: 7.188
+    - id: cx32
+      name: CX32
+      arch: Intel
+      vcpu: 4
+      ram_gb: 8
+      disk_gb: 80
+      pricing:
+        hourly_eur: 0.01152
+        monthly_eur: 7.188
+    - id: cax21
+      name: CAX21
+      arch: ARM64
+      vcpu: 4
+      ram_gb: 8
+      disk_gb: 80
+      pricing:
+        hourly_eur: 0.01272
+        monthly_eur: 7.908
+    - id: cpx32
+      name: CPX32
+      arch: AMD EPYC
+      vcpu: 4
+      ram_gb: 8
+      disk_gb: 160
+      pricing:
+        hourly_eur: 0.02076
+        monthly_eur: 12.948
 _metadata:
   last_pricing_update: '2026-02-23T07:15:36.443714'
   source: Hetzner Cloud API

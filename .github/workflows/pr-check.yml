@@ -55,16 +55,3 @@ jobs:
             echo "::warning::Provider authentication failed (expected for dummy token). Plan validated otherwise."
           }
 
-      - name: Comment Plan on PR
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            const plan = fs.readFileSync('terraform/plan_output.txt', 'utf8');
-            const body = `## Terraform Plan\n\n\`\`\`\n${plan.substring(0, 6000)}\n\`\`\``;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body
-            });
