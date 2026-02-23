@@ -88,17 +88,13 @@ a:hover {
 }
 
 .header-logo {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 0;
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.02em;
   display: flex;
   align-items: center;
-  height: 100%;
+  flex-shrink: 0;
 }
 
 .header-logo span {
@@ -133,6 +129,16 @@ a:hover {
 .header-meta {
   font-size: 0.75rem;
   color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .header-meta {
+    display: none;
+  }
 }
 
 /* Announcement Banner */
@@ -196,6 +202,14 @@ a:hover {
   .grid-2, .grid-3, .grid-4 {
     grid-template-columns: 1fr;
   }
+
+  .chart-wide {
+    grid-column: span 1;
+  }
+}
+
+.chart-wide {
+  grid-column: span 2;
 }
 
 /* Stat Card - Dense data display */
