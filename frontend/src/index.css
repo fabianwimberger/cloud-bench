@@ -276,17 +276,35 @@ a:hover {
   color: var(--color-text-muted);
 }
 
-.filter-range {
+.range-slider {
+  position: relative;
   width: 120px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.range-slider-track {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.range-slider-input {
+  position: absolute;
+  width: 100%;
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: var(--color-surface-light);
-  border-radius: 2px;
+  background: transparent;
+  pointer-events: none;
   outline: none;
+  margin: 0;
 }
 
-.filter-range::-webkit-slider-thumb {
+.range-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px;
@@ -294,6 +312,17 @@ a:hover {
   background: var(--color-primary);
   border-radius: 50%;
   cursor: pointer;
+  pointer-events: all;
+}
+
+.range-slider-input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: all;
+  border: none;
 }
 
 .filter-actions {

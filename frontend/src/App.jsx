@@ -29,6 +29,27 @@ const DataAPI = {
   }
 }
 
+function normalizeArch(raw) {
+  if (!raw) return 'X86'
+  const lower = raw.toLowerCase()
+  if (lower.includes('arm') || lower.includes('aarch')) return 'ARM64'
+  return 'X86'
+}
+
+function parseExprFilter(expr, value) {
+  if (!expr || expr.trim() === '') return true
+  const match = expr.trim().match(/^([<>]=?|=)?\s*(\d+\.?\d*)$/)
+  if (!match) return true
+  const op = match[1] || '>='
+  const threshold = parseFloat(match[2])
+  if (op === '>') return value > threshold
+  if (op === '>=') return value >= threshold
+  if (op === '<') return value < threshold
+  if (op === '<=') return value <= threshold
+  if (op === '=') return value === threshold
+  return true
+}
+
 function transformData(data) {
   if (!data || data.schema_version !== '2.0') {
     throw new Error('Unsupported data format')
@@ -46,7 +67,7 @@ function transformData(data) {
     ranking: instances.map(inst => ({
       instance_type: inst.id,
       display_name: inst.name,
-      arch: inst.specs?.arch || 'Unknown',
+      arch: normalizeArch(inst.specs?.arch),
       vcpu: inst.specs?.vcpu || 0,
       ram_gb: inst.specs?.ram_gb || 0,
       disk_gb: inst.specs?.disk_gb || 0,
@@ -78,12 +99,14 @@ function transformData(data) {
 
 function filterData(ranking, filters) {
   if (!ranking) return []
-  
+
   return ranking.filter(inst => {
     if (filters.arch && inst.arch !== filters.arch) return false
-    if (filters.min_vcpu && inst.vcpu < parseInt(filters.min_vcpu)) return false
-    if (filters.min_ram && inst.ram_gb < parseInt(filters.min_ram)) return false
+    if (!parseExprFilter(filters.vcpu, inst.vcpu)) return false
+    if (!parseExprFilter(filters.ram, inst.ram_gb)) return false
+    if (!parseExprFilter(filters.disk, inst.disk_gb)) return false
     if (inst.price_monthly > filters.max_monthly_price) return false
+    if (inst.price_monthly < filters.min_monthly_price) return false
     if (filters.search && !inst.instance_type.toLowerCase().includes(filters.search.toLowerCase())) return false
     return true
   })
@@ -110,8 +133,10 @@ function App() {
   
   const [filters, setFilters] = useState({
     arch: '',
-    min_vcpu: '',
-    min_ram: '',
+    vcpu: '',
+    ram: '',
+    disk: '',
+    min_monthly_price: 0,
     max_monthly_price: 100,
     search: ''
   })
@@ -138,6 +163,7 @@ function App() {
       
       setFilters(prev => ({
         ...prev,
+        min_monthly_price: 0,
         max_monthly_price: Math.ceil(Math.max(...transformed.ranking.map(r => r.price_monthly)) * 1.2)
       }))
       
@@ -200,8 +226,7 @@ function App() {
       filteredRanking.map(r => [r.instance_type, r.arch])
     )
 
-    const fmtLabel = (type, arch) =>
-      `${type.toUpperCase()} (${arch === 'aarch64' ? 'ARM64' : 'x86'})`
+    const fmtLabel = (type, arch) => `${type.toUpperCase()} (${arch})`
 
     const sortByValue = (labels, values) => {
       const pairs = labels.map((l, i) => [l, values[i]])
