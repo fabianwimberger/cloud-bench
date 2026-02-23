@@ -67,7 +67,7 @@ jobs:
       ssh_key_b64: ${{ steps.export_key.outputs.key_b64 }}
       ssh_pub_key: ${{ steps.export_key.outputs.pub_key }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Validate Inputs
         env:
@@ -189,10 +189,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download Ansible Inventory
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ansible-inventory
 
@@ -208,7 +208,7 @@ jobs:
           chmod 644 ~/.ssh/cloud_bench.pub
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
@@ -256,16 +256,16 @@ jobs:
     outputs:
       summary: ${{ steps.summary.outputs.content }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download Results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: benchmark-raw-results
           path: results/
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
@@ -300,7 +300,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Get Runner Public IP
         id: get_ip
@@ -329,7 +329,7 @@ jobs:
           echo "Runner IP for cleanup: ${RUNNER_IP}"
 
       - name: Download Terraform State
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: terraform-state
           path: terraform/
@@ -394,10 +394,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download Processed Results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: benchmark-processed
           path: frontend/public/data/

@@ -31,10 +31,10 @@ jobs:
       instance_count: ${{ steps.calculate.outputs.count }}
       should_run: ${{ steps.gate.outputs.should_run }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
