@@ -460,11 +460,7 @@ def main():
 
         df = calculate_scores(df)
 
-        currency = (
-            config.get("providers", {})
-            .get(args.provider, {})
-            .get("currency", "EUR")
-        )
+        currency = config.get("providers", {}).get(args.provider, {}).get("currency", "EUR")
 
         timestamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
         summary_file = f"summary-{timestamp}.json"
