@@ -55,8 +55,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly_eur: 0.01272
-        monthly_eur: 7.908
+        hourly_eur: 0.01152
+        monthly_eur: 7.188
     - id: cpx32
       name: CPX32
       arch: AMD EPYC
@@ -64,8 +64,8 @@ providers:
       ram_gb: 8
       disk_gb: 160
       pricing:
-        hourly_eur: 0.02076
-        monthly_eur: 12.948
+        hourly_eur: 0.02016
+        monthly_eur: 12.588
 _metadata:
-  last_pricing_update: '2026-02-23T07:15:36.443714'
+  last_pricing_update: '2026-02-23T16:04:30.634560'
   source: Hetzner Cloud API
