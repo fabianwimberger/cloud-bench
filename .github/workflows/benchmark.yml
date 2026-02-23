@@ -208,7 +208,7 @@ jobs:
           chmod 644 ~/.ssh/cloud_bench.pub
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
@@ -265,7 +265,7 @@ jobs:
           path: results/
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
