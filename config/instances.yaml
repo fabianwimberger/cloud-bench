@@ -19,8 +19,17 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly_eur: 0.00576
-        monthly_eur: 3.588
+        hourly_eur: 0.006
+        monthly_eur: 3.59
+    - id: cx33
+      name: CX33
+      arch: Intel
+      vcpu: 4
+      ram_gb: 8
+      disk_gb: 80
+      pricing:
+        hourly_eur: 0.010
+        monthly_eur: 5.99
     - id: cax11
       name: CAX11
       arch: ARM64
@@ -28,26 +37,8 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly_eur: 0.00636
-        monthly_eur: 3.948
-    - id: cpx22
-      name: CPX22
-      arch: AMD EPYC
-      vcpu: 2
-      ram_gb: 4
-      disk_gb: 80
-      pricing:
-        hourly_eur: 0.01152
-        monthly_eur: 7.188
-    - id: cx32
-      name: CX32
-      arch: Intel
-      vcpu: 4
-      ram_gb: 8
-      disk_gb: 80
-      pricing:
-        hourly_eur: 0.01152
-        monthly_eur: 7.188
+        hourly_eur: 0.006
+        monthly_eur: 3.95
     - id: cax21
       name: CAX21
       arch: ARM64
@@ -55,8 +46,17 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly_eur: 0.01152
-        monthly_eur: 7.188
+        hourly_eur: 0.012
+        monthly_eur: 7.19
+    - id: cpx22
+      name: CPX22
+      arch: AMD EPYC
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 80
+      pricing:
+        hourly_eur: 0.012
+        monthly_eur: 7.19
     - id: cpx32
       name: CPX32
       arch: AMD EPYC
@@ -64,8 +64,26 @@ providers:
       ram_gb: 8
       disk_gb: 160
       pricing:
-        hourly_eur: 0.02016
-        monthly_eur: 12.588
+        hourly_eur: 0.020
+        monthly_eur: 12.59
+    - id: ccx13
+      name: CCX13
+      arch: Intel (Dedicated)
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 80
+      pricing:
+        hourly_eur: 0.023
+        monthly_eur: 14.39
+    - id: ccx23
+      name: CCX23
+      arch: Intel (Dedicated)
+      vcpu: 4
+      ram_gb: 16
+      disk_gb: 160
+      pricing:
+        hourly_eur: 0.046
+        monthly_eur: 28.79
 _metadata:
   last_pricing_update: '2026-02-23T16:04:30.634560'
   source: Hetzner Cloud API
