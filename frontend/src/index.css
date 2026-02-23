@@ -88,17 +88,13 @@ a:hover {
 }
 
 .header-logo {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 0;
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.02em;
   display: flex;
   align-items: center;
-  height: 100%;
+  flex-shrink: 0;
 }
 
 .header-logo span {
@@ -133,6 +129,16 @@ a:hover {
 .header-meta {
   font-size: 0.75rem;
   color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .header-meta {
+    display: none;
+  }
 }
 
 /* Announcement Banner */
@@ -196,6 +202,14 @@ a:hover {
   .grid-2, .grid-3, .grid-4 {
     grid-template-columns: 1fr;
   }
+
+  .chart-wide {
+    grid-column: span 1;
+  }
+}
+
+.chart-wide {
+  grid-column: span 2;
 }
 
 /* Stat Card - Dense data display */
@@ -276,17 +290,35 @@ a:hover {
   color: var(--color-text-muted);
 }
 
-.filter-range {
+.range-slider {
+  position: relative;
   width: 120px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.range-slider-track {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.range-slider-input {
+  position: absolute;
+  width: 100%;
   height: 4px;
   -webkit-appearance: none;
   appearance: none;
-  background: var(--color-surface-light);
-  border-radius: 2px;
+  background: transparent;
+  pointer-events: none;
   outline: none;
+  margin: 0;
 }
 
-.filter-range::-webkit-slider-thumb {
+.range-slider-input::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 14px;
@@ -294,6 +326,17 @@ a:hover {
   background: var(--color-primary);
   border-radius: 50%;
   cursor: pointer;
+  pointer-events: all;
+}
+
+.range-slider-input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: all;
+  border: none;
 }
 
 .filter-actions {

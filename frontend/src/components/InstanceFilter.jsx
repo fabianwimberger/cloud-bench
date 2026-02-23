@@ -2,7 +2,7 @@ function InstanceFilter({ ranking, filters, onFilterChange }) {
   if (!ranking || ranking.length === 0) return null
 
   const arches = [...new Set(ranking.map(r => r.arch))].filter(Boolean).sort()
-  
+
   const maxPrice = Math.ceil(Math.max(...ranking.map(r => r.price_monthly)) * 1.2)
 
   const handleChange = (key, value) => {
@@ -12,22 +12,34 @@ function InstanceFilter({ ranking, filters, onFilterChange }) {
   const clearFilters = () => {
     onFilterChange({
       arch: '',
-      min_vcpu: '',
-      min_ram: '',
+      vcpu: '',
+      ram: '',
+      disk: '',
+      min_monthly_price: 0,
       max_monthly_price: maxPrice,
       search: ''
     })
   }
 
-  const hasActiveFilters = filters.arch || filters.min_vcpu || filters.min_ram || filters.search || filters.max_monthly_price < maxPrice
+  const hasActiveFilters =
+    filters.arch ||
+    filters.vcpu ||
+    filters.ram ||
+    filters.disk ||
+    filters.search ||
+    filters.min_monthly_price > 0 ||
+    filters.max_monthly_price < maxPrice
+
+  const minPct = (filters.min_monthly_price / maxPrice) * 100
+  const maxPct = (filters.max_monthly_price / maxPrice) * 100
 
   return (
     <div className="filter-bar">
       <div className="filter-group">
         <label>Architecture</label>
-        <select 
+        <select
           className="filter-select"
-          value={filters.arch} 
+          value={filters.arch}
           onChange={(e) => handleChange('arch', e.target.value)}
         >
           <option value="">All</option>
@@ -38,42 +50,79 @@ function InstanceFilter({ ranking, filters, onFilterChange }) {
       </div>
 
       <div className="filter-group">
-        <label>Min vCPUs</label>
+        <label>vCPU</label>
         <input
-          type="number"
+          type="text"
           className="filter-input"
-          placeholder="0"
-          value={filters.min_vcpu}
-          onChange={(e) => handleChange('min_vcpu', e.target.value)}
-          min="0"
+          placeholder=">2"
+          value={filters.vcpu}
+          onChange={(e) => handleChange('vcpu', e.target.value)}
           style={{ width: '70px' }}
         />
       </div>
 
       <div className="filter-group">
-        <label>Min RAM (GB)</label>
+        <label>Memory (GB)</label>
         <input
-          type="number"
+          type="text"
           className="filter-input"
-          placeholder="0"
-          value={filters.min_ram}
-          onChange={(e) => handleChange('min_ram', e.target.value)}
-          min="0"
+          placeholder="<32"
+          value={filters.ram}
+          onChange={(e) => handleChange('ram', e.target.value)}
           style={{ width: '70px' }}
         />
       </div>
 
       <div className="filter-group">
-        <label>Max Price: €{filters.max_monthly_price}</label>
+        <label>Disk (GB)</label>
         <input
-          type="range"
-          className="filter-range"
-          min="0"
-          max={maxPrice}
-          step="1"
-          value={filters.max_monthly_price}
-          onChange={(e) => handleChange('max_monthly_price', parseInt(e.target.value))}
+          type="text"
+          className="filter-input"
+          placeholder=">50"
+          value={filters.disk}
+          onChange={(e) => handleChange('disk', e.target.value)}
+          style={{ width: '70px' }}
         />
+      </div>
+
+      <div className="filter-group">
+        <label>Price: €{filters.min_monthly_price} – €{filters.max_monthly_price}</label>
+        <div className="range-slider">
+          <div
+            className="range-slider-track"
+            style={{
+              background: `linear-gradient(to right,
+                var(--color-surface-light) ${minPct}%,
+                var(--color-primary) ${minPct}%,
+                var(--color-primary) ${maxPct}%,
+                var(--color-surface-light) ${maxPct}%)`
+            }}
+          />
+          <input
+            type="range"
+            className="range-slider-input"
+            min={0}
+            max={maxPrice}
+            step={1}
+            value={filters.min_monthly_price}
+            onChange={(e) => {
+              const val = parseInt(e.target.value)
+              if (val <= filters.max_monthly_price) handleChange('min_monthly_price', val)
+            }}
+          />
+          <input
+            type="range"
+            className="range-slider-input"
+            min={0}
+            max={maxPrice}
+            step={1}
+            value={filters.max_monthly_price}
+            onChange={(e) => {
+              const val = parseInt(e.target.value)
+              if (val >= filters.min_monthly_price) handleChange('max_monthly_price', val)
+            }}
+          />
+        </div>
       </div>
 
       <div className="filter-group">
