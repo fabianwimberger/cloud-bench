@@ -2,43 +2,43 @@ providers:
   hetzner:
     regions:
       nbg1:
-        name: "Nuremberg"
+        name: Nuremberg
       fsn1:
-        name: "Falkenstein"
+        name: Falkenstein
       hel1:
-        name: "Helsinki"
+        name: Helsinki
       ash:
-        name: "Ashburn, VA"
+        name: Ashburn, VA
       hil:
-        name: "Hillsboro, OR"
-
+        name: Hillsboro, OR
     instances:
-      - id: cx23
-        name: "CX23"
-        arch: "Intel"
-        vcpu: 2
-        ram_gb: 4
-        disk_gb: 40
-        pricing:
-          hourly_eur: 0.0050
-          monthly_eur: 3.59
-
-      - id: cax11
-        name: "CAX11"
-        arch: "ARM64"
-        vcpu: 2
-        ram_gb: 4
-        disk_gb: 40
-        pricing:
-          hourly_eur: 0.0055
-          monthly_eur: 3.95
-
-      - id: cpx22
-        name: "CPX22"
-        arch: "AMD EPYC"
-        vcpu: 2
-        ram_gb: 4
-        disk_gb: 80
-        pricing:
-          hourly_eur: 0.0100
-          monthly_eur: 7.19
+    - id: cx23
+      name: CX23
+      arch: Intel
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 40
+      pricing:
+        hourly_eur: 0.00576
+        monthly_eur: 3.588
+    - id: cax11
+      name: CAX11
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 40
+      pricing:
+        hourly_eur: 0.00636
+        monthly_eur: 3.948
+    - id: cpx22
+      name: CPX22
+      arch: AMD EPYC
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 80
+      pricing:
+        hourly_eur: 0.01152
+        monthly_eur: 7.188
+_metadata:
+  last_pricing_update: '2026-02-23T07:15:36.443714'
+  source: Hetzner Cloud API
