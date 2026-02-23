@@ -366,8 +366,18 @@ jobs:
           echo "Verifying cleanup..."
 
           # Install hcloud CLI
-          HCLOUD_VERSION=$(curl -s https://api.github.com/repos/hetznercloud/cli/releases/latest | jq -r '.tag_name' | sed 's/^v//')
-          curl -fsSL "https://github.com/hetznercloud/cli/releases/download/v${HCLOUD_VERSION}/hcloud-linux-amd64.tar.gz" | tar -xz
+          HCLOUD_VERSION="1.61.0"
+          HCLOUD_SHA256="86da8a0bbff6d56ca39041e4594c2af3b50baf0971526a67669639a213b51936"
+          HCLOUD_URL="https://github.com/hetznercloud/cli/releases/download/v${HCLOUD_VERSION}/hcloud-linux-amd64.tar.gz"
+          curl -fsSL "$HCLOUD_URL" -o hcloud-linux-amd64.tar.gz
+          echo "${HCLOUD_SHA256}  hcloud-linux-amd64.tar.gz" | sha256sum -c -
+          if [ $? -ne 0 ]; then
+            echo "::error::SHA256 checksum verification failed for hcloud CLI"
+            rm -f hcloud-linux-amd64.tar.gz
+            exit 1
+          fi
+          tar -xzf hcloud-linux-amd64.tar.gz
+          rm -f hcloud-linux-amd64.tar.gz
           
           # Check for remaining resources with this run_id
           SERVERS=$(./hcloud server list -o json | jq -r ".[] | select(.name | contains(\"${{ env.RUN_ID }}\")) | .name")
