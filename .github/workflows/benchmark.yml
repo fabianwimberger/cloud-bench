@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - hetzner
+          - aws
 
       instances:
         description: 'Instance IDs (comma-separated, or "all")'
@@ -17,22 +18,16 @@ on:
         default: 'all'
 
       default_region:
-        description: 'Default region'
-        required: true
-        default: 'fsn1'
-        type: choice
-        options:
-          - fsn1
-          - nbg1
-          - hel1
-          - ash
-          - hil
+        description: 'Region (empty = auto-detect: fsn1 for hetzner, eu-central-1 for aws)'
+        required: false
+        default: ''
+        type: string
 
       instance_regions:
         description: 'Instance-specific regions (JSON: {"cx23":"nbg1"})'
         required: false
         default: '{}'
-      
+
       skip_cost_guard:
         description: 'Skip cost estimation (not recommended)'
         type: boolean
@@ -66,16 +61,35 @@ jobs:
       instances_arg: ${{ steps.instances.outputs.arg }}
       ssh_key_b64: ${{ steps.export_key.outputs.key_b64 }}
       ssh_pub_key: ${{ steps.export_key.outputs.pub_key }}
+      region: ${{ steps.resolve_region.outputs.region }}
     steps:
       - uses: actions/checkout@v6
+
+      - name: Resolve Region
+        id: resolve_region
+        run: |
+          REGION="${{ github.event.inputs.default_region }}"
+          if [ -z "$REGION" ]; then
+            case "${{ github.event.inputs.provider }}" in
+              hetzner) REGION="fsn1" ;;
+              aws)     REGION="eu-central-1" ;;
+            esac
+          fi
+          echo "region=$REGION" >> $GITHUB_OUTPUT
+          echo "Resolved region: $REGION"
 
       - name: Validate Inputs
         env:
           TOKEN_SET: ${{ secrets.HCLOUD_TOKEN != '' }}
+          AWS_KEY_SET: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
           INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
         run: |
-          if [ "$TOKEN_SET" != "true" ]; then
-            echo "::error::HCLOUD_TOKEN secret is required"
+          if [ "${{ github.event.inputs.provider }}" = "hetzner" ] && [ "$TOKEN_SET" != "true" ]; then
+            echo "::error::HCLOUD_TOKEN secret is required for Hetzner"
+            exit 1
+          fi
+          if [ "${{ github.event.inputs.provider }}" = "aws" ] && [ "$AWS_KEY_SET" != "true" ]; then
+            echo "::error::AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets are required for AWS"
             exit 1
           fi
           if [ -n "$INSTANCE_REGIONS" ] && [ "$INSTANCE_REGIONS" != "{}" ]; then
@@ -139,21 +153,26 @@ jobs:
         run: |
           INSTANCES_ARG=$(./scripts/parse-instances.sh "${{ github.event.inputs.instances }}")
           if [ $? -ne 0 ]; then
-            echo "::error::Invalid instance IDs: only alphanumeric characters, hyphens, underscores, and commas are allowed"
+            echo "::error::Invalid instance IDs: only alphanumeric characters, hyphens, underscores, dots, and commas are allowed"
             exit 1
           fi
           echo "arg=$INSTANCES_ARG" >> $GITHUB_OUTPUT
 
       - name: Terraform Apply
         working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           terraform apply -auto-approve \
             -var="run_id=${{ env.RUN_ID }}" \
             -var="cloud_provider=${{ github.event.inputs.provider }}" \
             -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
-            -var="default_region=${{ github.event.inputs.default_region }}" \
+            -var="default_region=${{ steps.resolve_region.outputs.region }}" \
             -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
-            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
+            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || '' }}" \
+            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || '' }}" \
             -var="ssh_public_key_path=~/.ssh/cloud_bench.pub" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
@@ -250,7 +269,7 @@ jobs:
           retention-days: 30
 
   process:
-    needs: benchmark
+    needs: [provision, benchmark]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -276,7 +295,7 @@ jobs:
             --input results/ \
             --output frontend/public/data/ \
             --config config/instances.yaml \
-            --region "${{ github.event.inputs.default_region }}" \
+            --region "${{ needs.provision.outputs.region }}" \
             --provider "${{ github.event.inputs.provider }}"
 
       - name: Generate Summary
@@ -293,6 +312,64 @@ jobs:
           name: benchmark-processed
           path: frontend/public/data/
           retention-days: 90
+
+      - name: Persist Results to Data Branch
+        run: |
+          TIMESTAMP=$(date -u +%Y-%m-%dT%H%M%S)
+          PROVIDER="${{ github.event.inputs.provider }}"
+          REGION="${{ needs.provision.outputs.region }}"
+          RUN_DIR="data/runs/${TIMESTAMP}-${PROVIDER}-${REGION}"
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Save processed results before switching branches
+          cp -r frontend/public/data/ /tmp/processed-results/
+          cp -r results/ /tmp/raw-results/ 2>/dev/null || true
+
+          # Fetch the data branch (create if missing)
+          if git fetch origin benchmark-data:benchmark-data 2>/dev/null; then
+            git checkout benchmark-data
+          else
+            git checkout --orphan benchmark-data
+            git rm -rf . 2>/dev/null || true
+            mkdir -p data
+            echo '{"schema_version":"3.0","runs":[],"instance_index":{}}' > data/manifest.json
+            git add data/manifest.json
+            git commit -m "init: benchmark-data branch"
+          fi
+
+          # Write run data
+          mkdir -p "$RUN_DIR/raw"
+          cp /tmp/raw-results/*.json "$RUN_DIR/raw/" 2>/dev/null || true
+
+          # Find the summary and detail files (timestamped filenames)
+          SUMMARY_FILE=$(ls /tmp/processed-results/summary-*.json 2>/dev/null | head -1)
+          DETAIL_FILE=$(ls /tmp/processed-results/detail-*.json 2>/dev/null | head -1)
+          if [ -n "$SUMMARY_FILE" ]; then
+            cp "$SUMMARY_FILE" "$RUN_DIR/summary.json"
+          fi
+          if [ -n "$DETAIL_FILE" ]; then
+            cp "$DETAIL_FILE" "$RUN_DIR/detail.json"
+          fi
+
+          # Update manifest
+          pip install pyyaml
+          python scripts/update_manifest.py \
+            --manifest data/manifest.json \
+            --run-dir "$RUN_DIR" \
+            --provider "$PROVIDER" \
+            --region "$REGION" \
+            --timestamp "$TIMESTAMP"
+
+          # Commit and push
+          git add data/
+          git commit -m "benchmark: ${PROVIDER} ${REGION} ${TIMESTAMP}" || echo "No changes to commit"
+          git push origin benchmark-data
+
+          # Switch back
+          git checkout -
 
   cleanup:
     needs: [provision, benchmark, process]
@@ -346,14 +423,19 @@ jobs:
 
       - name: Terraform Destroy
         working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           terraform destroy -auto-approve \
             -var="run_id=${{ env.RUN_ID }}" \
             -var="cloud_provider=${{ github.event.inputs.provider }}" \
             -var="enabled_instances=${{ needs.provision.outputs.instances_arg }}" \
-            -var="default_region=${{ github.event.inputs.default_region }}" \
+            -var="default_region=${{ needs.provision.outputs.region }}" \
             -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
-            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
+            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || '' }}" \
+            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || '' }}" \
             -var="ssh_public_key_path=/dev/null" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
@@ -362,33 +444,53 @@ jobs:
         if: always()
         env:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ needs.provision.outputs.region }}
         run: |
           echo "Verifying cleanup..."
 
-          # Install hcloud CLI
-          HCLOUD_VERSION="1.61.0"
-          HCLOUD_SHA256="86da8a0bbff6d56ca39041e4594c2af3b50baf0971526a67669639a213b51936"
-          HCLOUD_URL="https://github.com/hetznercloud/cli/releases/download/v${HCLOUD_VERSION}/hcloud-linux-amd64.tar.gz"
-          curl -fsSL "$HCLOUD_URL" -o hcloud-linux-amd64.tar.gz
-          echo "${HCLOUD_SHA256}  hcloud-linux-amd64.tar.gz" | sha256sum -c -
-          if [ $? -ne 0 ]; then
-            echo "::error::SHA256 checksum verification failed for hcloud CLI"
+          if [ "${{ github.event.inputs.provider }}" = "hetzner" ]; then
+            # Install hcloud CLI
+            HCLOUD_VERSION="1.61.0"
+            HCLOUD_SHA256="86da8a0bbff6d56ca39041e4594c2af3b50baf0971526a67669639a213b51936"
+            HCLOUD_URL="https://github.com/hetznercloud/cli/releases/download/v${HCLOUD_VERSION}/hcloud-linux-amd64.tar.gz"
+            curl -fsSL "$HCLOUD_URL" -o hcloud-linux-amd64.tar.gz
+            echo "${HCLOUD_SHA256}  hcloud-linux-amd64.tar.gz" | sha256sum -c -
+            if [ $? -ne 0 ]; then
+              echo "::error::SHA256 checksum verification failed for hcloud CLI"
+              rm -f hcloud-linux-amd64.tar.gz
+              exit 1
+            fi
+            tar -xzf hcloud-linux-amd64.tar.gz
             rm -f hcloud-linux-amd64.tar.gz
-            exit 1
-          fi
-          tar -xzf hcloud-linux-amd64.tar.gz
-          rm -f hcloud-linux-amd64.tar.gz
-          
-          # Check for remaining resources with this run_id
-          SERVERS=$(./hcloud server list -o json | jq -r ".[] | select(.name | contains(\"${{ env.RUN_ID }}\")) | .name")
-          
-          if [[ -n "$SERVERS" ]]; then
-            echo "::error::CRITICAL: Servers still exist after cleanup:"
-            echo "$SERVERS"
-            echo "Manual intervention required!"
-            exit 1
-          else
-            echo "[OK] All resources cleaned up successfully"
+
+            # Check for remaining resources with this run_id
+            SERVERS=$(./hcloud server list -o json | jq -r ".[] | select(.name | contains(\"${{ env.RUN_ID }}\")) | .name")
+
+            if [[ -n "$SERVERS" ]]; then
+              echo "::error::CRITICAL: Servers still exist after cleanup:"
+              echo "$SERVERS"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] All resources cleaned up successfully"
+            fi
+
+          elif [ "${{ github.event.inputs.provider }}" = "aws" ]; then
+            INSTANCES=$(aws ec2 describe-instances \
+              --filters "Name=tag:project,Values=cloud-bench" "Name=tag:run_id,Values=${{ env.RUN_ID }}" \
+              --query 'Reservations[].Instances[?State.Name!=`terminated`].InstanceId' \
+              --output text 2>/dev/null || echo "")
+
+            if [[ -n "$INSTANCES" && "$INSTANCES" != "None" ]]; then
+              echo "::error::CRITICAL: AWS instances still exist after cleanup:"
+              echo "$INSTANCES"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] All AWS resources cleaned up successfully"
+            fi
           fi
 
   deploy:
@@ -405,6 +507,30 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+
+      - name: Fetch benchmark data from data branch
+        run: |
+          git fetch origin benchmark-data || echo "No benchmark-data branch yet"
+          if git rev-parse origin/benchmark-data >/dev/null 2>&1; then
+            git checkout origin/benchmark-data -- data/ 2>/dev/null || true
+            if [ -d data ]; then
+              cp -r data/ frontend/public/data/
+            fi
+          fi
+
+      - name: Build history file
+        run: |
+          pip install -r scripts/requirements.txt
+          if [ -f frontend/public/data/manifest.json ]; then
+            python scripts/build_history.py \
+              --data-dir frontend/public/data/ \
+              --output frontend/public/data/history.json
+          fi
 
       - name: Download Processed Results
         uses: actions/download-artifact@v7
@@ -433,7 +559,7 @@ jobs:
         uses: actions/deploy-pages@v4
 
   summary:
-    needs: [process, cleanup]
+    needs: [provision, process, cleanup]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -449,7 +575,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## Benchmark Results\n\n**Provider**: ${{ github.event.inputs.provider }}\n**Region**: ${{ github.event.inputs.default_region }}\n\n${summary}`
+              body: `## Benchmark Results\n\n**Provider**: ${{ github.event.inputs.provider }}\n**Region**: ${{ needs.provision.outputs.region }}\n\n${summary}`
             });
 
       - name: Job Summary
@@ -458,7 +584,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Run ID**: ${{ env.RUN_ID }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Provider**: ${{ github.event.inputs.provider }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Region**: ${{ github.event.inputs.default_region }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region**: ${{ needs.provision.outputs.region }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Instances**: ${{ github.event.inputs.instances }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

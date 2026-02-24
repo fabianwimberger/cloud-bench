@@ -5,6 +5,7 @@ on:
 
 env:
   NODE_VERSION: "22.14.0"
+  PYTHON_VERSION: "3.13"
 
 jobs:
   deploy:
@@ -21,8 +22,34 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Find latest successful benchmark run
-        id: find_run
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+
+      - name: Install Python dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Fetch benchmark data from data branch
+        run: |
+          git fetch origin benchmark-data || echo "No benchmark-data branch yet"
+          if git rev-parse origin/benchmark-data >/dev/null 2>&1; then
+            git checkout origin/benchmark-data -- data/ 2>/dev/null || true
+            if [ -d data ]; then
+              cp -r data/ frontend/public/data/
+            fi
+          fi
+
+      - name: Build history file
+        run: |
+          if [ -f frontend/public/data/manifest.json ]; then
+            python scripts/build_history.py \
+              --data-dir frontend/public/data/ \
+              --output frontend/public/data/history.json
+          fi
+
+      - name: Fallback to latest artifact
+        if: ${{ !hashFiles('frontend/public/data/benchmark-data.json') }}
         run: |
           RUN_ID=$(gh run list \
             --workflow=benchmark.yml \
@@ -30,20 +57,14 @@ jobs:
             --limit=1 \
             --json databaseId \
             --jq '.[0].databaseId')
-          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
-            echo "::error::No successful benchmark run found"
-            exit 1
+          if [ -n "$RUN_ID" ] && [ "$RUN_ID" != "null" ]; then
+            echo "Falling back to artifact from run $RUN_ID"
+            gh run download "$RUN_ID" \
+              --name benchmark-processed \
+              --dir frontend/public/data/
+          else
+            echo "::warning::No benchmark data available"
           fi
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
-          echo "Using benchmark data from run $RUN_ID"
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: Download benchmark data
-        run: |
-          gh run download ${{ steps.find_run.outputs.run_id }} \
-            --name benchmark-processed \
-            --dir frontend/public/data/
         env:
           GH_TOKEN: ${{ github.token }}
 
