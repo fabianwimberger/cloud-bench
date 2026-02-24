@@ -16,6 +16,7 @@ def estimate_cost(
 
     provider_config = config.get("providers", {}).get(provider, {})
     all_instances = provider_config.get("instances", [])
+    currency = provider_config.get("currency", "EUR")
 
     if instances_input == "all":
         to_benchmark = all_instances
@@ -25,12 +26,23 @@ def estimate_cost(
 
     # 20 minutes runtime (conservative)
     RUNTIME_HOURS = 0.33
-    USD_RATE = 1.08
 
-    total_cost_eur = sum(
+    # Get exchange rates from config
+    exchange = config.get("exchange_rates", {})
+    eur_to_usd = exchange.get("eur_to_usd", 1.087)
+    usd_to_eur = exchange.get("usd_to_eur", 0.92)
+
+    total_cost_native = sum(
         i.get("pricing", {}).get("hourly", 0) * RUNTIME_HOURS for i in to_benchmark
     )
-    total_cost_usd = total_cost_eur * USD_RATE
+
+    # Convert to both EUR and USD
+    if currency == "USD":
+        total_cost_usd = total_cost_native
+        total_cost_eur = total_cost_native * usd_to_eur
+    else:
+        total_cost_eur = total_cost_native
+        total_cost_usd = total_cost_native * eur_to_usd
 
     return {
         "cost_eur": round(total_cost_eur, 4),

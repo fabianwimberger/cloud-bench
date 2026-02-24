@@ -297,7 +297,11 @@ def create_instance_summary(row: pd.Series) -> dict:
 
 
 def generate_summary_data(
-    df: pd.DataFrame, provider: str, region: str, currency: str = "EUR"
+    df: pd.DataFrame,
+    provider: str,
+    region: str,
+    currency: str = "EUR",
+    config: dict | None = None,
 ) -> dict:
     if df.empty:
         return {}
@@ -305,15 +309,21 @@ def generate_summary_data(
     df_sorted = df.sort_values("overall_score", ascending=False)
     labels = df_sorted["instance_type"].tolist()
 
+    metadata = {
+        "generated_at": datetime.now().isoformat(),
+        "run_count": len(df),
+        "currency": currency,
+        "provider": provider,
+        "region": region,
+    }
+    if config:
+        exchange_rates = config.get("exchange_rates")
+        if exchange_rates:
+            metadata["exchange_rates"] = exchange_rates
+
     return {
         "schema_version": SCHEMA_VERSION,
-        "metadata": {
-            "generated_at": datetime.now().isoformat(),
-            "run_count": len(df),
-            "currency": currency,
-            "provider": provider,
-            "region": region,
-        },
+        "metadata": metadata,
         "summary": {
             "labels": labels,
             "instances": [
@@ -331,7 +341,11 @@ def generate_summary_data(
 
 
 def generate_detail_data(
-    df: pd.DataFrame, provider: str, region: str, currency: str = "EUR"
+    df: pd.DataFrame,
+    provider: str,
+    region: str,
+    currency: str = "EUR",
+    config: dict | None = None,
 ) -> dict:
     if df.empty:
         return {}
@@ -345,29 +359,36 @@ def generate_detail_data(
         inst["provider_attributes"] = row["provider_attributes"]
         instances.append(inst)
 
+    metadata = {
+        "generated_at": datetime.now().isoformat(),
+        "run_count": len(df),
+        "currency": currency,
+        "provider": provider,
+        "region": region,
+    }
+    if config:
+        exchange_rates = config.get("exchange_rates")
+        if exchange_rates:
+            metadata["exchange_rates"] = exchange_rates
+
     return {
         "schema_version": SCHEMA_VERSION,
-        "metadata": {
-            "generated_at": datetime.now().isoformat(),
-            "run_count": len(df),
-            "currency": currency,
-            "provider": provider,
-            "region": region,
-        },
+        "metadata": metadata,
         "instances": instances,
     }
 
 
-def generate_markdown_summary(df: pd.DataFrame) -> str:
+def generate_markdown_summary(df: pd.DataFrame, currency: str = "EUR") -> str:
     if df.empty:
         return "No benchmark results available."
 
+    currency_symbol = currency
     df_sorted = df.sort_values("overall_score", ascending=False)
 
     lines = [
         "## Performance & Value Rankings",
         "",
-        "| Rank | Instance | Single | Multi | Memory | Disk | Overall | EUR/Month | Value |",
+        f"| Rank | Instance | Single | Multi | Memory | Disk | Overall | {currency}/Month | Value |",
         "|------|----------|--------|-------|--------|------|---------|-----------|-------|",
     ]
 
@@ -375,15 +396,15 @@ def generate_markdown_summary(df: pd.DataFrame) -> str:
         lines.append(
             f"| {i} | {row['display_name']} | {row['single_core_score']:.0f} | "
             f"{row['multi_core_score']:.0f} | {row['memory_score']:.0f} | {row['disk_score']:.0f} | "
-            f"**{row['overall_score']:.0f}** | EUR{row['price_monthly']:.2f} | {row['value_monthly']:.1f} |"
+            f"**{row['overall_score']:.0f}** | {currency_symbol}{row['price_monthly']:.2f} | {row['value_monthly']:.1f} |"
         )
 
-    lines.extend(["", "### Best Value (Performance per Euro)", ""])
+    lines.extend(["", f"### Best Value (Performance per {currency_symbol})", ""])
 
     df_value = df.sort_values("cpu_value_monthly", ascending=False)
     for i, (_, row) in enumerate(df_value.head(3).iterrows(), 1):
         lines.append(
-            f"{i}. **{row['display_name']}** - {row['cpu_value_monthly']:.1f} CPU points/EUR"
+            f"{i}. **{row['display_name']}** - {row['cpu_value_monthly']:.1f} CPU points/{currency_symbol}"
         )
 
     return "\n".join(lines) + "\n"
@@ -468,9 +489,13 @@ def main():
         summary_file = f"summary-{timestamp}.json"
         detail_file = f"detail-{timestamp}.json"
 
-        summary_data = generate_summary_data(df, args.provider, args.region, currency)
-        detail_data = generate_detail_data(df, args.provider, args.region, currency)
-        summary_md = generate_markdown_summary(df)
+        summary_data = generate_summary_data(
+            df, args.provider, args.region, currency, config
+        )
+        detail_data = generate_detail_data(
+            df, args.provider, args.region, currency, config
+        )
+        summary_md = generate_markdown_summary(df, currency)
 
         metadata = {
             "run_id": timestamp,
@@ -524,7 +549,7 @@ def main():
             df.sort_values("overall_score", ascending=False).head(3).iterrows()
         ):
             print(
-                f"  {row['display_name']}: {row['overall_score']:.0f} (EUR{row['price_monthly']}/mo)"
+                f"  {row['display_name']}: {row['overall_score']:.0f} ({currency}{row['price_monthly']}/mo)"
             )
 
         print("\nBest value:")
@@ -532,7 +557,7 @@ def main():
             df.sort_values("cpu_value_monthly", ascending=False).head(3).iterrows()
         ):
             print(
-                f"  {row['display_name']}: {row['cpu_value_monthly']:.1f} CPU pts/EUR"
+                f"  {row['display_name']}: {row['cpu_value_monthly']:.1f} CPU pts/{currency}"
             )
 
     except KeyboardInterrupt:

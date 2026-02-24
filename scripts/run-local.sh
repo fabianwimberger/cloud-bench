@@ -1,26 +1,36 @@
 #!/bin/bash
-# Local Hetzner benchmark runner script
+# Local benchmark runner script (supports Hetzner and AWS)
 set -e
 
 # Configuration
 RUN_ID="local-$(date +%Y%m%d-%H%M%S)"
 PROVIDER="${PROVIDER:-hetzner}"
-REGION="${REGION:-fsn1}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
+# Auto-detect region based on provider
+if [ -z "$REGION" ]; then
+    case "$PROVIDER" in
+        hetzner) REGION="fsn1" ;;
+        aws)     REGION="eu-central-1" ;;
+        *)       REGION="fsn1" ;;
+    esac
+fi
+
 echo "Cloud-Bench Local Runner"
+echo "Provider: $PROVIDER"
+echo "Region: $REGION"
 echo "Run ID: $RUN_ID"
 echo ""
 
 # Check prerequisites
 check_prereqs() {
     local missing=()
-    
+
     command -v terraform >/dev/null 2>&1 || missing+=("terraform")
     command -v ansible-playbook >/dev/null 2>&1 || missing+=("ansible")
     command -v python3 >/dev/null 2>&1 || missing+=("python3")
-    
+
     if [ ${#missing[@]} -ne 0 ]; then
         echo "[ERROR] Missing prerequisites: ${missing[*]}"
         echo "Please install them and try again."
@@ -33,25 +43,42 @@ check_ssh_key() {
     # Allow custom SSH key path via environment variable
     SSH_KEY_PATH="${SSH_KEY_PATH:-$HOME/.ssh/id_ed25519}"
     SSH_PUB_KEY_PATH="${SSH_KEY_PATH}.pub"
-    
+
     if [ ! -f "$SSH_KEY_PATH" ]; then
         echo "[WARN] No SSH key found at $SSH_KEY_PATH"
         echo "Generating new SSH key pair..."
         ssh-keygen -t ed25519 -f "$SSH_KEY_PATH" -N ""
     fi
-    
+
     # Export for use in other functions
     export SSH_KEY_PATH
     export SSH_PUB_KEY_PATH
 }
 
-# Validate credentials
+# Validate credentials based on provider
 validate_credentials() {
-    if [ -z "$HCLOUD_TOKEN" ]; then
-        echo "[ERROR] HCLOUD_TOKEN not set!"
-        echo "Set it with: export HCLOUD_TOKEN=your-token"
-        exit 1
-    fi
+    case "$PROVIDER" in
+        hetzner)
+            if [ -z "$HCLOUD_TOKEN" ]; then
+                echo "[ERROR] HCLOUD_TOKEN not set!"
+                echo "Set it with: export HCLOUD_TOKEN=your-token"
+                exit 1
+            fi
+            ;;
+        aws)
+            if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+                echo "[ERROR] AWS credentials not set!"
+                echo "Set them with:"
+                echo "  export AWS_ACCESS_KEY_ID=your-key-id"
+                echo "  export AWS_SECRET_ACCESS_KEY=your-secret-key"
+                exit 1
+            fi
+            ;;
+        *)
+            echo "[ERROR] Unsupported provider: $PROVIDER"
+            exit 1
+            ;;
+    esac
 
     # Get local IP for firewall if not set
     if [ -z "$ALLOWED_SSH_IPS" ]; then
@@ -78,32 +105,57 @@ validate_credentials() {
     fi
 }
 
+# Build terraform var args based on provider
+build_tf_vars() {
+    local action="$1"
+    local common_vars=(
+        -var="run_id=$RUN_ID"
+        -var="cloud_provider=$PROVIDER"
+        -var="default_region=$REGION"
+        -var="ssh_public_key_path=$SSH_PUB_KEY_PATH"
+        -var="allowed_ssh_ips=[\"$ALLOWED_SSH_IPS\"]"
+    )
+
+    case "$PROVIDER" in
+        hetzner)
+            common_vars+=(
+                -var="hcloud_token=$HCLOUD_TOKEN"
+                -var="aws_access_key_id="
+                -var="aws_secret_access_key="
+            )
+            ;;
+        aws)
+            common_vars+=(
+                -var="hcloud_token=unused"
+                -var="aws_access_key_id=$AWS_ACCESS_KEY_ID"
+                -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
+            )
+            ;;
+    esac
+
+    echo "${common_vars[@]}"
+}
+
 # Main execution
 main() {
     cd "$PROJECT_DIR"
-    
+
     check_prereqs
     check_ssh_key
     validate_credentials
-    
+
     # Terraform apply
     echo "[INFO] Provisioning infrastructure..."
     cd terraform
 
     terraform init
 
-    terraform apply -auto-approve \
-        -var="run_id=$RUN_ID" \
-        -var="cloud_provider=$PROVIDER" \
-        -var="default_region=$REGION" \
-        -var="hcloud_token=$HCLOUD_TOKEN" \
-        -var="ssh_public_key_path=$SSH_PUB_KEY_PATH" \
-        -var="allowed_ssh_ips=[\"$ALLOWED_SSH_IPS\"]" \
+    eval terraform apply -auto-approve $(build_tf_vars apply) \
         || {
             echo "[ERROR] Terraform apply failed!"
             exit 1
         }
-    
+
     # Generate Ansible inventory from Terraform output
     terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
@@ -147,8 +199,8 @@ main() {
         --input results/ \
         --output frontend/public/data/ \
         --config config/instances.yaml \
-        --region "${REGION:-fsn1}" \
-        --provider "${PROVIDER:-hetzner}" || {
+        --region "$REGION" \
+        --provider "$PROVIDER" || {
             echo "[WARN] Result processing had issues"
         }
 
@@ -156,13 +208,13 @@ main() {
     echo "[OK] Benchmark complete!"
     echo "Results saved to: frontend/public/data/"
     echo ""
-    
+
     # Show results preview
     if [ -f frontend/public/data/benchmark-results.csv ]; then
         echo "Top performers:"
         head -5 frontend/public/data/benchmark-results.csv | column -t -s,
     fi
-    
+
     # Cleanup prompt
     echo ""
     read -p "Destroy infrastructure? (y/n) " -n 1 -r
@@ -170,13 +222,7 @@ main() {
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "[INFO] Destroying infrastructure..."
         cd terraform
-        terraform destroy -auto-approve \
-            -var="run_id=$RUN_ID" \
-            -var="cloud_provider=$PROVIDER" \
-            -var="default_region=$REGION" \
-            -var="hcloud_token=$HCLOUD_TOKEN" \
-            -var="ssh_public_key_path=$SSH_PUB_KEY_PATH" \
-            -var="allowed_ssh_ips=[\"$ALLOWED_SSH_IPS\"]"
+        eval terraform destroy -auto-approve $(build_tf_vars destroy)
         echo "[OK] Cleanup complete!"
     else
         echo "[WARN] Infrastructure left running. Don't forget to clean up!"
