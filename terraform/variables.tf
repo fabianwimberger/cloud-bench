@@ -20,8 +20,8 @@ variable "cloud_provider" {
   default     = "hetzner"
 
   validation {
-    condition     = can(regex("^(hetzner)$", var.cloud_provider))
-    error_message = "Provider must be 'hetzner'."
+    condition     = can(regex("^(hetzner|aws)$", var.cloud_provider))
+    error_message = "Provider must be 'hetzner' or 'aws'."
   }
 }
 
@@ -32,9 +32,9 @@ variable "enabled_instances" {
 }
 
 variable "default_region" {
-  description = "Default region for instances"
+  description = "Default region for instances (empty = auto-detect based on provider)"
   type        = string
-  default     = "fsn1"
+  default     = ""
 }
 
 variable "instance_regions" {
@@ -64,15 +64,14 @@ variable "allowed_ssh_ips" {
   }
 }
 
-
 variable "os_image" {
-  description = "OS image for the servers"
+  description = "OS image for the servers (Hetzner format or AWS AMI ID)"
   type        = string
   default     = "ubuntu-24.04"
 
   validation {
-    condition     = can(regex("^(ubuntu-[0-9]{2}\\.[0-9]{2}|debian-[0-9]{2}|fedora-[0-9]+)$", var.os_image))
-    error_message = "OS image must be a valid Hetzner image format (e.g., ubuntu-24.04, debian-12)."
+    condition     = can(regex("^(ubuntu-[0-9]{2}\\.[0-9]{2}|debian-[0-9]{2}|fedora-[0-9]+|ami-[a-z0-9]+)$", var.os_image))
+    error_message = "OS image must be a valid Hetzner image (e.g., ubuntu-24.04) or AWS AMI ID (e.g., ami-12345678)."
   }
 }
 
@@ -80,4 +79,24 @@ variable "hcloud_token" {
   description = "Hetzner Cloud API token"
   type        = string
   sensitive   = true
+}
+
+variable "aws_access_key_id" {
+  description = "AWS access key ID"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "aws_secret_access_key" {
+  description = "AWS secret access key"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "aws_ebs_size" {
+  description = "EBS volume size in GB for AWS instances"
+  type        = number
+  default     = 20
 }
