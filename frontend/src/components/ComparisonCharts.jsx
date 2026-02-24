@@ -3,7 +3,7 @@ import { Chart, registerables } from 'chart.js'
 
 Chart.register(...registerables)
 
-function ComparisonCharts({ charts }) {
+function ComparisonCharts({ charts, currency }) {
   const singleRef = useRef(null)
   const multiRef = useRef(null)
   const memoryRef = useRef(null)
@@ -27,14 +27,14 @@ function ComparisonCharts({ charts }) {
         y: {
           beginAtZero: true,
           grid: { color: '#2a2a3c' },
-          ticks: { 
+          ticks: {
             color: '#6b6b7b',
             font: { size: 11, family: 'Inter' }
           }
         },
         x: {
           grid: { display: false },
-          ticks: { 
+          ticks: {
             color: '#6b6b7b',
             font: { size: 11, family: 'Inter' }
           }
@@ -46,7 +46,7 @@ function ComparisonCharts({ charts }) {
 
     const createChart = (ref, data, title, max = 100) => {
       if (!ref.current || !data) return null
-      
+
       return new Chart(ref.current, {
         type: 'bar',
         data: {
@@ -85,17 +85,19 @@ function ComparisonCharts({ charts }) {
     chartInstances.current.multi = createChart(multiRef, charts.multi_core, 'Multi Core Score')
     chartInstances.current.memory = createChart(memoryRef, charts.memory, 'Memory Score')
     chartInstances.current.disk = createChart(diskRef, charts.disk, 'Disk Score')
-    
+
     // Value chart - dynamic max
     if (valueRef.current && charts.value) {
       const maxValue = Math.max(...charts.value.values) * 1.1
-      chartInstances.current.value = createChart(valueRef, charts.value, 'Value Score', maxValue)
+      const displayCurrency = currency?.displayCurrency || 'EUR'
+      const currencySymbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
+      chartInstances.current.value = createChart(valueRef, charts.value, `Value (perf/${currencySymbol})`, maxValue)
     }
 
     return () => {
       Object.values(chartInstances.current).forEach(chart => chart?.destroy())
     }
-  }, [charts])
+  }, [charts, currency?.displayCurrency])
 
   if (!charts) return null
 
