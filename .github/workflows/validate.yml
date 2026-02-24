@@ -163,7 +163,7 @@ jobs:
           pip install -r tests/requirements-test.txt
           cd frontend && npm ci && cd ..
 
-      - name: Create Mock Results
+      - name: Create Mock Results (Hetzner)
         run: |
           mkdir -p results
           cat > results/cx23-mock.json << 'MOCKEOF'
@@ -242,7 +242,7 @@ jobs:
           }
           MOCKEOF
 
-      - name: Test Result Processing
+      - name: Test Result Processing (Hetzner)
         run: |
           python3 scripts/process_results.py \
             --input results/ \
@@ -251,12 +251,78 @@ jobs:
             --region fsn1 \
             --provider hetzner
 
-      - name: Verify Output Files
+      - name: Verify Hetzner Output Files
         run: |
           for f in benchmark-data.json benchmark-results.csv summary.md manifest.json; do
             test -f "frontend/public/data/$f" || (echo "$f missing" && exit 1)
           done
           python3 -c "import json; json.load(open('frontend/public/data/benchmark-data.json'))"
+
+      - name: Create Mock Results (AWS)
+        run: |
+          rm -f results/*.json
+          cat > results/t3.medium-mock.json << 'MOCKEOF'
+          {
+            "run_id": "test-mock-aws",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "system": {
+              "provider": "aws",
+              "instance_type": "t3.medium"
+            },
+            "provider_attributes": {
+              "arch": "x86_64",
+              "os": "Ubuntu 24.04",
+              "kernel": "6.8.0",
+              "vcpu": 2,
+              "memory_mb": 4096,
+              "ebs_optimized": true,
+              "burstable": true,
+              "baseline_cpu": 20
+            },
+            "cpu": {
+              "test": "sysbench-cpu",
+              "runs": 5,
+              "single_thread_events": 400,
+              "multi_thread_events": 800,
+              "threads": 2
+            },
+            "memory": {
+              "test": "sysbench-memory",
+              "runs": 5,
+              "read_mib_per_sec": 7000,
+              "write_mib_per_sec": 5500,
+              "total_throughput_mib": 12500
+            },
+            "disk": {
+              "test": "fio-randread",
+              "runs": 5,
+              "read_iops": 16000
+            }
+          }
+          MOCKEOF
+
+      - name: Test Result Processing (AWS)
+        run: |
+          mkdir -p frontend/public/data-aws/
+          python3 scripts/process_results.py \
+            --input results/ \
+            --output frontend/public/data-aws/ \
+            --config config/instances.yaml \
+            --region eu-central-1 \
+            --provider aws
+
+      - name: Verify AWS Output Files
+        run: |
+          for f in benchmark-data.json benchmark-results.csv summary.md; do
+            test -f "frontend/public/data-aws/$f" || (echo "$f missing" && exit 1)
+          done
+          # Verify currency is USD
+          python3 -c "
+          import json
+          data = json.load(open('frontend/public/data-aws/benchmark-data.json'))
+          assert data['metadata']['currency'] == 'USD', f'Expected USD, got {data[\"metadata\"][\"currency\"]}'
+          print('AWS currency check passed: USD')
+          "
 
       - name: Build Frontend with Real Data
         working-directory: frontend
