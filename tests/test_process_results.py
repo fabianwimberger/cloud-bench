@@ -73,6 +73,69 @@ class TestGetInstanceTypeFromKey(unittest.TestCase):
         self.assertEqual(pr.get_instance_type_from_key("some-key"), "some-key")
 
 
+class TestGetInstanceTypeFromKeyAWS(unittest.TestCase):
+    """Test instance type extraction for AWS IDs with dots and hyphens."""
+
+    def setUp(self):
+        self.config = {
+            "providers": {
+                "aws": {
+                    "instances": [
+                        {"id": "t3.medium"},
+                        {"id": "t3.large"},
+                        {"id": "t3a.medium"},
+                        {"id": "t4g.medium"},
+                        {"id": "c7i-flex.large"},
+                        {"id": "c8i-flex.xlarge"},
+                    ]
+                }
+            }
+        }
+        self.provider = "aws"
+
+    def test_t3_medium_extraction(self):
+        self.assertEqual(
+            pr.get_instance_type_from_key("t3.medium", self.config, self.provider),
+            "t3.medium",
+        )
+
+    def test_t3_medium_from_key(self):
+        self.assertEqual(
+            pr.get_instance_type_from_key(
+                "aws-t3.medium-12345", self.config, self.provider
+            ),
+            "t3.medium",
+        )
+
+    def test_t3a_medium_not_confused_with_t3(self):
+        """t3a.medium should match t3a.medium, not t3.medium."""
+        self.assertEqual(
+            pr.get_instance_type_from_key("t3a.medium", self.config, self.provider),
+            "t3a.medium",
+        )
+
+    def test_c7i_flex_large_with_hyphen(self):
+        """Instance IDs with hyphens in family name (c7i-flex)."""
+        self.assertEqual(
+            pr.get_instance_type_from_key("c7i-flex.large", self.config, self.provider),
+            "c7i-flex.large",
+        )
+
+    def test_c8i_flex_xlarge_with_hyphen(self):
+        self.assertEqual(
+            pr.get_instance_type_from_key(
+                "c8i-flex.xlarge", self.config, self.provider
+            ),
+            "c8i-flex.xlarge",
+        )
+
+    def test_t4g_medium(self):
+        self.assertEqual(
+            pr.get_instance_type_from_key("t4g.medium", self.config, self.provider),
+            "t4g.medium",
+        )
+
+
 class TestLoadResults(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
@@ -296,6 +359,67 @@ class TestGenerateSummaryData(unittest.TestCase):
         self.assertIn("scores", inst)
         self.assertIn("pricing", inst)
 
+    def test_exchange_rates_in_metadata(self):
+        """Test that exchange rates are included when config has them."""
+        config = {
+            "exchange_rates": {
+                "usd_to_eur": 0.92,
+                "eur_to_usd": 1.087,
+                "last_updated": "2026-02-23",
+                "source": "Frankfurter API (ECB data)",
+            }
+        }
+        data = pr.generate_summary_data(
+            self.sample_df, "hetzner", "nbg1", "EUR", config
+        )
+        self.assertIn("exchange_rates", data["metadata"])
+        self.assertEqual(data["metadata"]["exchange_rates"]["usd_to_eur"], 0.92)
+
+    def test_usd_currency_in_metadata(self):
+        """Test that USD currency is properly set for AWS provider."""
+        data = pr.generate_summary_data(self.sample_df, "aws", "eu-central-1", "USD")
+        self.assertEqual(data["metadata"]["currency"], "USD")
+
+
+class TestMarkdownSummaryCurrency(unittest.TestCase):
+    def setUp(self):
+        import pandas as pd
+
+        self.sample_df = pd.DataFrame(
+            [
+                {
+                    "instance_type": "T3.MEDIUM",
+                    "display_name": "T3.MEDIUM (X86)",
+                    "vcpu": 2,
+                    "ram_gb": 4,
+                    "disk_gb": 20,
+                    "price_hourly": 0.0416,
+                    "price_monthly": 29.95,
+                    "single_core_score": 60,
+                    "multi_core_score": 55,
+                    "memory_score": 65,
+                    "disk_score": 70,
+                    "overall_score": 62,
+                    "value_monthly": 2.07,
+                    "cpu_value_monthly": 1.92,
+                    "metrics": {},
+                    "provider_attributes": {"arch": "X86"},
+                }
+            ]
+        )
+
+    def test_usd_currency_in_markdown(self):
+        """Test that USD is used in markdown when specified."""
+        md = pr.generate_markdown_summary(self.sample_df, "USD")
+        self.assertIn("USD/Month", md)
+        self.assertIn("USD29.95", md)
+        self.assertIn("CPU points/USD", md)
+
+    def test_eur_currency_in_markdown(self):
+        """Test that EUR is used by default."""
+        md = pr.generate_markdown_summary(self.sample_df)
+        self.assertIn("EUR/Month", md)
+
 
 class TestExtensibility(unittest.TestCase):
     """Test that provider_attributes allows adding new providers without code changes."""
@@ -303,13 +427,13 @@ class TestExtensibility(unittest.TestCase):
     def setUp(self):
         self.aws_result = [
             {
-                "_source_file": "aws-t3-micro-test.json",
-                "_instance_key": "t3-micro",
-                "system": {"provider": "aws", "instance_type": "t3.micro"},
+                "_source_file": "aws-t3.medium-test.json",
+                "_instance_key": "t3.medium",
+                "system": {"provider": "aws", "instance_type": "t3.medium"},
                 "provider_attributes": {
                     "arch": "x86_64",
                     "vcpu": 2,
-                    "memory_mb": 1024,
+                    "memory_mb": 4096,
                     "ebs_optimized": True,
                     "burstable": True,
                     "baseline_cpu": 20,
@@ -325,13 +449,13 @@ class TestExtensibility(unittest.TestCase):
                 "aws": {
                     "instances": [
                         {
-                            "id": "t3-micro",
-                            "name": "T3 Micro",
+                            "id": "t3.medium",
+                            "name": "t3.medium",
                             "arch": "X86",
                             "vcpu": 2,
-                            "ram_gb": 1,
-                            "disk_gb": 0,
-                            "pricing": {"hourly": 0.0104, "monthly": 7.60},
+                            "ram_gb": 4,
+                            "disk_gb": 20,
+                            "pricing": {"hourly": 0.0416, "monthly": 29.95},
                         }
                     ]
                 }
@@ -339,7 +463,7 @@ class TestExtensibility(unittest.TestCase):
         }
 
     def test_aws_attributes_preserved(self):
-        df = pr.normalize_results(self.aws_result, self.config, "aws", "us-east-1")
+        df = pr.normalize_results(self.aws_result, self.config, "aws", "eu-central-1")
         attrs = df.iloc[0]["provider_attributes"]
 
         # Standard fields
@@ -349,6 +473,10 @@ class TestExtensibility(unittest.TestCase):
         self.assertEqual(attrs["ebs_optimized"], True)
         self.assertEqual(attrs["burstable"], True)
         self.assertEqual(attrs["baseline_cpu"], 20)
+
+    def test_aws_instance_type_uppercased(self):
+        df = pr.normalize_results(self.aws_result, self.config, "aws", "eu-central-1")
+        self.assertEqual(df.iloc[0]["instance_type"], "T3.MEDIUM")
 
 
 class TestManifest(unittest.TestCase):
