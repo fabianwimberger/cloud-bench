@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ScoreBar from './ScoreBar'
 
-function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections, currency }) {
+function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections, currency, onSelectHistory }) {
   const [sortKey, setSortKey] = useState(null)
   const [sortDir, setSortDir] = useState('desc')
 
@@ -113,7 +113,13 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                   </td>
                   <td>
                     <div className="instance-cell">
-                      <span className="instance-name">{instance.instance_type}</span>
+                      <button
+                        className="instance-name-btn"
+                        onClick={() => onSelectHistory?.(instance.instance_type)}
+                        title="View history"
+                      >
+                        {instance.instance_type}
+                      </button>
                     </div>
                   </td>
                   <td>

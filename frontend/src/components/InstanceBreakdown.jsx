@@ -1,4 +1,4 @@
-function InstanceBreakdown({ ranking, metadata, currency }) {
+function InstanceBreakdown({ ranking, metadata, currency, onSelectHistory }) {
   if (!ranking || ranking.length === 0) return null
 
   const byPrice = [...ranking].sort((a, b) => b.price_monthly - a.price_monthly)
@@ -48,6 +48,16 @@ function InstanceBreakdown({ ranking, metadata, currency }) {
                 <span style={{ color: 'var(--color-text-muted)' }}>Price:</span>
                 <span>{fp(instance.price_monthly)}/mo</span>
               </div>
+            </div>
+
+            <div style={{ marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid var(--color-border)' }}>
+              <button
+                className="btn btn-ghost btn-small"
+                style={{ width: '100%' }}
+                onClick={() => onSelectHistory?.(instance.instance_type)}
+              >
+                History
+              </button>
             </div>
           </div>
         ))}

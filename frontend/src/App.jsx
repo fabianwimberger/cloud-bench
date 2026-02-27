@@ -6,6 +6,7 @@ import InstanceComparison from './components/InstanceComparison'
 import ComparisonTable from './components/ComparisonTable'
 import ComparisonCharts from './components/ComparisonCharts'
 import InstanceBreakdown from './components/InstanceBreakdown'
+import InstanceHistory from './components/InstanceHistory'
 import Footer from './components/Footer'
 import './App.css'
 
@@ -25,6 +26,12 @@ const DataAPI = {
   async loadDetail(filename) {
     const response = await fetch(`./data/${filename}`)
     if (!response.ok) throw new Error(`Failed to load ${filename}`)
+    return await response.json()
+  },
+
+  async loadHistory() {
+    const response = await fetch('./data/history.json')
+    if (!response.ok) throw new Error('Failed to load history')
     return await response.json()
   }
 }
@@ -161,6 +168,8 @@ function App() {
   })
 
   const [selectedForComparison, setSelectedForComparison] = useState([])
+  const [selectedHistoryInstance, setSelectedHistoryInstance] = useState(null)
+  const [historyData, setHistoryData] = useState(null)
 
   useEffect(() => {
     loadInitialData()
@@ -282,6 +291,23 @@ function App() {
     })
   }
 
+  const handleSelectHistory = useCallback(async (instanceType) => {
+    setSelectedHistoryInstance(instanceType)
+    if (!historyData) {
+      try {
+        const data = await DataAPI.loadHistory()
+        setHistoryData(data)
+      } catch (err) {
+        console.error('Failed to load history:', err)
+        setHistoryData({ instances: {} })
+      }
+    }
+  }, [historyData])
+
+  const handleCloseHistory = useCallback(() => {
+    setSelectedHistoryInstance(null)
+  }, [])
+
   const currencyProps = {
     displayCurrency,
     nativeCurrency: data?.metadata?.currency || 'EUR',
@@ -390,12 +416,22 @@ function App() {
           onToggleSelection={toggleInstanceSelection}
           maxSelections={3}
           currency={currencyProps}
+          onSelectHistory={handleSelectHistory}
         />
 
         <ComparisonCharts charts={filteredCharts} currency={currencyProps} />
-        <InstanceBreakdown ranking={filteredRanking} metadata={data?.metadata} currency={currencyProps} />
+        <InstanceBreakdown ranking={filteredRanking} metadata={data?.metadata} currency={currencyProps} onSelectHistory={handleSelectHistory} />
         <Footer metadata={data?.metadata} />
       </div>
+
+      {selectedHistoryInstance && (
+        <InstanceHistory
+          instanceType={selectedHistoryInstance}
+          historyEntry={historyData?.instances?.[selectedHistoryInstance] || null}
+          onClose={handleCloseHistory}
+          currency={currencyProps}
+        />
+      )}
     </div>
   )
 }
