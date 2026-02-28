@@ -33,14 +33,14 @@ hcloud server list -o json | jq -r '.[] | select(.name | contains("cloud-bench")
 export AWS_DEFAULT_REGION=eu-central-1
 
 # List cloud-bench instances
-aws ec2 describe-instances --filters "Name=tag:Project,Values=cloud-bench" \
+aws ec2 describe-instances --filters "Name=tag:project,Values=cloud-bench" \
   --query 'Reservations[].Instances[].[InstanceId,State.Name,Tags[?Key==`Name`].Value|[0]]' --output table
 
 # Terminate specific instance
 aws ec2 terminate-instances --instance-ids <instance-id>
 
 # Terminate all cloud-bench instances
-aws ec2 describe-instances --filters "Name=tag:Project,Values=cloud-bench" "Name=instance-state-name,Values=running" \
+aws ec2 describe-instances --filters "Name=tag:project,Values=cloud-bench" "Name=instance-state-name,Values=running" \
   --query 'Reservations[].Instances[].InstanceId' --output text | xargs aws ec2 terminate-instances --instance-ids
 ```
 

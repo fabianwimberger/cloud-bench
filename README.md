@@ -40,7 +40,7 @@ export HCLOUD_TOKEN="your-token"
 # AWS
 export AWS_ACCESS_KEY_ID="your-key"
 export AWS_SECRET_ACCESS_KEY="your-secret"
-./scripts/run-local.sh --provider aws
+PROVIDER=aws ./scripts/run-local.sh
 
 # Or run via GitHub Actions: Actions → Run Benchmarks
 ```

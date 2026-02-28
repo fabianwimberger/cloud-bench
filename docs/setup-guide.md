@@ -66,7 +66,7 @@ export HCLOUD_TOKEN="your-token"
 # AWS
 export AWS_ACCESS_KEY_ID="your-key"
 export AWS_SECRET_ACCESS_KEY="your-secret"
-./scripts/run-local.sh --provider aws
+PROVIDER=aws ./scripts/run-local.sh
 ```
 
 The script auto-detects your IP for the firewall/security group. It provisions, benchmarks, processes results, and prompts to destroy.
