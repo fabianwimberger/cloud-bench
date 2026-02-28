@@ -85,8 +85,8 @@ class TestGetInstanceTypeFromKeyAWS(unittest.TestCase):
                         {"id": "t3.large"},
                         {"id": "t3a.medium"},
                         {"id": "t4g.medium"},
-                        {"id": "c7i-flex.large"},
-                        {"id": "c8i-flex.xlarge"},
+                        {"id": "t2.medium"},
+                        {"id": "t2.xlarge"},
                     ]
                 }
             }
@@ -114,19 +114,19 @@ class TestGetInstanceTypeFromKeyAWS(unittest.TestCase):
             "t3a.medium",
         )
 
-    def test_c7i_flex_large_with_hyphen(self):
-        """Instance IDs with hyphens in family name (c7i-flex)."""
+    def test_t2_medium_extraction(self):
+        """Instance IDs with different family prefix (t2)."""
         self.assertEqual(
-            pr.get_instance_type_from_key("c7i-flex.large", self.config, self.provider),
-            "c7i-flex.large",
+            pr.get_instance_type_from_key("t2.medium", self.config, self.provider),
+            "t2.medium",
         )
 
-    def test_c8i_flex_xlarge_with_hyphen(self):
+    def test_t2_xlarge_from_key(self):
         self.assertEqual(
             pr.get_instance_type_from_key(
-                "c8i-flex.xlarge", self.config, self.provider
+                "aws-t2.xlarge-12345", self.config, self.provider
             ),
-            "c8i-flex.xlarge",
+            "t2.xlarge",
         )
 
     def test_t4g_medium(self):

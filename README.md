@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Results](https://img.shields.io/badge/Live%20Results-View%20Dashboard-blue)](https://fabianwimberger.github.io/cloud-bench/)
 
-A cloud instance benchmarking suite comparing CPU, memory, and disk performance across instance types with cost analysis.
+A cloud instance benchmarking suite comparing CPU, memory, and disk performance across instance types and providers with cost analysis.
 
 ## Why This Project?
 
@@ -17,10 +17,12 @@ Cloud instance pricing and performance characteristics vary significantly betwee
 
 ## Features
 
-- **Multi-provider support** — currently Hetzner Cloud, extensible for AWS, GCP, Azure
+- **Multi-provider support** — Hetzner Cloud and AWS EC2
 - **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
 - **Cost analysis** — performance per dollar across instance types
-- **Interactive dashboard** — React-based visualization of results
+- **Currency support** — EUR (Hetzner) and USD (AWS) with toggle in dashboard
+- **Interactive dashboard** — React-based visualization with instance history tracking
+- **Historical data** — benchmark results persisted across runs on a dedicated data branch
 - **Automated infrastructure** — Terraform for provisioning, Ansible for execution
 - **Security-first** — fresh SSH keys per run, automatic cleanup
 
@@ -31,11 +33,14 @@ Cloud instance pricing and performance characteristics vary significantly betwee
 git clone https://github.com/fabianwimberger/cloud-bench.git
 cd cloud-bench
 
-# Set your API token
+# Hetzner Cloud
 export HCLOUD_TOKEN="your-token"
-
-# Run benchmarks locally
 ./scripts/run-local.sh
+
+# AWS
+export AWS_ACCESS_KEY_ID="your-key"
+export AWS_SECRET_ACCESS_KEY="your-secret"
+./scripts/run-local.sh --provider aws
 
 # Or run via GitHub Actions: Actions → Run Benchmarks
 ```
@@ -59,16 +64,29 @@ Edit `config/instances.yaml` to add/remove instances:
 ```yaml
 providers:
   hetzner:
+    currency: EUR
     instances:
       - id: cx23
-        name: "CX23"
-        arch: "Intel"
+        name: CX23
+        arch: X86
         vcpu: 2
         ram_gb: 4
         disk_gb: 40
         pricing:
-          hourly_eur: 0.0050
-          monthly_eur: 3.59
+          hourly: 0.00576
+          monthly: 3.588
+  aws:
+    currency: USD
+    instances:
+      - id: t3.medium
+        name: t3.medium
+        arch: X86
+        vcpu: 2
+        ram_gb: 4
+        disk_gb: 20
+        pricing:
+          hourly: 0.0416
+          monthly: 29.95
 ```
 
 ## Project Structure
@@ -81,16 +99,18 @@ cloud-bench/
 ├── config/               # Instance configurations
 │   └── instances.yaml
 ├── docs/                 # Documentation
-│   ├── architecture.md
-│   ├── configuration.md
-│   └── data-format.md
 ├── frontend/             # React dashboard
 │   └── src/
 ├── scripts/              # Helper scripts
 │   ├── process_results.py
+│   ├── update_pricing.py
+│   ├── update_manifest.py
+│   ├── build_history.py
 │   └── run-local.sh
 ├── terraform/            # Infrastructure provisioning
 │   └── modules/
+│       ├── hetzner/
+│       └── aws/
 └── tests/                # Test suite
 ```
 
@@ -105,8 +125,8 @@ cloud-bench/
 ~10 minutes per run, costs a few cents. Infrastructure is destroyed automatically even if benchmarks fail.
 
 **Protection:**
-- Cost estimation before each run (blocks >$5 or >10 instances)
-- Orphan cleanup every 6 hours
+- Cost estimation before each run (blocks >$5 or >15 instances)
+- Orphan cleanup every 6 hours (Hetzner and AWS)
 
 ## License
 
