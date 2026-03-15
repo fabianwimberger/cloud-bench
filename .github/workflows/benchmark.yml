@@ -344,7 +344,7 @@ jobs:
 
       - name: Persist Results to Data Branch
         run: |
-          TIMESTAMP=$(date -u +%Y-%m-%dT%H%M%S)
+          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S)
           PROVIDER="${{ github.event.inputs.provider }}"
           REGION="${{ needs.provision.outputs.region }}"
           RUN_DIR="data/runs/${TIMESTAMP}-${PROVIDER}-${REGION}"

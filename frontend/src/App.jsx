@@ -205,15 +205,32 @@ function App() {
     setSelectedHistoryInstance(null)
   }, [])
 
+  const nativeCurrency = data?.metadata?.currency || 'USD'
+  const exchangeRates = data?.metadata?.exchange_rates
+
+  const convertAmount = (amount) => {
+    if (displayCurrency === nativeCurrency || !exchangeRates) {
+      return amount
+    }
+    if (nativeCurrency === 'EUR' && displayCurrency === 'USD') {
+      return amount * (exchangeRates.eur_to_usd || 1)
+    }
+    if (nativeCurrency === 'USD' && displayCurrency === 'EUR') {
+      return amount * (exchangeRates.usd_to_eur || 1)
+    }
+    return amount
+  }
+
   const currencyProps = {
     displayCurrency,
-    nativeCurrency: data?.metadata?.currency || 'USD',
-    exchangeRates: data?.metadata?.exchange_rates,
+    nativeCurrency,
+    exchangeRates,
     formatPrice: (amount) => {
+      const converted = convertAmount(amount)
       const symbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
-      return `${symbol}${amount.toFixed(2)}`
+      return `${symbol}${converted.toFixed(2)}`
     },
-    formatPriceRaw: (amount) => amount,
+    formatPriceRaw: (amount) => convertAmount(amount),
   }
 
   if (loading && !data) {
