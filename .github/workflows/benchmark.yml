@@ -132,7 +132,7 @@ jobs:
           echo "Runner IP: ${RUNNER_IP}"
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
@@ -183,14 +183,14 @@ jobs:
           terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
       - name: Upload Terraform State
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: terraform-state
           path: terraform/terraform.tfstate
           retention-days: 1
 
       - name: Upload Ansible Inventory
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ansible-inventory
           path: ansible/inventory.ini
@@ -211,7 +211,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Download Ansible Inventory
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: ansible-inventory
 
@@ -262,7 +262,7 @@ jobs:
             -vv
 
       - name: Upload Raw Results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-raw-results
           path: ansible/results/*.json
@@ -278,7 +278,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Download Results
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: benchmark-raw-results
           path: results/
@@ -307,7 +307,7 @@ jobs:
           echo "${delimiter}" >> $GITHUB_OUTPUT
 
       - name: Upload Processed Results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-processed
           path: frontend/public/data/
@@ -406,13 +406,13 @@ jobs:
           echo "Runner IP for cleanup: ${RUNNER_IP}"
 
       - name: Download Terraform State
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: terraform-state
           path: terraform/
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
@@ -533,7 +533,7 @@ jobs:
           fi
 
       - name: Download Processed Results
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: benchmark-processed
           path: frontend/public/data/
