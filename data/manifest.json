@@ -2,6 +2,27 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-03-15T12:55:25-hetzner-fsn1",
+      "timestamp": "2026-03-15T12:55:25",
+      "provider": "hetzner",
+      "region": "fsn1",
+      "instance_count": 8,
+      "instances": [
+        "CCX23",
+        "CPX32",
+        "CX33",
+        "CCX13",
+        "CPX22",
+        "CAX21",
+        "CAX11",
+        "CX23"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-15T12:55:25-hetzner-fsn1/summary.json",
+        "detail": "data/runs/2026-03-15T12:55:25-hetzner-fsn1/detail.json"
+      }
+    },
+    {
       "id": "2026-03-15T12:15:56-aws-eu-central-1",
       "timestamp": "2026-03-15T12:15:56",
       "provider": "aws",
@@ -83,6 +104,46 @@
     }
   ],
   "instance_index": {
+    "CCX23": [
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CPX32": [
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CX33": [
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CCX13": [
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CPX22": [
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CAX21": [
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CAX11": [
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CX23": [
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
     "C7I-FLEX.LARGE": [
       "2026-03-15T12:15:56-aws-eu-central-1",
       "2026-03-15T11:19:32-aws-eu-central-1"
@@ -106,38 +167,6 @@
     "T3.MICRO": [
       "2026-03-15T12:15:56-aws-eu-central-1",
       "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "CPX32": [
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CCX23": [
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CCX13": [
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CAX21": [
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CPX22": [
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CAX11": [
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CX33": [
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CX23": [
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
     ]
   }
 }
