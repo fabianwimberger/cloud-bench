@@ -2,6 +2,25 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-03-15T111932-aws-eu-central-1",
+      "timestamp": "2026-03-15T111932",
+      "provider": "aws",
+      "region": "eu-central-1",
+      "instance_count": 6,
+      "instances": [
+        "T4G.SMALL",
+        "T4G.MICRO",
+        "M7I-FLEX.LARGE",
+        "C7I-FLEX.LARGE",
+        "T3.MICRO",
+        "T3.SMALL"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-15T111932-aws-eu-central-1/summary.json",
+        "detail": "data/runs/2026-03-15T111932-aws-eu-central-1/detail.json"
+      }
+    },
+    {
       "id": "2026-03-15T111103-hetzner-fsn1",
       "timestamp": "2026-03-15T111103",
       "provider": "hetzner",
@@ -24,6 +43,24 @@
     }
   ],
   "instance_index": {
+    "T4G.SMALL": [
+      "2026-03-15T111932-aws-eu-central-1"
+    ],
+    "T4G.MICRO": [
+      "2026-03-15T111932-aws-eu-central-1"
+    ],
+    "M7I-FLEX.LARGE": [
+      "2026-03-15T111932-aws-eu-central-1"
+    ],
+    "C7I-FLEX.LARGE": [
+      "2026-03-15T111932-aws-eu-central-1"
+    ],
+    "T3.MICRO": [
+      "2026-03-15T111932-aws-eu-central-1"
+    ],
+    "T3.SMALL": [
+      "2026-03-15T111932-aws-eu-central-1"
+    ],
     "CPX32": [
       "2026-03-15T111103-hetzner-fsn1"
     ],
