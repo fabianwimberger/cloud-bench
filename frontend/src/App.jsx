@@ -4,28 +4,15 @@ import StatsOverview from './components/StatsOverview'
 import InstanceFilter from './components/InstanceFilter'
 import InstanceComparison from './components/InstanceComparison'
 import ComparisonTable from './components/ComparisonTable'
-import ComparisonCharts from './components/ComparisonCharts'
 import InstanceBreakdown from './components/InstanceBreakdown'
 import InstanceHistory from './components/InstanceHistory'
 import Footer from './components/Footer'
 import './App.css'
 
 const DataAPI = {
-  async loadManifest() {
-    const response = await fetch('./data/manifest.json')
-    if (!response.ok) throw new Error('Failed to load manifest')
-    return await response.json()
-  },
-
-  async loadSummary(filename = 'benchmark-data.json') {
-    const response = await fetch(`./data/${filename}`)
-    if (!response.ok) throw new Error(`Failed to load ${filename}`)
-    return await response.json()
-  },
-
-  async loadDetail(filename) {
-    const response = await fetch(`./data/${filename}`)
-    if (!response.ok) throw new Error(`Failed to load ${filename}`)
+  async loadBenchmarkData() {
+    const response = await fetch('./data/benchmark-data.json')
+    if (!response.ok) throw new Error('Failed to load benchmark data')
     return await response.json()
   },
 
@@ -34,30 +21,6 @@ const DataAPI = {
     if (!response.ok) throw new Error('Failed to load history')
     return await response.json()
   }
-}
-
-function formatPrice(amount, nativeCurrency, displayCurrency, exchangeRates) {
-  let converted = amount
-  if (nativeCurrency !== displayCurrency) {
-    if (nativeCurrency === 'EUR' && displayCurrency === 'USD') {
-      converted = amount * (exchangeRates?.eur_to_usd || 1.087)
-    } else if (nativeCurrency === 'USD' && displayCurrency === 'EUR') {
-      converted = amount * (exchangeRates?.usd_to_eur || 0.92)
-    }
-  }
-  const symbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
-  return `${symbol}${converted.toFixed(2)}`
-}
-
-function formatPriceRaw(amount, nativeCurrency, displayCurrency, exchangeRates) {
-  if (nativeCurrency !== displayCurrency) {
-    if (nativeCurrency === 'EUR' && displayCurrency === 'USD') {
-      return amount * (exchangeRates?.eur_to_usd || 1.087)
-    } else if (nativeCurrency === 'USD' && displayCurrency === 'EUR') {
-      return amount * (exchangeRates?.usd_to_eur || 0.92)
-    }
-  }
-  return amount
 }
 
 function parseExprFilter(expr, value) {
@@ -80,13 +43,11 @@ function transformData(data) {
   }
 
   const instances = data.summary?.instances || []
-  const labels = data.summary?.labels || []
-  const charts = data.summary?.charts || {}
 
   return {
     metadata: {
       ...data.metadata,
-      currency: data.metadata?.currency || 'EUR',
+      currency: data.metadata?.currency || 'USD',
       exchange_rates: data.metadata?.exchange_rates || null,
     },
     ranking: instances.map(inst => ({
@@ -106,7 +67,6 @@ function transformData(data) {
       cpu_value_monthly: inst.value || 0,
       provider: inst.provider || data.metadata?.provider || '',
       region: inst.region || data.metadata?.region || '',
-      // Include raw metrics
       metrics: inst.metrics || {
         cpu_single_events: 0,
         cpu_multi_events: 0,
@@ -114,13 +74,6 @@ function transformData(data) {
         disk_iops: 0,
       }
     })),
-    charts: {
-      single_core: { labels, values: charts.single_core || [] },
-      multi_core: { labels, values: charts.multi_core || [] },
-      memory: { labels, values: charts.memory || [] },
-      disk: { labels, values: charts.disk || [] },
-      value: { labels, values: charts.value || [] },
-    }
   }
 }
 
@@ -142,12 +95,10 @@ function filterData(ranking, filters) {
 
 function App() {
   const [data, setData] = useState(null)
-  const [manifest, setManifest] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [displayCurrency, setDisplayCurrency] = useState('EUR')
+  const [displayCurrency, setDisplayCurrency] = useState('USD')
 
-  // Global error handler for uncaught promise rejections
   useEffect(() => {
     const handleUnhandledRejection = (event) => {
       console.error('Unhandled promise rejection:', event.reason)
@@ -157,8 +108,6 @@ function App() {
     window.addEventListener('unhandledrejection', handleUnhandledRejection)
     return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection)
   }, [])
-
-  const [selectedRunId, setSelectedRunId] = useState('latest')
 
   const [filters, setFilters] = useState({
     arch: '',
@@ -176,22 +125,17 @@ function App() {
   const [historyData, setHistoryData] = useState(null)
 
   useEffect(() => {
-    loadInitialData()
+    loadData()
   }, [])
 
-  const loadInitialData = async () => {
+  const loadData = async () => {
     try {
       setLoading(true)
 
-      const manifestData = await DataAPI.loadManifest()
-      setManifest(manifestData)
-
-      // Load combined benchmark-data.json (all providers merged)
-      const summary = await DataAPI.loadSummary('benchmark-data.json')
+      const summary = await DataAPI.loadBenchmarkData()
       const transformed = transformData(summary)
       setData(transformed)
 
-      // Default to USD for multi-provider view
       setDisplayCurrency(transformed.metadata?.currency || 'USD')
 
       setFilters(prev => ({
@@ -210,78 +154,9 @@ function App() {
     }
   }
 
-  const loadHistoricalRun = useCallback(async (runId) => {
-    if (!manifest || runId === 'latest') {
-      await loadInitialData()
-      return
-    }
-
-    try {
-      setLoading(true)
-      const run = manifest.runs.find(r => r.id === runId)
-      if (!run) throw new Error('Run not found')
-
-      const summary = await DataAPI.loadSummary(run.files?.summary)
-      const transformed = transformData(summary)
-      setData(transformed)
-      setSelectedForComparison([])
-      setDisplayCurrency(transformed.metadata?.currency || 'EUR')
-      setError(null)
-    } catch (err) {
-      console.error('Failed to load historical data:', err)
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [manifest])
-
-  const handleRunChange = (runId) => {
-    setSelectedRunId(runId)
-    if (runId === 'latest') {
-      loadInitialData()
-    } else {
-      loadHistoricalRun(runId)
-    }
-  }
-
   const filteredRanking = useMemo(() => {
     return filterData(data?.ranking, filters)
   }, [data?.ranking, filters])
-
-  const filteredCharts = useMemo(() => {
-    if (!data?.charts || !filteredRanking.length) return null
-
-    const filteredTypes = new Set(filteredRanking.map(r => r.instance_type))
-    const filteredIndices = data.ranking
-      .map((r, i) => filteredTypes.has(r.instance_type) ? i : -1)
-      .filter(i => i !== -1)
-
-    const sortByValue = (labels, values) => {
-      const pairs = labels.map((l, i) => [l, values[i]])
-      pairs.sort((a, b) => b[1] - a[1])
-      return {
-        labels: pairs.map(p => p[0]),
-        values: pairs.map(p => p[1])
-      }
-    }
-
-    const buildChart = (chartKey) => {
-      const values = filteredIndices.map(i => data.charts[chartKey].values[i])
-      const labels = filteredIndices.map(i => {
-        const inst = data.ranking[i]
-        return `${inst.instance_type} (${inst.arch})`
-      })
-      return sortByValue(labels, values)
-    }
-
-    return {
-      single_core: buildChart('single_core'),
-      multi_core: buildChart('multi_core'),
-      memory: buildChart('memory'),
-      disk: buildChart('disk'),
-      value: buildChart('value')
-    }
-  }, [data?.charts, data?.ranking, filteredRanking])
 
   const toggleInstanceSelection = (instanceType) => {
     setSelectedForComparison(prev => {
@@ -312,10 +187,13 @@ function App() {
 
   const currencyProps = {
     displayCurrency,
-    nativeCurrency: data?.metadata?.currency || 'EUR',
+    nativeCurrency: data?.metadata?.currency || 'USD',
     exchangeRates: data?.metadata?.exchange_rates,
-    formatPrice: (amount) => formatPrice(amount, data?.metadata?.currency || 'EUR', displayCurrency, data?.metadata?.exchange_rates),
-    formatPriceRaw: (amount) => formatPriceRaw(amount, data?.metadata?.currency || 'EUR', displayCurrency, data?.metadata?.exchange_rates),
+    formatPrice: (amount) => {
+      const symbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
+      return `${symbol}${amount.toFixed(2)}`
+    },
+    formatPriceRaw: (amount) => amount,
   }
 
   if (loading && !data) {
@@ -340,32 +218,6 @@ function App() {
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          {manifest && manifest.runs && manifest.runs.length > 1 && (
-            <div className="run-selector" style={{ marginBottom: 0 }}>
-              <div className="filter-group">
-                <label>Run</label>
-                <select
-                  className="filter-select"
-                  value={selectedRunId}
-                  onChange={(e) => handleRunChange(e.target.value)}
-                  style={{ minWidth: '280px' }}
-                >
-                  <option value="latest">Latest ({manifest.runs[0]?.region?.toUpperCase()})</option>
-                  {manifest.runs.map((run) => (
-                    <option key={run.id} value={run.id}>
-                      {new Date(run.timestamp).toLocaleString()} ({run.provider?.toUpperCase()} / {run.region?.toUpperCase()})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div style={{ marginLeft: 'auto', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                {manifest.runs.length} historical run{manifest.runs.length !== 1 ? 's' : ''}
-                {loading && <span style={{ marginLeft: '10px' }}>Loading...</span>}
-              </div>
-            </div>
-          )}
-
           {data?.metadata?.exchange_rates && (
             <div className="filter-group">
               <label>Currency</label>
@@ -421,7 +273,6 @@ function App() {
           onSelectHistory={handleSelectHistory}
         />
 
-        <ComparisonCharts charts={filteredCharts} currency={currencyProps} />
         <InstanceBreakdown ranking={filteredRanking} metadata={data?.metadata} currency={currencyProps} onSelectHistory={handleSelectHistory} />
         <Footer metadata={data?.metadata} />
       </div>
