@@ -107,7 +107,7 @@ locals {
       host = mod.server_ip
       name = mod.server_name
     }
-  } : {
+    } : {
     for inst_id, mod in module.aws_instances : inst_id => {
       host = mod.server_ip
       name = mod.server_name
