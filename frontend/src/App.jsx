@@ -4,6 +4,7 @@ import StatsOverview from './components/StatsOverview'
 import InstanceFilter from './components/InstanceFilter'
 import InstanceComparison from './components/InstanceComparison'
 import ComparisonTable from './components/ComparisonTable'
+import ComparisonCharts from './components/ComparisonCharts'
 import InstanceBreakdown from './components/InstanceBreakdown'
 import InstanceHistory from './components/InstanceHistory'
 import Footer from './components/Footer'
@@ -27,7 +28,7 @@ function parseExprFilter(expr, value) {
   if (!expr || expr.trim() === '') return true
   const match = expr.trim().match(/^([<>]=?|=)?\s*(\d+\.?\d*)$/)
   if (!match) return true
-  const op = match[1] || '>='
+  const op = match[1] || '='
   const threshold = parseFloat(match[2])
   if (op === '>') return value > threshold
   if (op === '>=') return value >= threshold
@@ -158,6 +159,25 @@ function App() {
     return filterData(data?.ranking, filters)
   }, [data?.ranking, filters])
 
+  const filteredCharts = useMemo(() => {
+    if (!filteredRanking.length) return null
+
+    const sorted = [...filteredRanking]
+    const buildChart = (scoreFn) => {
+      const pairs = sorted.map(r => [r.instance_type, scoreFn(r)])
+      pairs.sort((a, b) => b[1] - a[1])
+      return { labels: pairs.map(p => p[0]), values: pairs.map(p => p[1]) }
+    }
+
+    return {
+      single_core: buildChart(r => r.single_core_score),
+      multi_core: buildChart(r => r.multi_core_score),
+      memory: buildChart(r => r.memory_score),
+      disk: buildChart(r => r.disk_score),
+      value: buildChart(r => r.cpu_value_monthly),
+    }
+  }, [filteredRanking])
+
   const toggleInstanceSelection = (instanceType) => {
     setSelectedForComparison(prev => {
       if (prev.includes(instanceType)) {
@@ -273,6 +293,7 @@ function App() {
           onSelectHistory={handleSelectHistory}
         />
 
+        <ComparisonCharts charts={filteredCharts} currency={currencyProps} />
         <InstanceBreakdown ranking={filteredRanking} metadata={data?.metadata} currency={currencyProps} onSelectHistory={handleSelectHistory} />
         <Footer metadata={data?.metadata} />
       </div>
