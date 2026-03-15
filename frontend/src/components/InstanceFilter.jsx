@@ -65,7 +65,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
           >
             <option value="">All</option>
             {providers.map(p => (
-              <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+              <option key={p} value={p}>{p.length <= 3 ? p.toUpperCase() : p.charAt(0).toUpperCase() + p.slice(1)}</option>
             ))}
           </select>
         </div>
