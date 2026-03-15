@@ -2,6 +2,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
   if (!ranking || ranking.length === 0) return null
 
   const arches = [...new Set(ranking.map(r => r.arch))].filter(Boolean).sort()
+  const providers = [...new Set(ranking.map(r => r.provider))].filter(Boolean).sort()
 
   const maxPrice = Math.ceil(Math.max(...ranking.map(r => r.price_monthly)) * 1.2)
 
@@ -15,6 +16,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
   const clearFilters = () => {
     onFilterChange({
       arch: '',
+      provider: '',
       vcpu: '',
       ram: '',
       disk: '',
@@ -26,6 +28,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
 
   const hasActiveFilters =
     filters.arch ||
+    filters.provider ||
     filters.vcpu ||
     filters.ram ||
     filters.disk ||
@@ -51,6 +54,22 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
           ))}
         </select>
       </div>
+
+      {providers.length > 1 && (
+        <div className="filter-group">
+          <label>Provider</label>
+          <select
+            className="filter-select"
+            value={filters.provider || ''}
+            onChange={(e) => handleChange('provider', e.target.value)}
+          >
+            <option value="">All</option>
+            {providers.map(p => (
+              <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="filter-group">
         <label>vCPU</label>

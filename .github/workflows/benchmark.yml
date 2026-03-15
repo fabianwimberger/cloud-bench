@@ -553,20 +553,20 @@ jobs:
             fi
           fi
 
-      - name: Build history file
+      - name: Build combined data
         run: |
           pip install -r scripts/requirements.txt
           if [ -f frontend/public/data/manifest.json ]; then
+            python scripts/merge_summaries.py \
+              --manifest frontend/public/data/manifest.json \
+              --data-dir frontend/public/data/ \
+              --output frontend/public/data/benchmark-data.json
             python scripts/build_history.py \
               --data-dir frontend/public/data/ \
               --output frontend/public/data/history.json
+          else
+            echo "No benchmark data available yet"
           fi
-
-      - name: Download Processed Results
-        uses: actions/download-artifact@v8
-        with:
-          name: benchmark-processed
-          path: frontend/public/data/
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
