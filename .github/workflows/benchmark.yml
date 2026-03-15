@@ -351,9 +351,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Save processed results before switching branches
+          # Save processed results and scripts before switching branches
           cp -r frontend/public/data/ /tmp/processed-results/
           cp -r results/ /tmp/raw-results/ 2>/dev/null || true
+          cp scripts/update_manifest.py /tmp/update_manifest.py
 
           # Fetch the data branch (create if missing)
           if git fetch origin benchmark-data:benchmark-data 2>/dev/null; then
@@ -383,7 +384,7 @@ jobs:
 
           # Update manifest
           pip install pyyaml
-          python scripts/update_manifest.py \
+          python /tmp/update_manifest.py \
             --manifest data/manifest.json \
             --run-dir "$RUN_DIR" \
             --provider "$PROVIDER" \
