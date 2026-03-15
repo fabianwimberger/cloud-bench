@@ -299,6 +299,8 @@ jobs:
     needs: [provision, benchmark]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     outputs:
       summary: ${{ steps.summary.outputs.content }}
     steps:
