@@ -399,7 +399,7 @@ jobs:
           git push origin benchmark-data
 
           # Switch back
-          git checkout -
+          git checkout main 2>/dev/null || true
 
   cleanup:
     needs: [provision, benchmark, process]
