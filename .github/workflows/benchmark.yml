@@ -226,6 +226,33 @@ jobs:
           echo "$SSH_PUB_KEY" > ~/.ssh/cloud_bench.pub
           chmod 644 ~/.ssh/cloud_bench.pub
 
+      - name: Update AWS Security Groups with Runner IP
+        if: ${{ github.event.inputs.provider == 'aws' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ needs.provision.outputs.region }}
+        run: |
+          RUNNER_IP=$(curl -s --retry 3 https://ifconfig.me || curl -s --retry 3 https://api.ipify.org)
+          echo "Benchmark runner IP: $RUNNER_IP"
+          PREV_IP="${{ needs.provision.outputs.runner_ip }}"
+          echo "Provision runner IP: $PREV_IP"
+          if [ "$RUNNER_IP" = "$PREV_IP" ]; then
+            echo "Same IP, no update needed"
+            exit 0
+          fi
+          # Find all cloud-bench security groups and authorize the new runner IP
+          SG_IDS=$(aws ec2 describe-security-groups \
+            --filters "Name=tag:project,Values=cloud-bench" "Name=tag:run_id,Values=${{ env.RUN_ID }}" \
+            --query "SecurityGroups[].GroupId" --output text)
+          for sg in $SG_IDS; do
+            echo "Authorizing $RUNNER_IP/32 on $sg"
+            aws ec2 authorize-security-group-ingress --group-id "$sg" \
+              --protocol tcp --port 22 --cidr "$RUNNER_IP/32" || true
+            aws ec2 authorize-security-group-ingress --group-id "$sg" \
+              --protocol icmp --port -1 --cidr "$RUNNER_IP/32" || true
+          done
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -237,7 +264,7 @@ jobs:
 
       - name: Wait for instances to be ready
         run: |
-          for i in $(seq 1 30); do
+          for i in $(seq 1 10); do
             echo "Attempt $i: Checking SSH connectivity..."
             if ansible all -i inventory.ini -m raw -a "echo ready" \
               --private-key ~/.ssh/cloud_bench \
