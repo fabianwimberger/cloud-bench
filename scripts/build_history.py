@@ -103,7 +103,7 @@ def build_history(data_dir: str) -> dict:
         for inst_id, run_data in instance_data.items():
             if inst_id not in history:
                 # Find specs from the detail instances
-                inst_detail = next(
+                inst_detail: dict = next(
                     (i for i in detail.get("instances", []) if i.get("id") == inst_id),
                     {},
                 )
