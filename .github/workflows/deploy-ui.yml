@@ -36,7 +36,7 @@ jobs:
           if git rev-parse origin/benchmark-data >/dev/null 2>&1; then
             git checkout origin/benchmark-data -- data/ 2>/dev/null || true
             if [ -d data ]; then
-              cp -r data/ frontend/public/data/
+              cp -r data/* frontend/public/data/
             fi
           fi
 
