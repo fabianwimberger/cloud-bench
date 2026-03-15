@@ -28,7 +28,7 @@ function parseExprFilter(expr, value) {
   if (!expr || expr.trim() === '') return true
   const match = expr.trim().match(/^([<>]=?|=)?\s*(\d+\.?\d*)$/)
   if (!match) return true
-  const op = match[1] || '>='
+  const op = match[1] || '='
   const threshold = parseFloat(match[2])
   if (op === '>') return value > threshold
   if (op === '>=') return value >= threshold
