@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import ScoreBar from './ScoreBar'
+import ProviderBadge from './ProviderBadge'
 
 function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections, currency, onSelectHistory }) {
   const [sortKey, setSortKey] = useState(null)
@@ -77,7 +78,8 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
             <tr>
               <th style={{ width: '40px' }}></th>
               <th className="sortable" onClick={() => handleSort('instance_type')}>Instance{indicator('instance_type')}</th>
-              <th className="sortable" onClick={() => handleSort('arch')}>Arch (x86/ARM){indicator('arch')}</th>
+              <th className="sortable" onClick={() => handleSort('provider')}>Provider{indicator('provider')}</th>
+              <th className="sortable" onClick={() => handleSort('arch')}>Arch{indicator('arch')}</th>
               <th className="cell-numeric sortable" onClick={() => handleSort('vcpu')}>vCPUs{indicator('vcpu')}</th>
               <th className="cell-numeric sortable" onClick={() => handleSort('ram_gb')}>Memory{indicator('ram_gb')}</th>
               <th className="cell-numeric sortable" onClick={() => handleSort('disk_gb')}>Disk{indicator('disk_gb')}</th>
@@ -121,6 +123,9 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                         {instance.instance_type}
                       </button>
                     </div>
+                  </td>
+                  <td>
+                    <ProviderBadge provider={instance.provider} />
                   </td>
                   <td>
                     <span className="arch-badge">{instance.arch}</span>

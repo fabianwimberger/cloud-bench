@@ -543,31 +543,29 @@ jobs:
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
-      - name: Download Processed Results
-        uses: actions/download-artifact@v8
-        with:
-          name: benchmark-processed
-          path: frontend/public/data/
-
       - name: Fetch benchmark data from data branch
         run: |
           git fetch origin benchmark-data || echo "No benchmark-data branch yet"
           if git rev-parse origin/benchmark-data >/dev/null 2>&1; then
             git checkout origin/benchmark-data -- data/ 2>/dev/null || true
             if [ -d data ]; then
-              # Copy run data and manifest without overwriting current processed results
-              cp -r data/runs/ frontend/public/data/runs/ 2>/dev/null || true
-              cp data/manifest.json frontend/public/data/manifest.json 2>/dev/null || true
+              cp -r data/ frontend/public/data/
             fi
           fi
 
-      - name: Build history file
+      - name: Build combined data
         run: |
           pip install -r scripts/requirements.txt
           if [ -f frontend/public/data/manifest.json ]; then
+            python scripts/merge_summaries.py \
+              --manifest frontend/public/data/manifest.json \
+              --data-dir frontend/public/data/ \
+              --output frontend/public/data/benchmark-data.json
             python scripts/build_history.py \
               --data-dir frontend/public/data/ \
               --output frontend/public/data/history.json
+          else
+            echo "No benchmark data available yet"
           fi
 
       - name: Setup Node.js

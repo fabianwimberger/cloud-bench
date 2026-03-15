@@ -104,6 +104,8 @@ function transformData(data) {
       disk_score: inst.scores?.disk || 0,
       overall_score: inst.scores?.overall || 0,
       cpu_value_monthly: inst.value || 0,
+      provider: inst.provider || data.metadata?.provider || '',
+      region: inst.region || data.metadata?.region || '',
       // Include raw metrics
       metrics: inst.metrics || {
         cpu_single_events: 0,
@@ -127,6 +129,7 @@ function filterData(ranking, filters) {
 
   return ranking.filter(inst => {
     if (filters.arch && inst.arch !== filters.arch) return false
+    if (filters.provider && inst.provider !== filters.provider) return false
     if (!parseExprFilter(filters.vcpu, inst.vcpu)) return false
     if (!parseExprFilter(filters.ram, inst.ram_gb)) return false
     if (!parseExprFilter(filters.disk, inst.disk_gb)) return false
@@ -159,6 +162,7 @@ function App() {
 
   const [filters, setFilters] = useState({
     arch: '',
+    provider: '',
     vcpu: '',
     ram: '',
     disk: '',
@@ -182,15 +186,13 @@ function App() {
       const manifestData = await DataAPI.loadManifest()
       setManifest(manifestData)
 
-      const latest = manifestData.runs?.[0]
-      if (!latest) throw new Error('No runs found in manifest')
-
-      const summary = await DataAPI.loadSummary(latest.files?.summary)
+      // Load combined benchmark-data.json (all providers merged)
+      const summary = await DataAPI.loadSummary('benchmark-data.json')
       const transformed = transformData(summary)
       setData(transformed)
 
-      // Set initial display currency to match data's native currency
-      setDisplayCurrency(transformed.metadata?.currency || 'EUR')
+      // Default to USD for multi-provider view
+      setDisplayCurrency(transformed.metadata?.currency || 'USD')
 
       setFilters(prev => ({
         ...prev,
