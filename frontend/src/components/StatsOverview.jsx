@@ -46,9 +46,9 @@ function StatsOverview({ data, currency }) {
       subtext: 'Tested configurations'
     },
     {
-      label: 'Region',
-      value: (metadata.region || 'unknown').toUpperCase(),
-      subtext: metadata.provider || 'Unknown provider'
+      label: 'Providers',
+      value: [...new Set(ranking.map(r => r.provider))].filter(Boolean).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ') || 'Unknown',
+      subtext: [...new Set(ranking.map(r => r.region))].filter(Boolean).join(', ')
     },
   ]
 

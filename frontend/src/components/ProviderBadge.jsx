@@ -3,13 +3,11 @@ const providerStyles = {
     background: 'rgba(213, 12, 45, 0.2)',
     color: '#fb7185',
     label: 'Hetzner',
-    flag: '\uD83C\uDDE9\uD83C\uDDEA',
   },
   aws: {
     background: 'rgba(255, 153, 0, 0.2)',
     color: '#f59e0b',
     label: 'AWS',
-    flag: '\uD83C\uDDFA\uD83C\uDDF8',
   },
 }
 
@@ -29,7 +27,7 @@ function ProviderBadge({ provider }) {
       background: style.background,
       color: style.color
     }}>
-      {style.flag} {style.label}
+      {style.label}
     </span>
   )
 }
