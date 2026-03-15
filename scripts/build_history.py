@@ -91,7 +91,11 @@ def build_history(data_dir: str) -> dict:
     history: dict[str, dict] = {}
 
     for run in manifest.get("runs", []):
-        detail_path = os.path.join(data_dir, run.get("files", {}).get("detail", ""))
+        raw_path = run.get("files", {}).get("detail", "")
+        # Strip leading "data/" prefix since data_dir already points to data/
+        if raw_path.startswith("data/"):
+            raw_path = raw_path[5:]
+        detail_path = os.path.join(data_dir, raw_path)
         detail = load_detail(detail_path)
         if not detail:
             print(f"  Skipping run {run.get('id', '?')}: no detail data")
