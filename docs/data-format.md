@@ -1,4 +1,4 @@
-# Data Format (v2.0)
+# Data Format (v3.0)
 
 ## Output files
 
@@ -8,23 +8,25 @@ frontend/public/data/
 ├── summary-YYYYMMDD-HHMMSS.json # Historical summaries
 ├── detail-YYYYMMDD-HHMMSS.json  # Full historical data with raw metrics
 ├── manifest.json                # Index of all runs
+├── history.json                 # Per-instance history (built from all runs)
 ├── summary.md                   # Markdown summary
 └── benchmark-results.csv        # CSV export
 ```
 
 ## Summary format
 
-~5KB, used by the dashboard landing page.
+~5KB, used by the dashboard landing page. Each run is provider-specific.
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "3.0",
   "metadata": {
     "generated_at": "2026-02-21T09:15:00Z",
     "run_count": 3,
     "currency": "EUR",
     "provider": "hetzner",
-    "region": "fsn1"
+    "region": "fsn1",
+    "exchange_rates": { "usd_to_eur": 0.92, "eur_to_usd": 1.087 }
   },
   "summary": {
     "labels": ["CPX22 (AMD EPYC)", "CAX11 (ARM64)", "CX23 (Intel)"],
@@ -55,7 +57,7 @@ Full data including raw metrics and system info.
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "3.0",
   "metadata": { "..." : "same as summary" },
   "instances": [
     {
@@ -85,11 +87,11 @@ Full data including raw metrics and system info.
 
 ## Manifest
 
-Index for browsing historical runs.
+Index for browsing historical runs. Persisted on the `benchmark-data` branch.
 
 ```json
 {
-  "schema_version": "2.0",
+  "schema_version": "3.0",
   "runs": [
     {
       "id": "2026-02-21-091512",
@@ -106,6 +108,31 @@ Index for browsing historical runs.
 }
 ```
 
+## History
+
+Pre-built per-instance history for the dashboard's history view. Built by `scripts/build_history.py` from all runs in the manifest.
+
+```json
+{
+  "schema_version": "3.0",
+  "instances": {
+    "cx23": {
+      "runs": [
+        {
+          "run_id": "2026-02-21-091512",
+          "timestamp": "2026-02-21T09:15:12Z",
+          "scores": { "overall": 85.2, "single_core": 90.1, "multi_core": 80.3, "memory": 88.0, "disk": 77.5 }
+        }
+      ]
+    }
+  }
+}
+```
+
 ## `provider_attributes`
 
 Extensible field for provider-specific data. No schema changes needed when adding new providers — just include whatever fields are relevant.
+
+## Currency
+
+Prices are stored in the provider's native currency (EUR for Hetzner, USD for AWS). Exchange rates are included in metadata so the frontend can convert between currencies on the fly.

@@ -1,10 +1,11 @@
-function InstanceBreakdown({ ranking, metadata }) {
+function InstanceBreakdown({ ranking, metadata, currency, onSelectHistory }) {
   if (!ranking || ranking.length === 0) return null
 
   const byPrice = [...ranking].sort((a, b) => b.price_monthly - a.price_monthly)
 
-  const currency = metadata?.currency || 'EUR'
-  const currencySymbol = currency === 'EUR' ? '€' : currency
+  const displayCurrency = currency?.displayCurrency || metadata?.currency || 'EUR'
+  const currencySymbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
+  const fp = currency?.formatPrice || ((v) => `${currencySymbol}${v.toFixed(2)}`)
 
   return (
     <div className="card">
@@ -20,7 +21,7 @@ function InstanceBreakdown({ ranking, metadata }) {
               <div>
                 <strong style={{ fontSize: '1rem' }}>{instance.instance_type}</strong>
                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.125rem' }}>
-                  {instance.vcpu} vCPU · {instance.ram_gb} GB · {instance.disk_gb} GB
+                  {instance.vcpu} vCPU {'\u00B7'} {instance.ram_gb} GB {'\u00B7'} {instance.disk_gb} GB
                 </div>
               </div>
               <span className="arch-badge">{instance.arch}</span>
@@ -45,8 +46,18 @@ function InstanceBreakdown({ ranking, metadata }) {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '0.5rem', marginTop: '0.5rem', borderTop: '1px solid var(--color-border)' }}>
                 <span style={{ color: 'var(--color-text-muted)' }}>Price:</span>
-                <span>{currencySymbol}{instance.price_monthly.toFixed(2)}/mo</span>
+                <span>{fp(instance.price_monthly)}/mo</span>
               </div>
+            </div>
+
+            <div style={{ marginTop: '0.75rem', paddingTop: '0.5rem', borderTop: '1px solid var(--color-border)' }}>
+              <button
+                className="btn btn-ghost btn-small"
+                style={{ width: '100%' }}
+                onClick={() => onSelectHistory?.(instance.instance_type)}
+              >
+                History
+              </button>
             </div>
           </div>
         ))}

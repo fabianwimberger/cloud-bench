@@ -20,6 +20,7 @@ jobs:
         uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
 
       - name: Terraform Format Check
         working-directory: terraform
@@ -27,7 +28,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform
-        run: terraform init -backend=false
+        run: terraform init
 
       - name: Terraform Validate
         working-directory: terraform
@@ -42,7 +43,7 @@ jobs:
           set -o pipefail
           terraform plan \
             -var="run_id=pr-${{ github.event.pull_request.number }}" \
-            -var="hcloud_token=dummy-token-for-validation-only" \
+            -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000" \
             -var='allowed_ssh_ips=["10.0.0.1/32"]' \
             -input=false 2>&1 | tee plan_output.txt || {
             # Exit code 1 is expected (invalid token), exit code >1 indicates real errors
