@@ -47,7 +47,7 @@ function StatsOverview({ data, currency }) {
     },
     {
       label: 'Providers',
-      value: [...new Set(ranking.map(r => r.provider))].filter(Boolean).map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(', ') || 'Unknown',
+      value: [...new Set(ranking.map(r => r.provider))].filter(Boolean).map(p => p.length <= 3 ? p.toUpperCase() : p.charAt(0).toUpperCase() + p.slice(1)).join(', ') || 'Unknown',
       subtext: [...new Set(ranking.map(r => r.region))].filter(Boolean).join(', ')
     },
   ]
