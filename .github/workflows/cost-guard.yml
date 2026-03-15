@@ -59,7 +59,7 @@ jobs:
           COST_USD=${{ steps.calculate.outputs.cost_usd }}
           COUNT=${{ steps.calculate.outputs.count }}
           MAX_COST_USD=5.00
-          MAX_INSTANCES=10
+          MAX_INSTANCES=15
           
           SHOULD_RUN="true"
           

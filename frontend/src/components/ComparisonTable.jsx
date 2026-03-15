@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import ScoreBar from './ScoreBar'
 
-function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections }) {
+function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections, currency, onSelectHistory }) {
   const [sortKey, setSortKey] = useState(null)
   const [sortDir, setSortDir] = useState('desc')
 
@@ -14,16 +14,17 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
     )
   }
 
-  const currency = metadata?.currency || 'EUR'
-  const currencySymbol = currency === 'EUR' ? '€' : currency
+  const displayCurrency = currency?.displayCurrency || metadata?.currency || 'EUR'
+  const currencySymbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('de-DE', {
+    const converted = currency?.formatPriceRaw ? currency.formatPriceRaw(value) : value
+    return new Intl.NumberFormat(displayCurrency === 'EUR' ? 'de-DE' : 'en-US', {
       style: 'currency',
-      currency: currency,
+      currency: displayCurrency,
       minimumFractionDigits: 4,
       maximumFractionDigits: 4
-    }).format(value)
+    }).format(converted)
   }
 
   const canSelectMore = selectedForComparison.length < maxSelections
@@ -55,7 +56,7 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
     }
   }
 
-  const indicator = (key) => sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''
+  const indicator = (key) => sortKey === key ? (sortDir === 'asc' ? ' \u25B2' : ' \u25BC') : ''
 
   return (
     <div className="card">
@@ -112,7 +113,13 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                   </td>
                   <td>
                     <div className="instance-cell">
-                      <span className="instance-name">{instance.instance_type}</span>
+                      <button
+                        className="instance-name-btn"
+                        onClick={() => onSelectHistory?.(instance.instance_type)}
+                        title="View history"
+                      >
+                        {instance.instance_type}
+                      </button>
                     </div>
                   </td>
                   <td>

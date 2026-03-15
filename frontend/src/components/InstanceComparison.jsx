@@ -11,10 +11,10 @@ function formatNumber(num, decimals = 0) {
   return num.toFixed(decimals)
 }
 
-function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
+function InstanceComparison({ ranking, metadata, selectedInstances, onClear, currency }) {
   const [showSelector, setShowSelector] = useState(false)
-  const currency = metadata?.currency || 'EUR'
-  const currencySymbol = currency === 'EUR' ? '€' : currency
+  const displayCurrency = currency?.displayCurrency || metadata?.currency || 'EUR'
+  const currencySymbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
 
   const selected = ranking?.filter(r => selectedInstances.includes(r.instance_type)) || []
   const available = ranking?.filter(r => !selectedInstances.includes(r.instance_type)) || []
@@ -40,11 +40,12 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
   }
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('de-DE', {
+    const converted = currency?.formatPriceRaw ? currency.formatPriceRaw(value) : value
+    return new Intl.NumberFormat(displayCurrency === 'EUR' ? 'de-DE' : 'en-US', {
       style: 'currency',
-      currency: currency,
+      currency: displayCurrency,
       minimumFractionDigits: 2
-    }).format(value)
+    }).format(converted)
   }
 
   return (
@@ -93,8 +94,8 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
         </div>
       )}
 
-      <div style={{ 
-        display: 'grid', 
+      <div style={{
+        display: 'grid',
         gridTemplateColumns: `140px repeat(${selected.length}, 1fr)`,
         gap: '1px',
         background: 'var(--color-border)',
@@ -163,8 +164,8 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
           const best = getBest('cpu_single_events', true)
           const isBest = value === best && value > 0
           return (
-            <div key={inst.instance_type} style={{ 
-              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)', 
+            <div key={inst.instance_type} style={{
+              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)',
               padding: '0.75rem 1rem',
               fontFamily: 'var(--font-mono)'
             }}>
@@ -173,7 +174,7 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
                 <span style={{ fontWeight: isBest ? 600 : 400 }}>
                   {formatNumber(value)}
                 </span>
-                {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem' }}>★</span>}
+                {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem' }}>{'\u2605'}</span>}
               </div>
               <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
                 events/sec
@@ -191,8 +192,8 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
           const best = getBest('cpu_multi_events', true)
           const isBest = value === best && value > 0
           return (
-            <div key={inst.instance_type} style={{ 
-              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)', 
+            <div key={inst.instance_type} style={{
+              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)',
               padding: '0.75rem 1rem',
               fontFamily: 'var(--font-mono)'
             }}>
@@ -201,7 +202,7 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
                 <span style={{ fontWeight: isBest ? 600 : 400 }}>
                   {formatNumber(value)}
                 </span>
-                {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem' }}>★</span>}
+                {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem' }}>{'\u2605'}</span>}
               </div>
               <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
                 events/sec
@@ -219,8 +220,8 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
           const best = getBest('memory_mib_per_sec', true)
           const isBest = value === best && value > 0
           return (
-            <div key={inst.instance_type} style={{ 
-              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)', 
+            <div key={inst.instance_type} style={{
+              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)',
               padding: '0.75rem 1rem',
               fontFamily: 'var(--font-mono)'
             }}>
@@ -229,7 +230,7 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
                 <span style={{ fontWeight: isBest ? 600 : 400 }}>
                   {Math.round(value)}
                 </span>
-                {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem' }}>★</span>}
+                {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem' }}>{'\u2605'}</span>}
               </div>
               <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
                 MiB/s
@@ -247,8 +248,8 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
           const best = getBest('disk_iops', true)
           const isBest = value === best && value > 0
           return (
-            <div key={inst.instance_type} style={{ 
-              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)', 
+            <div key={inst.instance_type} style={{
+              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)',
               padding: '0.75rem 1rem',
               fontFamily: 'var(--font-mono)'
             }}>
@@ -257,7 +258,7 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
                 <span style={{ fontWeight: isBest ? 600 : 400 }}>
                   {formatNumber(value)}
                 </span>
-                {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem' }}>★</span>}
+                {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem' }}>{'\u2605'}</span>}
               </div>
               <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>
                 read IOPS
@@ -275,15 +276,15 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
           const best = getBest('overall_score')
           const isBest = value === best && value > 0
           return (
-            <div key={inst.instance_type} style={{ 
-              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)', 
+            <div key={inst.instance_type} style={{
+              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)',
               padding: '0.75rem 1rem',
               fontFamily: 'var(--font-mono)'
             }}>
               <span style={{ fontWeight: isBest ? 600 : 400, fontSize: '1.125rem' }}>
                 {value.toFixed(0)}/100
               </span>
-              {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem', marginLeft: '0.5rem' }}>★</span>}
+              {isBest && <span style={{ color: 'var(--color-primary-light)', fontSize: '0.75rem', marginLeft: '0.5rem' }}>{'\u2605'}</span>}
             </div>
           )
         })}
@@ -297,8 +298,8 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear }) {
           const best = getBest('cpu_value_monthly')
           const isBest = value === best && value > 0
           return (
-            <div key={inst.instance_type} style={{ 
-              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)', 
+            <div key={inst.instance_type} style={{
+              background: isBest ? 'rgba(139, 92, 246, 0.15)' : 'var(--color-surface)',
               padding: '0.75rem 1rem',
               fontFamily: 'var(--font-mono)'
             }}>

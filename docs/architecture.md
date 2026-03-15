@@ -6,6 +6,7 @@ config/instances.yaml          # Single source of truth for instances & pricing
         ▼
 ┌── Terraform ──────────────┐
 │  modules/hetzner/          │  Provisions servers, SSH keys, firewalls
+│  modules/aws/              │  EC2 instances, security groups, key pairs
 └────────────┬──────────────┘
              ▼
 ┌── Ansible ────────────────┐
@@ -14,6 +15,8 @@ config/instances.yaml          # Single source of truth for instances & pricing
              ▼
 ┌── Python ─────────────────┐
 │  scripts/process_results.py│  Normalizes, scores, outputs JSON/CSV
+│  scripts/update_manifest.py│  Indexes runs into manifest.json
+│  scripts/build_history.py  │  Builds per-instance history.json
 └────────────┬──────────────┘
              ▼
 ┌── Frontend ───────────────┐
@@ -36,7 +39,7 @@ All scores are normalized 0-100 relative to the best performer in the run.
 ```
 CPU Score     = (Single Core + Multi Core) / 2
 Overall Score = CPU * 0.40 + Memory * 0.35 + Disk * 0.25
-Value Score   = CPU Score / Monthly Price (EUR)
+Value Score   = Overall Score / Monthly Price (in provider's native currency)
 ```
 
 ## Data format
@@ -50,6 +53,6 @@ See [data-format.md](data-format.md) for the schema.
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
-- Firewall allows SSH from any IP (key-based auth only)
+- Firewall/security group allows SSH from runner IP only (key-based auth)
 - `if: always()` cleanup in CI
-- Dedicated Hetzner project recommended for isolation
+- Dedicated Hetzner project and AWS IAM user recommended for isolation

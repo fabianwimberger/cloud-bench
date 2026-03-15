@@ -15,7 +15,7 @@ if [ "$INSTANCES_INPUT" = "all" ]; then
     echo "null"
 else
     # Validate instance IDs contain only allowed characters
-    if ! echo "$INSTANCES_INPUT" | grep -qE '^[a-zA-Z0-9,_-]+$'; then
+    if ! echo "$INSTANCES_INPUT" | grep -qE '^[a-zA-Z0-9,._-]+$'; then
         echo "Error: Invalid instance IDs" >&2
         exit 1
     fi

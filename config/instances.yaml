@@ -1,6 +1,7 @@
 providers:
   hetzner:
     currency: EUR
+    default_region: fsn1
     regions:
       nbg1:
         name: Nuremberg
@@ -85,6 +86,72 @@ providers:
       pricing:
         hourly: 0.05004
         monthly: 31.188
+  aws:
+    currency: USD
+    default_region: eu-central-1
+    regions:
+      eu-central-1:
+        name: Frankfurt
+    instances:
+    - id: t3.micro
+      name: t3.micro
+      arch: X86
+      vcpu: 2
+      ram_gb: 1
+      disk_gb: 20
+      pricing:
+        hourly: 0.0104
+        monthly: 7.49
+    - id: t3.small
+      name: t3.small
+      arch: X86
+      vcpu: 2
+      ram_gb: 2
+      disk_gb: 20
+      pricing:
+        hourly: 0.0208
+        monthly: 14.98
+    - id: t4g.micro
+      name: t4g.micro
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 1
+      disk_gb: 20
+      pricing:
+        hourly: 0.0084
+        monthly: 6.05
+    - id: t4g.small
+      name: t4g.small
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 2
+      disk_gb: 20
+      pricing:
+        hourly: 0.0168
+        monthly: 12.1
+    - id: c7i-flex.large
+      name: c7i-flex.large
+      arch: X86
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 20
+      pricing:
+        hourly: 0.0504
+        monthly: 36.29
+    - id: m7i-flex.large
+      name: m7i-flex.large
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.0572
+        monthly: 41.18
+exchange_rates:
+  usd_to_eur: 0.92
+  eur_to_usd: 1.087
+  last_updated: '2026-02-23T12:00:00'
+  source: Frankfurter API (ECB data)
 _metadata:
   last_pricing_update: '2026-02-23T16:23:59.169879'
-  source: Hetzner Cloud API
+  source: Hetzner Cloud API / AWS Pricing API

@@ -1,4 +1,4 @@
-function StatsOverview({ data }) {
+function StatsOverview({ data, currency }) {
   const ranking = data?.ranking || []
   const metadata = data?.metadata || {}
 
@@ -15,8 +15,9 @@ function StatsOverview({ data }) {
     (current.metrics?.cpu_single_events || 0) > (fastest.metrics?.cpu_single_events || 0) ? current : fastest
   )
 
-  const currency = metadata.currency || 'EUR'
-  const currencySymbol = currency === 'EUR' ? '€' : currency
+  const displayCurrency = currency?.displayCurrency || metadata.currency || 'EUR'
+  const currencySymbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
+  const fp = currency?.formatPrice || ((v) => `${currencySymbol}${v.toFixed(2)}`)
 
   const stats = [
     {
@@ -36,7 +37,7 @@ function StatsOverview({ data }) {
     },
     {
       label: 'Cheapest',
-      value: `${currencySymbol}${cheapest.price_monthly.toFixed(2)}`,
+      value: fp(cheapest.price_monthly),
       subtext: `${cheapest.instance_type} / month`
     },
     {

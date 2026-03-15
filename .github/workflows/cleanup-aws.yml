@@ -1,0 +1,60 @@
+name: Cleanup AWS Orphans
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Find and terminate orphaned instances
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-central-1
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "AWS credentials not configured, skipping"
+            exit 0
+          fi
+
+          echo "Checking for orphaned cloud-bench instances..."
+
+          # Find cloud-bench tagged instances that are running
+          INSTANCES=$(aws ec2 describe-instances \
+            --filters "Name=tag:project,Values=cloud-bench" "Name=instance-state-name,Values=running,pending,stopping,stopped" \
+            --query 'Reservations[].Instances[].[InstanceId,LaunchTime,Tags[?Key==`run_id`].Value|[0]]' \
+            --output text)
+
+          if [ -z "$INSTANCES" ]; then
+            echo "[OK] No cloud-bench instances found"
+            exit 0
+          fi
+
+          echo "Found instances:"
+          echo "$INSTANCES"
+
+          # Terminate instances older than 2 hours
+          CUTOFF=$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -u -v-2H +%Y-%m-%dT%H:%M:%S)
+          TERMINATED=0
+
+          while IFS=$'\t' read -r instance_id launch_time run_id; do
+            if [[ "$launch_time" < "$CUTOFF" ]]; then
+              echo "Terminating orphaned instance: $instance_id (launched: $launch_time, run_id: $run_id)"
+              aws ec2 terminate-instances --instance-ids "$instance_id"
+              TERMINATED=$((TERMINATED + 1))
+            else
+              echo "Keeping recent instance: $instance_id (launched: $launch_time)"
+            fi
+          done <<< "$INSTANCES"
+
+          echo ""
+          echo "Summary: Terminated $TERMINATED orphaned instance(s)"
+
+          if [ $TERMINATED -gt 0 ]; then
+            echo "## AWS Orphan Cleanup" >> $GITHUB_STEP_SUMMARY
+            echo "Terminated **$TERMINATED** orphaned instance(s) older than 2 hours." >> $GITHUB_STEP_SUMMARY
+          fi

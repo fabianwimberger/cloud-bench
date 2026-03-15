@@ -1,9 +1,12 @@
-function InstanceFilter({ ranking, filters, onFilterChange }) {
+function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
   if (!ranking || ranking.length === 0) return null
 
   const arches = [...new Set(ranking.map(r => r.arch))].filter(Boolean).sort()
 
   const maxPrice = Math.ceil(Math.max(...ranking.map(r => r.price_monthly)) * 1.2)
+
+  const displayCurrency = currency?.displayCurrency || 'EUR'
+  const currencySymbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
 
   const handleChange = (key, value) => {
     onFilterChange({ ...filters, [key]: value })
@@ -86,7 +89,7 @@ function InstanceFilter({ ranking, filters, onFilterChange }) {
       </div>
 
       <div className="filter-group">
-        <label>Price: €{filters.min_monthly_price} – €{filters.max_monthly_price}</label>
+        <label>Price: {currencySymbol}{filters.min_monthly_price} {'\u2013'} {currencySymbol}{filters.max_monthly_price}</label>
         <div className="range-slider">
           <div
             className="range-slider-track"
