@@ -1,0 +1,44 @@
+{
+  "run_id": "23110069540-1",
+  "hostname": "cloud-bench-aws-t4g-small-23110069540-1",
+  "timestamp": "2026-03-15T12:15:33Z",
+  "benchmark_runs": 5,
+  "aggregation": "median",
+  "system": {
+    "schema_version": "2.0",
+    "provider": "aws",
+    "instance_type": "t4g.small",
+    "timestamp": "2026-03-15T12:11:30Z",
+    "provider_attributes": {
+      "arch": "aarch64",
+      "os": "Ubuntu 24.04",
+      "kernel": "6.17.0-1007-aws",
+      "vcpu": 2,
+      "memory_mb": 1837,
+      "hostname": "cloud-bench-aws-t4g-small-23110069540-1"
+    },
+    "benchmark_config": {
+      "runs": 5,
+      "aggregation": "median"
+    }
+  },
+  "cpu": {
+    "test": "sysbench-cpu",
+    "runs": 5,
+    "single_thread_events": 1064.77,
+    "multi_thread_events": 2140.18,
+    "threads": 2
+  },
+  "memory": {
+    "test": "sysbench-memory",
+    "runs": 5,
+    "read_mib_per_sec": 7376.34,
+    "write_mib_per_sec": 3671.78,
+    "total_throughput_mib": 11048.12
+  },
+  "disk": {
+    "test": "fio-randread",
+    "runs": 5,
+    "read_iops": 3043.576033
+  }
+}
