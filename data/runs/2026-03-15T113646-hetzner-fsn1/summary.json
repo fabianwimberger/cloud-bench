@@ -1,0 +1,306 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-03-15T11:36:45.699412",
+    "run_count": 8,
+    "currency": "EUR",
+    "provider": "hetzner",
+    "region": "fsn1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1476,
+      "usd_to_eur": 0.8714,
+      "last_updated": "2026-03-13",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "CPX32",
+      "CCX23",
+      "CCX13",
+      "CAX21",
+      "CPX22",
+      "CAX11",
+      "CX33",
+      "CX23"
+    ],
+    "instances": [
+      {
+        "id": "CPX32",
+        "name": "CPX32 (X86)",
+        "scores": {
+          "single_core": 98.8,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 81.3,
+          "overall": 95.1
+        },
+        "metrics": {
+          "cpu_single_events": 1632.66,
+          "cpu_multi_events": 6499.5,
+          "memory_mib_per_sec": 45150.759999999995,
+          "disk_iops": 62178.368121
+        },
+        "pricing": {
+          "hourly": 0.02016,
+          "monthly": 12.588
+        },
+        "value": 7.9,
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 8,
+          "disk_gb": 160,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "CCX23",
+        "name": "CCX23 (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 55.4,
+          "memory": 90.0,
+          "disk": 86.5,
+          "overall": 84.2
+        },
+        "metrics": {
+          "cpu_single_events": 1652.36,
+          "cpu_multi_events": 3601.91,
+          "memory_mib_per_sec": 40638.16,
+          "disk_iops": 66164.563352
+        },
+        "pricing": {
+          "hourly": 0.05004,
+          "monthly": 31.188
+        },
+        "value": 2.49,
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 16,
+          "disk_gb": 160,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "CCX13",
+        "name": "CCX13 (X86)",
+        "scores": {
+          "single_core": 99.8,
+          "multi_core": 27.7,
+          "memory": 50.0,
+          "disk": 100.0,
+          "overall": 68.0
+        },
+        "metrics": {
+          "cpu_single_events": 1648.45,
+          "cpu_multi_events": 1800.52,
+          "memory_mib_per_sec": 22556.09,
+          "disk_iops": 76471.411902
+        },
+        "pricing": {
+          "hourly": 0.02508,
+          "monthly": 15.588
+        },
+        "value": 4.09,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 80,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "CAX21",
+        "name": "CAX21 (ARM64)",
+        "scores": {
+          "single_core": 77.1,
+          "multi_core": 78.2,
+          "memory": 39.5,
+          "disk": 72.7,
+          "overall": 63.0
+        },
+        "metrics": {
+          "cpu_single_events": 1274.42,
+          "cpu_multi_events": 5079.98,
+          "memory_mib_per_sec": 17852.38,
+          "disk_iops": 55562.526494
+        },
+        "pricing": {
+          "hourly": 0.01152,
+          "monthly": 7.188
+        },
+        "value": 10.8,
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 8,
+          "disk_gb": 80,
+          "arch": "ARM64"
+        }
+      },
+      {
+        "id": "CPX22",
+        "name": "CPX22 (X86)",
+        "scores": {
+          "single_core": 99.4,
+          "multi_core": 50.6,
+          "memory": 32.6,
+          "disk": 83.1,
+          "overall": 62.2
+        },
+        "metrics": {
+          "cpu_single_events": 1643.05,
+          "cpu_multi_events": 3291.87,
+          "memory_mib_per_sec": 14706.15,
+          "disk_iops": 63565.470417
+        },
+        "pricing": {
+          "hourly": 0.01152,
+          "monthly": 7.188
+        },
+        "value": 10.43,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 80,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "CAX11",
+        "name": "CAX11 (ARM64)",
+        "scores": {
+          "single_core": 77.0,
+          "multi_core": 39.2,
+          "memory": 24.7,
+          "disk": 72.5,
+          "overall": 50.0
+        },
+        "metrics": {
+          "cpu_single_events": 1271.93,
+          "cpu_multi_events": 2544.56,
+          "memory_mib_per_sec": 11148.119999999999,
+          "disk_iops": 55421.564482
+        },
+        "pricing": {
+          "hourly": 0.00636,
+          "monthly": 3.948
+        },
+        "value": 14.72,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 40,
+          "arch": "ARM64"
+        }
+      },
+      {
+        "id": "CX33",
+        "name": "CX33 (X86)",
+        "scores": {
+          "single_core": 20.3,
+          "multi_core": 20.5,
+          "memory": 42.6,
+          "disk": 61.4,
+          "overall": 38.4
+        },
+        "metrics": {
+          "cpu_single_events": 334.85,
+          "cpu_multi_events": 1333.17,
+          "memory_mib_per_sec": 19250.92,
+          "disk_iops": 46979.21147
+        },
+        "pricing": {
+          "hourly": 0.0096,
+          "monthly": 5.988
+        },
+        "value": 3.41,
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 8,
+          "disk_gb": 80,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "CX23",
+        "name": "CX23 (X86)",
+        "scores": {
+          "single_core": 16.8,
+          "multi_core": 8.4,
+          "memory": 21.7,
+          "disk": 48.9,
+          "overall": 24.9
+        },
+        "metrics": {
+          "cpu_single_events": 278.17,
+          "cpu_multi_events": 546.93,
+          "memory_mib_per_sec": 9787.25,
+          "disk_iops": 37363.740023
+        },
+        "pricing": {
+          "hourly": 0.00576,
+          "monthly": 3.588
+        },
+        "value": 3.51,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 40,
+          "arch": "X86"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        98.8,
+        100.0,
+        99.8,
+        77.1,
+        99.4,
+        77.0,
+        20.3,
+        16.8
+      ],
+      "multi_core": [
+        100.0,
+        55.4,
+        27.7,
+        78.2,
+        50.6,
+        39.2,
+        20.5,
+        8.4
+      ],
+      "memory": [
+        100.0,
+        90.0,
+        50.0,
+        39.5,
+        32.6,
+        24.7,
+        42.6,
+        21.7
+      ],
+      "disk": [
+        81.3,
+        86.5,
+        100.0,
+        72.7,
+        83.1,
+        72.5,
+        61.4,
+        48.9
+      ],
+      "value": [
+        7.9,
+        2.49,
+        4.09,
+        10.8,
+        10.43,
+        14.72,
+        3.41,
+        3.51
+      ]
+    }
+  }
+}
