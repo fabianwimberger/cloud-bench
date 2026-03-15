@@ -62,7 +62,11 @@ def main():
     providers_seen = []
 
     for provider, run in latest_per_provider.items():
-        summary_path = os.path.join(args.data_dir, run["files"]["summary"])
+        raw_path = run["files"]["summary"]
+        # Strip leading "data/" prefix since --data-dir already points to data/
+        if raw_path.startswith("data/"):
+            raw_path = raw_path[5:]
+        summary_path = os.path.join(args.data_dir, raw_path)
         summary = load_json(summary_path)
         if not summary:
             print(f"  [WARN] No summary for {provider} run {run['id']}")
