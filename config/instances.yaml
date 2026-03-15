@@ -93,114 +93,60 @@ providers:
       eu-central-1:
         name: Frankfurt
     instances:
-    - id: t2.medium
-      name: t2.medium
+    - id: t3.micro
+      name: t3.micro
       arch: X86
       vcpu: 2
-      ram_gb: 4
+      ram_gb: 1
       disk_gb: 20
       pricing:
-        hourly: 0.0464
-        monthly: 33.41
-    - id: t2.large
-      name: t2.large
+        hourly: 0.0104
+        monthly: 7.49
+    - id: t3.small
+      name: t3.small
       arch: X86
       vcpu: 2
-      ram_gb: 8
+      ram_gb: 2
       disk_gb: 20
       pricing:
-        hourly: 0.0928
-        monthly: 66.82
-    - id: t2.xlarge
-      name: t2.xlarge
-      arch: X86
-      vcpu: 4
-      ram_gb: 16
-      disk_gb: 20
-      pricing:
-        hourly: 0.1856
-        monthly: 133.63
-    - id: t3.medium
-      name: t3.medium
-      arch: X86
-      vcpu: 2
-      ram_gb: 4
-      disk_gb: 20
-      pricing:
-        hourly: 0.0416
-        monthly: 29.95
-    - id: t3.large
-      name: t3.large
-      arch: X86
-      vcpu: 2
-      ram_gb: 8
-      disk_gb: 20
-      pricing:
-        hourly: 0.0832
-        monthly: 59.9
-    - id: t3.xlarge
-      name: t3.xlarge
-      arch: X86
-      vcpu: 4
-      ram_gb: 16
-      disk_gb: 20
-      pricing:
-        hourly: 0.1664
-        monthly: 119.81
-    - id: t3a.medium
-      name: t3a.medium
-      arch: X86
-      vcpu: 2
-      ram_gb: 4
-      disk_gb: 20
-      pricing:
-        hourly: 0.0376
-        monthly: 27.07
-    - id: t3a.large
-      name: t3a.large
-      arch: X86
-      vcpu: 2
-      ram_gb: 8
-      disk_gb: 20
-      pricing:
-        hourly: 0.0752
-        monthly: 54.14
-    - id: t3a.xlarge
-      name: t3a.xlarge
-      arch: X86
-      vcpu: 4
-      ram_gb: 16
-      disk_gb: 20
-      pricing:
-        hourly: 0.1504
-        monthly: 108.29
-    - id: t4g.medium
-      name: t4g.medium
+        hourly: 0.0208
+        monthly: 14.98
+    - id: t4g.micro
+      name: t4g.micro
       arch: ARM64
       vcpu: 2
+      ram_gb: 1
+      disk_gb: 20
+      pricing:
+        hourly: 0.0084
+        monthly: 6.05
+    - id: t4g.small
+      name: t4g.small
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 2
+      disk_gb: 20
+      pricing:
+        hourly: 0.0168
+        monthly: 12.1
+    - id: c7i-flex.large
+      name: c7i-flex.large
+      arch: X86
+      vcpu: 2
       ram_gb: 4
       disk_gb: 20
       pricing:
-        hourly: 0.0336
-        monthly: 24.19
-    - id: t4g.large
-      name: t4g.large
-      arch: ARM64
+        hourly: 0.0504
+        monthly: 36.29
+    - id: m7i-flex.large
+      name: m7i-flex.large
+      arch: X86
       vcpu: 2
       ram_gb: 8
       disk_gb: 20
       pricing:
-        hourly: 0.0672
-        monthly: 48.38
-    - id: t4g.xlarge
-      name: t4g.xlarge
-      arch: ARM64
-      vcpu: 4
-      ram_gb: 16
-      disk_gb: 20
-      pricing:
-        hourly: 0.1344
-        monthly: 96.77
+        hourly: 0.0572
+        monthly: 41.18
 exchange_rates:
   usd_to_eur: 0.92
   eur_to_usd: 1.087
