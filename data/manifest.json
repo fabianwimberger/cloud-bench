@@ -1,1 +1,52 @@
-{"schema_version":"3.0","runs":[],"instance_index":{}}
+{
+  "schema_version": "3.0",
+  "runs": [
+    {
+      "id": "2026-03-15T111103-hetzner-fsn1",
+      "timestamp": "2026-03-15T111103",
+      "provider": "hetzner",
+      "region": "fsn1",
+      "instance_count": 8,
+      "instances": [
+        "CPX32",
+        "CCX23",
+        "CCX13",
+        "CPX22",
+        "CAX21",
+        "CAX11",
+        "CX33",
+        "CX23"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-15T111103-hetzner-fsn1/summary.json",
+        "detail": "data/runs/2026-03-15T111103-hetzner-fsn1/detail.json"
+      }
+    }
+  ],
+  "instance_index": {
+    "CPX32": [
+      "2026-03-15T111103-hetzner-fsn1"
+    ],
+    "CCX23": [
+      "2026-03-15T111103-hetzner-fsn1"
+    ],
+    "CCX13": [
+      "2026-03-15T111103-hetzner-fsn1"
+    ],
+    "CPX22": [
+      "2026-03-15T111103-hetzner-fsn1"
+    ],
+    "CAX21": [
+      "2026-03-15T111103-hetzner-fsn1"
+    ],
+    "CAX11": [
+      "2026-03-15T111103-hetzner-fsn1"
+    ],
+    "CX33": [
+      "2026-03-15T111103-hetzner-fsn1"
+    ],
+    "CX23": [
+      "2026-03-15T111103-hetzner-fsn1"
+    ]
+  }
+}
