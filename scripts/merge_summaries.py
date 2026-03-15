@@ -12,9 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Merge benchmark summaries from multiple runs"
     )
-    parser.add_argument(
-        "--manifest", required=True, help="Path to manifest.json"
-    )
+    parser.add_argument("--manifest", required=True, help="Path to manifest.json")
     parser.add_argument(
         "--data-dir", required=True, help="Path to the data directory containing runs/"
     )
@@ -92,7 +90,9 @@ def main():
             all_instances.append(inst)
             all_labels.append(inst["id"])
 
-        print(f"  [OK] {provider}: {len(summary.get('summary', {}).get('instances', []))} instances")
+        print(
+            f"  [OK] {provider}: {len(summary.get('summary', {}).get('instances', []))} instances"
+        )
 
     # Re-score across all instances so scores are comparable
     all_instances = rescale_scores(all_instances)
@@ -116,7 +116,9 @@ def main():
     with open(args.output, "w") as f:
         json.dump(merged, f, indent=2)
 
-    print(f"[OK] Merged {len(all_instances)} instances from {len(providers_seen)} providers")
+    print(
+        f"[OK] Merged {len(all_instances)} instances from {len(providers_seen)} providers"
+    )
 
 
 def rescale_scores(instances: list[dict]) -> list[dict]:
@@ -124,7 +126,12 @@ def rescale_scores(instances: list[dict]) -> list[dict]:
     if not instances:
         return instances
 
-    metrics_keys = ["cpu_single_events", "cpu_multi_events", "memory_mib_per_sec", "disk_iops"]
+    metrics_keys = [
+        "cpu_single_events",
+        "cpu_multi_events",
+        "memory_mib_per_sec",
+        "disk_iops",
+    ]
     score_keys = ["single_core", "multi_core", "memory", "disk"]
 
     # Get raw metric values
@@ -150,7 +157,11 @@ def rescale_scores(instances: list[dict]) -> list[dict]:
 
         # Recalculate overall as average of component scores
         component_scores = [scores.get(k, 0) for k in score_keys]
-        scores["overall"] = round(sum(component_scores) / len(component_scores), 1) if component_scores else 0
+        scores["overall"] = (
+            round(sum(component_scores) / len(component_scores), 1)
+            if component_scores
+            else 0
+        )
 
         # Recalculate value score (overall / monthly price)
         monthly = inst.get("pricing", {}).get("monthly", 0)
