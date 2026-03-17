@@ -20,8 +20,8 @@ variable "cloud_provider" {
   default     = "hetzner"
 
   validation {
-    condition     = can(regex("^(hetzner|aws)$", var.cloud_provider))
-    error_message = "Provider must be 'hetzner' or 'aws'."
+    condition     = can(regex("^(hetzner|aws|ovhcloud)$", var.cloud_provider))
+    error_message = "Provider must be 'hetzner', 'aws', or 'ovhcloud'."
   }
 }
 
@@ -99,4 +99,32 @@ variable "aws_ebs_size" {
   description = "EBS volume size in GB for AWS instances"
   type        = number
   default     = 20
+}
+
+variable "ovh_application_key" {
+  description = "OVHcloud application key"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_application_secret" {
+  description = "OVHcloud application secret"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_consumer_key" {
+  description = "OVHcloud consumer key"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_cloud_project_id" {
+  description = "OVHcloud Public Cloud project ID (service_name)"
+  type        = string
+  sensitive   = true
+  default     = ""
 }

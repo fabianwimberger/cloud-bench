@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    ovh = {
+      source  = "ovh/ovh"
+      version = "~> 2.12"
+    }
   }
 
   backend "local" {
@@ -32,6 +36,13 @@ provider "aws" {
   skip_metadata_api_check     = var.cloud_provider != "aws"
 }
 
+provider "ovh" {
+  endpoint           = "ovh-eu"
+  application_key    = var.ovh_application_key
+  application_secret = var.ovh_application_secret
+  consumer_key       = var.ovh_consumer_key
+}
+
 locals {
   config = yamldecode(file("${path.module}/../config/instances.yaml"))
 
@@ -52,8 +63,9 @@ locals {
   # Auto-detect region based on provider if not explicitly set
   effective_region = var.default_region != "" ? var.default_region : lookup(
     {
-      hetzner = "fsn1"
-      aws     = "eu-central-1"
+      hetzner  = "fsn1"
+      aws      = "eu-central-1"
+      ovhcloud = "DE1"
     },
     var.cloud_provider,
     "fsn1"
@@ -101,16 +113,38 @@ module "aws_instances" {
   enable_unlimited_credits = true
 }
 
+module "ovhcloud_instances" {
+  source   = "./modules/ovhcloud"
+  for_each = var.cloud_provider == "ovhcloud" ? { for inst in local.instances : inst.id => inst } : {}
+
+  instance_name  = "cloud-bench-${var.cloud_provider}-${each.value.id}-${var.run_id}"
+  instance_type  = each.value.id
+  region         = local.effective_region
+  ssh_key_name   = "cloud-bench-${each.value.id}-${var.run_id}"
+  ssh_public_key = local.ssh_public_key
+  service_name   = var.ovh_cloud_project_id
+  labels         = merge(local.common_labels, { instance_type = each.value.id })
+}
+
 locals {
-  all_instances = var.cloud_provider == "hetzner" ? {
-    for inst_id, mod in module.hetzner_instances : inst_id => {
-      host = mod.server_ip
-      name = mod.server_name
-    }
-    } : {
-    for inst_id, mod in module.aws_instances : inst_id => {
-      host = mod.server_ip
-      name = mod.server_name
-    }
-  }
+  all_instances = merge(
+    {
+      for inst_id, mod in module.hetzner_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+    {
+      for inst_id, mod in module.aws_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+    {
+      for inst_id, mod in module.ovhcloud_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+  )
 }
