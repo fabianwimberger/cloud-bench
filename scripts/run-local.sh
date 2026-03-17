@@ -11,9 +11,10 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 # Auto-detect region based on provider
 if [ -z "$REGION" ]; then
     case "$PROVIDER" in
-        hetzner) REGION="fsn1" ;;
-        aws)     REGION="eu-central-1" ;;
-        *)       REGION="fsn1" ;;
+        hetzner)  REGION="fsn1" ;;
+        aws)      REGION="eu-central-1" ;;
+        ovhcloud) REGION="DE1" ;;
+        *)        REGION="fsn1" ;;
     esac
 fi
 
@@ -74,6 +75,22 @@ validate_credentials() {
                 exit 1
             fi
             ;;
+        ovhcloud)
+            local ovh_missing=()
+            [ -z "$OVH_APPLICATION_KEY" ] && ovh_missing+=("OVH_APPLICATION_KEY")
+            [ -z "$OVH_APPLICATION_SECRET" ] && ovh_missing+=("OVH_APPLICATION_SECRET")
+            [ -z "$OVH_CONSUMER_KEY" ] && ovh_missing+=("OVH_CONSUMER_KEY")
+            [ -z "$OVH_CLOUD_PROJECT_ID" ] && ovh_missing+=("OVH_CLOUD_PROJECT_ID")
+            if [ ${#ovh_missing[@]} -ne 0 ]; then
+                echo "[ERROR] OVHcloud credentials not set: ${ovh_missing[*]}"
+                echo "Set them with:"
+                echo "  export OVH_APPLICATION_KEY=your-app-key"
+                echo "  export OVH_APPLICATION_SECRET=your-app-secret"
+                echo "  export OVH_CONSUMER_KEY=your-consumer-key"
+                echo "  export OVH_CLOUD_PROJECT_ID=your-project-id"
+                exit 1
+            fi
+            ;;
         *)
             echo "[ERROR] Unsupported provider: $PROVIDER"
             exit 1
@@ -122,6 +139,10 @@ build_tf_vars() {
                 -var="hcloud_token=$HCLOUD_TOKEN"
                 -var="aws_access_key_id="
                 -var="aws_secret_access_key="
+                -var="ovh_application_key="
+                -var="ovh_application_secret="
+                -var="ovh_consumer_key="
+                -var="ovh_cloud_project_id="
             )
             ;;
         aws)
@@ -129,6 +150,21 @@ build_tf_vars() {
                 -var="hcloud_token=unused"
                 -var="aws_access_key_id=$AWS_ACCESS_KEY_ID"
                 -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
+                -var="ovh_application_key="
+                -var="ovh_application_secret="
+                -var="ovh_consumer_key="
+                -var="ovh_cloud_project_id="
+            )
+            ;;
+        ovhcloud)
+            common_vars+=(
+                -var="hcloud_token=unused"
+                -var="aws_access_key_id="
+                -var="aws_secret_access_key="
+                -var="ovh_application_key=$OVH_APPLICATION_KEY"
+                -var="ovh_application_secret=$OVH_APPLICATION_SECRET"
+                -var="ovh_consumer_key=$OVH_CONSUMER_KEY"
+                -var="ovh_cloud_project_id=$OVH_CLOUD_PROJECT_ID"
             )
             ;;
     esac
