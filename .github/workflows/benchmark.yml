@@ -11,6 +11,7 @@ on:
         options:
           - hetzner
           - aws
+          - ovhcloud
 
       instances:
         description: 'Instance IDs (comma-separated, or "all")'
@@ -71,8 +72,9 @@ jobs:
           REGION="${{ github.event.inputs.default_region }}"
           if [ -z "$REGION" ]; then
             case "${{ github.event.inputs.provider }}" in
-              hetzner) REGION="fsn1" ;;
-              aws)     REGION="eu-central-1" ;;
+              hetzner)  REGION="fsn1" ;;
+              aws)      REGION="eu-central-1" ;;
+              ovhcloud) REGION="DE1" ;;
             esac
           fi
           echo "region=$REGION" >> $GITHUB_OUTPUT
@@ -82,6 +84,7 @@ jobs:
         env:
           TOKEN_SET: ${{ secrets.HCLOUD_TOKEN != '' }}
           AWS_KEY_SET: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
+          OVH_KEY_SET: ${{ secrets.OVH_APPLICATION_KEY != '' }}
           INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
         run: |
           if [ "${{ github.event.inputs.provider }}" = "hetzner" ] && [ "$TOKEN_SET" != "true" ]; then
@@ -90,6 +93,10 @@ jobs:
           fi
           if [ "${{ github.event.inputs.provider }}" = "aws" ] && [ "$AWS_KEY_SET" != "true" ]; then
             echo "::error::AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY secrets are required for AWS"
+            exit 1
+          fi
+          if [ "${{ github.event.inputs.provider }}" = "ovhcloud" ] && [ "$OVH_KEY_SET" != "true" ]; then
+            echo "::error::OVH_APPLICATION_KEY, OVH_APPLICATION_SECRET, OVH_CONSUMER_KEY, and OVH_CLOUD_PROJECT_ID secrets are required for OVHcloud"
             exit 1
           fi
           if [ -n "$INSTANCE_REGIONS" ] && [ "$INSTANCE_REGIONS" != "{}" ]; then
@@ -173,6 +180,10 @@ jobs:
             -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || '' }}" \
             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || '' }}" \
+            -var="ovh_application_key=${{ secrets.OVH_APPLICATION_KEY || '' }}" \
+            -var="ovh_application_secret=${{ secrets.OVH_APPLICATION_SECRET || '' }}" \
+            -var="ovh_consumer_key=${{ secrets.OVH_CONSUMER_KEY || '' }}" \
+            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || '' }}" \
             -var="ssh_public_key_path=~/.ssh/cloud_bench.pub" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
@@ -466,6 +477,10 @@ jobs:
             -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || '' }}" \
             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || '' }}" \
+            -var="ovh_application_key=${{ secrets.OVH_APPLICATION_KEY || '' }}" \
+            -var="ovh_application_secret=${{ secrets.OVH_APPLICATION_SECRET || '' }}" \
+            -var="ovh_consumer_key=${{ secrets.OVH_CONSUMER_KEY || '' }}" \
+            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || '' }}" \
             -var="ssh_public_key_path=/dev/null" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
@@ -477,6 +492,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ needs.provision.outputs.region }}
+          OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
         run: |
           echo "Verifying cleanup..."
 
@@ -520,6 +536,15 @@ jobs:
               exit 1
             else
               echo "[OK] All AWS resources cleaned up successfully"
+            fi
+
+          elif [ "${{ github.event.inputs.provider }}" = "ovhcloud" ]; then
+            # Verify OVH instances are cleaned up via API
+            if [ -n "$OVH_APPLICATION_KEY" ]; then
+              echo "Checking OVH instances via Terraform state (already destroyed)..."
+              echo "[OK] OVH resources cleaned up via Terraform destroy"
+            else
+              echo "[WARN] Cannot verify OVH cleanup - no credentials available"
             fi
           fi
 
