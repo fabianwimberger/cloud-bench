@@ -2,6 +2,25 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-03-19T21:52:32-aws-eu-central-1",
+      "timestamp": "2026-03-19T21:52:32",
+      "provider": "aws",
+      "region": "eu-central-1",
+      "instance_count": 6,
+      "instances": [
+        "M7I-FLEX.LARGE",
+        "T4G.MICRO",
+        "T4G.SMALL",
+        "C7I-FLEX.LARGE",
+        "T3.MICRO",
+        "T3.SMALL"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-19T21:52:32-aws-eu-central-1/summary.json",
+        "detail": "data/runs/2026-03-19T21:52:32-aws-eu-central-1/detail.json"
+      }
+    },
+    {
       "id": "2026-03-19T21:42:58-hetzner-fsn1",
       "timestamp": "2026-03-19T21:42:58",
       "provider": "hetzner",
@@ -125,6 +144,36 @@
     }
   ],
   "instance_index": {
+    "M7I-FLEX.LARGE": [
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "T4G.MICRO": [
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "T4G.SMALL": [
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "C7I-FLEX.LARGE": [
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "T3.MICRO": [
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "T3.SMALL": [
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
     "CCX23": [
       "2026-03-19T21:42:58-hetzner-fsn1",
       "2026-03-15T12:55:25-hetzner-fsn1",
@@ -172,30 +221,6 @@
       "2026-03-15T12:55:25-hetzner-fsn1",
       "2026-03-15T11:36:46-hetzner-fsn1",
       "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "C7I-FLEX.LARGE": [
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "T4G.SMALL": [
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "T4G.MICRO": [
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "M7I-FLEX.LARGE": [
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "T3.SMALL": [
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "T3.MICRO": [
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
     ]
   }
 }

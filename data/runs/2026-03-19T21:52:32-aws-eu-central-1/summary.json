@@ -1,0 +1,238 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-03-19T21:52:31.213579",
+    "run_count": 6,
+    "currency": "USD",
+    "provider": "aws",
+    "region": "eu-central-1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1476,
+      "usd_to_eur": 0.8714,
+      "last_updated": "2026-03-13",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "M7I-FLEX.LARGE",
+      "T4G.MICRO",
+      "T4G.SMALL",
+      "C7I-FLEX.LARGE",
+      "T3.MICRO",
+      "T3.SMALL"
+    ],
+    "instances": [
+      {
+        "id": "M7I-FLEX.LARGE",
+        "name": "M7I-FLEX.LARGE (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 55.0,
+          "memory": 94.8,
+          "disk": 99.9,
+          "overall": 89.2
+        },
+        "metrics": {
+          "cpu_single_events": 1149.31,
+          "cpu_multi_events": 1178.0,
+          "memory_mib_per_sec": 15998.490000000002,
+          "disk_iops": 3041.677078
+        },
+        "pricing": {
+          "hourly": 0.11471,
+          "monthly": 82.59
+        },
+        "value": 0.94,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 20,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "T4G.MICRO",
+        "name": "T4G.MICRO (ARM64)",
+        "scores": {
+          "single_core": 93.1,
+          "multi_core": 99.7,
+          "memory": 66.8,
+          "disk": 100.0,
+          "overall": 86.9
+        },
+        "metrics": {
+          "cpu_single_events": 1069.72,
+          "cpu_multi_events": 2133.19,
+          "memory_mib_per_sec": 11267.49,
+          "disk_iops": 3043.576033
+        },
+        "pricing": {
+          "hourly": 0.0096,
+          "monthly": 6.91
+        },
+        "value": 13.95,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 1,
+          "disk_gb": 20,
+          "arch": "ARM64"
+        }
+      },
+      {
+        "id": "T4G.SMALL",
+        "name": "T4G.SMALL (ARM64)",
+        "scores": {
+          "single_core": 93.1,
+          "multi_core": 100.0,
+          "memory": 65.3,
+          "disk": 100.0,
+          "overall": 86.5
+        },
+        "metrics": {
+          "cpu_single_events": 1069.73,
+          "cpu_multi_events": 2140.47,
+          "memory_mib_per_sec": 11010.21,
+          "disk_iops": 3044.125731
+        },
+        "pricing": {
+          "hourly": 0.0192,
+          "monthly": 13.82
+        },
+        "value": 6.99,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 2,
+          "disk_gb": 20,
+          "arch": "ARM64"
+        }
+      },
+      {
+        "id": "C7I-FLEX.LARGE",
+        "name": "C7I-FLEX.LARGE (X86)",
+        "scores": {
+          "single_core": 93.5,
+          "multi_core": 52.0,
+          "memory": 89.6,
+          "disk": 99.9,
+          "overall": 85.5
+        },
+        "metrics": {
+          "cpu_single_events": 1074.23,
+          "cpu_multi_events": 1114.08,
+          "memory_mib_per_sec": 15111.29,
+          "disk_iops": 3041.227325
+        },
+        "pricing": {
+          "hourly": 0.09676,
+          "monthly": 69.67
+        },
+        "value": 1.04,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 20,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "T3.MICRO",
+        "name": "T3.MICRO (X86)",
+        "scores": {
+          "single_core": 35.8,
+          "multi_core": 30.1,
+          "memory": 100.0,
+          "disk": 100.0,
+          "overall": 73.2
+        },
+        "metrics": {
+          "cpu_single_events": 411.28,
+          "cpu_multi_events": 644.15,
+          "memory_mib_per_sec": 16873.33,
+          "disk_iops": 3043.675978
+        },
+        "pricing": {
+          "hourly": 0.012,
+          "monthly": 8.64
+        },
+        "value": 3.82,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 1,
+          "disk_gb": 20,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "T3.SMALL",
+        "name": "T3.SMALL (X86)",
+        "scores": {
+          "single_core": 35.8,
+          "multi_core": 30.1,
+          "memory": 99.6,
+          "disk": 100.0,
+          "overall": 73.1
+        },
+        "metrics": {
+          "cpu_single_events": 411.23,
+          "cpu_multi_events": 644.11,
+          "memory_mib_per_sec": 16797.75,
+          "disk_iops": 3044.627686
+        },
+        "pricing": {
+          "hourly": 0.024,
+          "monthly": 17.28
+        },
+        "value": 1.91,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 2,
+          "disk_gb": 20,
+          "arch": "X86"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0,
+        93.1,
+        93.1,
+        93.5,
+        35.8,
+        35.8
+      ],
+      "multi_core": [
+        55.0,
+        99.7,
+        100.0,
+        52.0,
+        30.1,
+        30.1
+      ],
+      "memory": [
+        94.8,
+        66.8,
+        65.3,
+        89.6,
+        100.0,
+        99.6
+      ],
+      "disk": [
+        99.9,
+        100.0,
+        100.0,
+        99.9,
+        100.0,
+        100.0
+      ],
+      "value": [
+        0.94,
+        13.95,
+        6.99,
+        1.04,
+        3.82,
+        1.91
+      ]
+    }
+  }
+}
