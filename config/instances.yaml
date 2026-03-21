@@ -125,7 +125,7 @@ providers:
       arch: X86
       vcpu: 4
       ram_gb: 8
-      disk_gb: 50
+      disk_gb: 100
       pricing:
         hourly: 0.0560
         monthly: 40.32
