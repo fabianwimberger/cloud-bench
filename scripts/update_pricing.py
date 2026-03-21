@@ -248,8 +248,11 @@ def fetch_ovhcloud_pricing(config: dict) -> int:
 
         pricings = addon.get("pricings", [])
         for pricing in pricings:
-            # OVH catalog prices are integers in units of 10^-8 EUR
-            hourly = pricing.get("price", 0) / 100_000_000
+            # OVH catalog returns net price + tax separately
+            # Use gross (price + tax) to match Hetzner's gross pricing
+            price_net = pricing.get("price", 0)
+            tax = pricing.get("tax", 0)
+            hourly = (price_net + tax) / 100_000_000
             if hourly > 0:
                 flavor_prices[flavor_name] = hourly
                 break
