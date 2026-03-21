@@ -27,8 +27,12 @@
         state: directory
         mode: '0755'
 
-    - name: Wait for dpkg lock to be released
-      shell: while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 3; done
+    - name: Wait for apt locks to be released
+      shell: |
+        while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
+              fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
+          sleep 3
+        done
       changed_when: false
       timeout: 120
 
