@@ -96,15 +96,15 @@ providers:
   aws:
     currency: USD
     instances:
-      - id: t3.medium
-        name: t3.medium
+      - id: t3.micro
+        name: t3.micro
         arch: X86
         vcpu: 2
-        ram_gb: 4
+        ram_gb: 1
         disk_gb: 20
         pricing:
-          hourly: 0.0416
-          monthly: 29.95
+          hourly: 0.012
+          monthly: 8.64
 ```
 
 ## Project Structure
