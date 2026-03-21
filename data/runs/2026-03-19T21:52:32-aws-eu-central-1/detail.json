@@ -33,8 +33,8 @@
         "disk_iops_raw": 3041.677078
       },
       "pricing": {
-        "hourly": 0.096395,
-        "monthly": 69.403
+        "hourly": 0.11471,
+        "monthly": 82.59
       },
       "value": 0.94,
       "specs": {
@@ -70,8 +70,8 @@
         "disk_iops_raw": 3043.576033
       },
       "pricing": {
-        "hourly": 0.008067,
-        "monthly": 5.807
+        "hourly": 0.0096,
+        "monthly": 6.91
       },
       "value": 13.95,
       "specs": {
@@ -107,8 +107,8 @@
         "disk_iops_raw": 3044.125731
       },
       "pricing": {
-        "hourly": 0.016134,
-        "monthly": 11.613
+        "hourly": 0.0192,
+        "monthly": 13.82
       },
       "value": 6.99,
       "specs": {
@@ -144,8 +144,8 @@
         "disk_iops_raw": 3041.227325
       },
       "pricing": {
-        "hourly": 0.081311,
-        "monthly": 58.546
+        "hourly": 0.09676,
+        "monthly": 69.67
       },
       "value": 1.04,
       "specs": {
@@ -181,8 +181,8 @@
         "disk_iops_raw": 3043.675978
       },
       "pricing": {
-        "hourly": 0.010084,
-        "monthly": 7.261
+        "hourly": 0.012,
+        "monthly": 8.64
       },
       "value": 3.82,
       "specs": {
@@ -218,8 +218,8 @@
         "disk_iops_raw": 3044.627686
       },
       "pricing": {
-        "hourly": 0.020168,
-        "monthly": 14.521
+        "hourly": 0.024,
+        "monthly": 17.28
       },
       "value": 1.91,
       "specs": {
