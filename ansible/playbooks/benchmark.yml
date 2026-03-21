@@ -34,7 +34,7 @@
           sleep 3
         done
       changed_when: false
-      timeout: 120
+      timeout: 300
 
     - name: Install required packages
       apt:
