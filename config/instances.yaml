@@ -21,8 +21,8 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly: 0.00576
-        monthly: 3.588
+        hourly: 0.0048
+        monthly: 2.99
     - id: cx33
       name: CX33
       arch: X86
@@ -30,8 +30,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly: 0.0096
-        monthly: 5.988
+        hourly: 0.008
+        monthly: 4.99
     - id: cax11
       name: CAX11
       arch: ARM64
@@ -39,8 +39,8 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly: 0.00636
-        monthly: 3.948
+        hourly: 0.0053
+        monthly: 3.29
     - id: cax21
       name: CAX21
       arch: ARM64
@@ -48,8 +48,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly: 0.01152
-        monthly: 7.188
+        hourly: 0.0096
+        monthly: 5.99
     - id: cpx22
       name: CPX22
       arch: X86
@@ -57,8 +57,8 @@ providers:
       ram_gb: 4
       disk_gb: 80
       pricing:
-        hourly: 0.01152
-        monthly: 7.188
+        hourly: 0.0096
+        monthly: 5.99
     - id: cpx32
       name: CPX32
       arch: X86
@@ -66,8 +66,8 @@ providers:
       ram_gb: 8
       disk_gb: 160
       pricing:
-        hourly: 0.02016
-        monthly: 12.588
+        hourly: 0.0168
+        monthly: 10.49
     - id: ccx13
       name: CCX13
       arch: X86
@@ -75,8 +75,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly: 0.02508
-        monthly: 15.588
+        hourly: 0.0209
+        monthly: 12.99
     - id: ccx23
       name: CCX23
       arch: X86
@@ -84,8 +84,8 @@ providers:
       ram_gb: 16
       disk_gb: 160
       pricing:
-        hourly: 0.05004
-        monthly: 31.188
+        hourly: 0.0417
+        monthly: 25.99
   ovhcloud:
     currency: EUR
     default_region: DE1
@@ -205,5 +205,5 @@ exchange_rates:
   last_updated: '2026-03-20'
   source: Frankfurter API (ECB data)
 _metadata:
-  last_pricing_update: '2026-03-21T11:10:57.049113'
+  last_pricing_update: '2026-03-21T11:24:19.808998'
   source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API
