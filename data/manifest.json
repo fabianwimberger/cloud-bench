@@ -2,6 +2,23 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-03-21T15:07:10-ovhcloud-DE1",
+      "timestamp": "2026-03-21T15:07:10",
+      "provider": "ovhcloud",
+      "region": "DE1",
+      "instance_count": 4,
+      "instances": [
+        "C3-8",
+        "C3-4",
+        "B3-8",
+        "R3-16"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-21T15:07:10-ovhcloud-DE1/summary.json",
+        "detail": "data/runs/2026-03-21T15:07:10-ovhcloud-DE1/detail.json"
+      }
+    },
+    {
       "id": "2026-03-21T14:47:31-ovhcloud-DE1",
       "timestamp": "2026-03-21T14:47:31",
       "provider": "ovhcloud",
@@ -221,15 +238,19 @@
   ],
   "instance_index": {
     "C3-8": [
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "R3-16": [
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "B3-8": [
+      "2026-03-21T15:07:10-ovhcloud-DE1",
       "2026-03-21T14:47:31-ovhcloud-DE1"
     ],
     "C3-4": [
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "B3-8": [
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "R3-16": [
+      "2026-03-21T15:07:10-ovhcloud-DE1",
       "2026-03-21T14:47:31-ovhcloud-DE1"
     ],
     "C7I-FLEX.LARGE": [
