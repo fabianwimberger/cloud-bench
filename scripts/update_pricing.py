@@ -231,23 +231,25 @@ def fetch_ovhcloud_pricing(config: dict) -> int:
         print(f"  [WARN] Failed to fetch OVH catalog: {e}")
         return 0
 
-    # Build a map of flavor name -> hourly price from the catalog addons
+    # Build a map of flavor name -> hourly price from the catalog addons.
+    # Compute flavor addons use planCode format "{flavor}.consumption"
+    # (e.g. "b3-8.consumption"), with region variants like ".LZ.EU".
+    # We match the base ".consumption" entry (no region suffix).
     flavor_prices = {}
     for addon in catalog.get("addons", []):
         plan_code = addon.get("planCode", "")
-        # Flavor addons look like "flavor-b3-8-hourly.consumption"
-        if not plan_code.startswith("flavor-") or "hourly" not in plan_code:
+        if not plan_code.endswith(".consumption"):
+            continue
+        # Skip non-compute addons (databases, storage, etc.)
+        if "." in plan_code.replace(".consumption", ""):
             continue
 
-        # Extract flavor name: "flavor-b3-8-hourly.consumption" -> "b3-8"
-        parts = plan_code.replace("flavor-", "").split("-hourly")[0]
-        flavor_name = parts
+        flavor_name = plan_code.replace(".consumption", "")
 
         pricings = addon.get("pricings", [])
         for pricing in pricings:
-            price_eur = pricing.get("price", 0)
-            # OVH catalog prices are in micro-cents (price * 10^-8), convert to EUR
-            hourly = price_eur / 100_000_000
+            # OVH catalog prices are integers in units of 10^-8 EUR
+            hourly = pricing.get("price", 0) / 100_000_000
             if hourly > 0:
                 flavor_prices[flavor_name] = hourly
                 break
