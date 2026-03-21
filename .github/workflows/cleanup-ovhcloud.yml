@@ -10,12 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
-        with:
-          terraform_version: "1.10.5"
-          terraform_wrapper: false
-
       - name: Find and terminate orphaned OVHcloud instances
         env:
           OVH_OPENSTACK_USERNAME: ${{ secrets.OVH_OPENSTACK_USERNAME }}
@@ -35,9 +29,9 @@ jobs:
           export OS_USER_DOMAIN_NAME=Default
           export OS_PROJECT_DOMAIN_NAME=Default
           export OS_REGION_NAME=DE1
-          export OS_USERNAME=$OVH_OPENSTACK_USERNAME
-          export OS_PASSWORD=$OVH_OPENSTACK_PASSWORD
-          export OS_TENANT_ID=$OVH_CLOUD_PROJECT_ID
+          export OS_USERNAME="$OVH_OPENSTACK_USERNAME"
+          export OS_PASSWORD="$OVH_OPENSTACK_PASSWORD"
+          export OS_TENANT_ID="$OVH_CLOUD_PROJECT_ID"
 
           # Install OpenStack CLI
           pip install python-openstackclient

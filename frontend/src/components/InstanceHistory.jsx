@@ -17,7 +17,6 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
       (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
     )
 
-    // Find max raw value for each metric across all runs
     const maxMetrics = {
       cpu_single: Math.max(...runs.map(r => r.metrics?.cpu_single_raw || 0)),
       cpu_multi: Math.max(...runs.map(r => r.metrics?.cpu_multi_raw || 0)),
@@ -25,7 +24,6 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
       disk: Math.max(...runs.map(r => r.metrics?.disk_iops_raw || 0)),
     }
 
-    // Calculate relative scores (0-100) for each run
     return runs.map(run => ({
       ...run,
       relative_scores: {
@@ -175,7 +173,6 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
   }
 
   const specs = historyEntry.specs || {}
-  // Use relative scores for display - already sorted by timestamp ascending in useMemo
   const displayRuns = [...runsWithRelativeScores].sort(
     (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
   )

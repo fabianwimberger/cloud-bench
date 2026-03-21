@@ -18,5 +18,3 @@ runcmd:
   - sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
   - sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
   - systemctl restart sshd
-
-final_message: "Cloud-bench instance setup complete!"

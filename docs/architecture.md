@@ -7,7 +7,7 @@ config/instances.yaml          # Single source of truth for instances & pricing
 ┌── Terraform ──────────────┐
 │  modules/hetzner/          │  Provisions servers, SSH keys, firewalls
 │  modules/aws/              │  EC2 instances, security groups, key pairs
-│  modules/ovhcloud/         │  OpenStack instances, key pairs, security groups
+│  modules/ovhcloud/         │  OpenStack instances, key pairs
 └────────────┬──────────────┘
              ▼
 ┌── Ansible ────────────────┐
