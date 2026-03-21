@@ -206,6 +206,72 @@ def fetch_aws_pricing(config: dict, aws_region: str = "eu-central-1") -> int:
     return updated
 
 
+def fetch_ovhcloud_pricing(config: dict) -> int:
+    """Fetch OVHcloud pricing using the public catalog API (no auth needed).
+    Returns count of updated instances."""
+    ovh_config = config.get("providers", {}).get("ovhcloud", {})
+    instances = ovh_config.get("instances", [])
+    if not instances:
+        print("  [WARN] No OVHcloud instances in config")
+        return 0
+
+    # OVH public catalog API - no authentication required
+    catalog_url = "https://api.ovh.com/v1/order/catalog/public/cloud"
+    updated = 0
+
+    try:
+        response = requests.get(
+            catalog_url,
+            params={"ovhSubsidiary": "DE"},
+            timeout=30,
+        )
+        response.raise_for_status()
+        catalog = response.json()
+    except requests.RequestException as e:
+        print(f"  [WARN] Failed to fetch OVH catalog: {e}")
+        return 0
+
+    # Build a map of flavor name -> hourly price from the catalog addons
+    flavor_prices = {}
+    for addon in catalog.get("addons", []):
+        plan_code = addon.get("planCode", "")
+        # Flavor addons look like "flavor-b3-8-hourly.consumption"
+        if not plan_code.startswith("flavor-") or "hourly" not in plan_code:
+            continue
+
+        # Extract flavor name: "flavor-b3-8-hourly.consumption" -> "b3-8"
+        parts = plan_code.replace("flavor-", "").split("-hourly")[0]
+        flavor_name = parts
+
+        pricings = addon.get("pricings", [])
+        for pricing in pricings:
+            price_eur = pricing.get("price", 0)
+            # OVH catalog prices are in micro-cents (price * 10^-8), convert to EUR
+            hourly = price_eur / 100_000_000
+            if hourly > 0:
+                flavor_prices[flavor_name] = hourly
+                break
+
+    for inst in instances:
+        inst_id = inst.get("id", "")
+        if inst_id not in flavor_prices:
+            print(f"  [WARN] No pricing found for {inst_id} in OVH catalog")
+            continue
+
+        hourly = round(flavor_prices[inst_id], 4)
+        monthly = round(hourly * 720, 2)
+
+        old_pricing = inst.get("pricing", {})
+        if old_pricing.get("hourly") != hourly or old_pricing.get("monthly") != monthly:
+            inst["pricing"] = {"hourly": hourly, "monthly": monthly}
+            updated += 1
+            print(f"  [UPDATED] {inst_id}: \u20ac{monthly}/mo")
+        else:
+            print(f"  [OK] {inst_id}: \u20ac{monthly}/mo (unchanged)")
+
+    return updated
+
+
 def fetch_exchange_rates() -> dict:
     """Fetch EUR/USD rate from Frankfurter API (ECB data, free, no key)."""
     try:
@@ -251,6 +317,11 @@ def update_config(
         print("\nUpdating AWS pricing...")
         total_updated += fetch_aws_pricing(config, aws_region)
 
+    # Update OVHcloud pricing
+    if provider in ("all", "ovhcloud"):
+        print("\nUpdating OVHcloud pricing...")
+        total_updated += fetch_ovhcloud_pricing(config)
+
     # Update exchange rates
     print("\nFetching exchange rates...")
     exchange_rates = fetch_exchange_rates()
@@ -268,7 +339,7 @@ def update_config(
     if not dry_run and total_updated > 0:
         config["_metadata"] = {
             "last_pricing_update": datetime.now().isoformat(),
-            "source": "Hetzner Cloud API / AWS Pricing API",
+            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API",
         }
         with open(config_path, "w") as f:
             yaml.dump(
@@ -295,7 +366,7 @@ def main():
         "--provider",
         "-p",
         default="all",
-        choices=["hetzner", "aws", "all"],
+        choices=["hetzner", "aws", "ovhcloud", "all"],
         help="Provider to update pricing for",
     )
     parser.add_argument(

@@ -3,7 +3,7 @@ import ScoreBar from './ScoreBar'
 import ProviderBadge from './ProviderBadge'
 
 function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections, currency, onSelectHistory }) {
-  const [sortKey, setSortKey] = useState(null)
+  const [sortKey, setSortKey] = useState('cpu_value_monthly')
   const [sortDir, setSortDir] = useState('desc')
 
   if (!ranking || ranking.length === 0) {
