@@ -17,7 +17,7 @@ resource "openstack_compute_instance_v2" "benchmark" {
   flavor_name = var.instance_type
   image_id    = data.openstack_images_image_v2.os.id
   key_pair    = openstack_compute_keypair_v2.benchmark.name
-  user_data   = templatefile("${path.module}/cloud-init.yml.tmpl", {
+  user_data = templatefile("${path.module}/cloud-init.yml.tmpl", {
     ssh_public_key = var.ssh_public_key
   })
 
