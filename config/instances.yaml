@@ -100,8 +100,8 @@ providers:
       ram_gb: 8
       disk_gb: 50
       pricing:
-        hourly: 0.0300
-        monthly: 21.60
+        hourly: 0.0465
+        monthly: 33.48
     - id: b3-16
       name: B3-16
       arch: X86
@@ -109,8 +109,8 @@ providers:
       ram_gb: 16
       disk_gb: 100
       pricing:
-        hourly: 0.0600
-        monthly: 43.20
+        hourly: 0.093
+        monthly: 66.96
     - id: c3-4
       name: C3-4
       arch: X86
@@ -118,8 +118,8 @@ providers:
       ram_gb: 4
       disk_gb: 50
       pricing:
-        hourly: 0.0280
-        monthly: 20.16
+        hourly: 0.0415
+        monthly: 29.88
     - id: c3-8
       name: C3-8
       arch: X86
@@ -127,8 +127,8 @@ providers:
       ram_gb: 8
       disk_gb: 100
       pricing:
-        hourly: 0.0560
-        monthly: 40.32
+        hourly: 0.083
+        monthly: 59.76
     - id: r3-16
       name: R3-16
       arch: X86
@@ -136,8 +136,8 @@ providers:
       ram_gb: 16
       disk_gb: 50
       pricing:
-        hourly: 0.0380
-        monthly: 27.36
+        hourly: 0.0602
+        monthly: 43.34
   aws:
     currency: USD
     default_region: eu-central-1
@@ -200,10 +200,10 @@ providers:
         hourly: 0.11471
         monthly: 82.59
 exchange_rates:
-  eur_to_usd: 1.1476
-  usd_to_eur: 0.8714
-  last_updated: '2026-03-13'
+  eur_to_usd: 1.1555
+  usd_to_eur: 0.8654
+  last_updated: '2026-03-20'
   source: Frankfurter API (ECB data)
 _metadata:
-  last_pricing_update: '2026-03-15T11:01:09.218117'
+  last_pricing_update: '2026-03-21T11:10:57.049113'
   source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API
