@@ -8,12 +8,6 @@ variable "instance_type" {
   type        = string
 }
 
-variable "region" {
-  description = "OVHcloud region (e.g. DE1)"
-  type        = string
-  default     = "DE1"
-}
-
 variable "ssh_key_name" {
   description = "Name for the SSH key resource"
   type        = string

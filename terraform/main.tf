@@ -4,15 +4,15 @@ terraform {
   required_providers {
     hcloud = {
       source  = "hetznercloud/hcloud"
-      version = "~> 1.50"
+      version = "~> 1.60"
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.0"
     }
     openstack = {
       source  = "terraform-provider-openstack/openstack"
-      version = "~> 2.0"
+      version = "~> 3.0"
     }
   }
 
@@ -121,7 +121,6 @@ module "ovhcloud_instances" {
 
   instance_name  = "cloud-bench-${var.cloud_provider}-${each.value.id}-${var.run_id}"
   instance_type  = each.value.id
-  region         = local.effective_region
   ssh_key_name   = "cloud-bench-${each.value.id}-${var.run_id}"
   ssh_public_key = local.ssh_public_key
   labels         = merge(local.common_labels, { instance_type = each.value.id })

@@ -537,12 +537,16 @@ jobs:
             fi
 
           elif [ "${{ github.event.inputs.provider }}" = "ovhcloud" ]; then
-            # Verify OVH instances are cleaned up via API
-            if [ -n "$OVH_OPENSTACK_USERNAME" ]; then
-              echo "Checking OVH instances via Terraform state (already destroyed)..."
-              echo "[OK] OVH resources cleaned up via Terraform destroy"
+            # Verify OVH instances are cleaned up by checking Terraform state
+            cd terraform
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "openstack_compute_instance" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: OVH instances still in Terraform state after cleanup!"
+              terraform state list | grep "openstack_compute_instance"
+              echo "Manual intervention required!"
+              exit 1
             else
-              echo "[WARN] Cannot verify OVH cleanup - no credentials available"
+              echo "[OK] OVH resources cleaned up successfully"
             fi
           fi
 

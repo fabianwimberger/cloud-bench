@@ -1,5 +1,5 @@
 #!/bin/bash
-# Local benchmark runner script (supports Hetzner and AWS)
+# Local benchmark runner script (supports Hetzner, AWS, and OVHcloud)
 set -e
 
 # Configuration
@@ -149,7 +149,7 @@ build_tf_vars() {
                 -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
                 -var="ovh_openstack_username=unused"
                 -var="ovh_openstack_password=unused"
-                -var="ovh_cloud_project_id="
+                -var="ovh_cloud_project_id=unused"
             )
             ;;
         ovhcloud)
