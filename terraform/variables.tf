@@ -118,5 +118,6 @@ variable "ovh_openstack_password" {
 variable "ovh_cloud_project_id" {
   description = "OVHcloud Public Cloud project ID (service_name)"
   type        = string
+  sensitive   = true
   default     = ""
 }

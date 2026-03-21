@@ -180,9 +180,9 @@ jobs:
             -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}" \
             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
-            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || '' }}" \
-            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || '' }}" \
-            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || '' }}" \
+            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
+            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}" \
+            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}" \
             -var="ssh_public_key_path=~/.ssh/cloud_bench.pub" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
@@ -476,9 +476,9 @@ jobs:
             -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}" \
             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
-            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || '' }}" \
-            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || '' }}" \
-            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || '' }}" \
+            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
+            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}" \
+            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}" \
             -var="ssh_public_key_path=/dev/null" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
