@@ -2,6 +2,25 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-03-21T17:22:32-aws-eu-central-1",
+      "timestamp": "2026-03-21T17:22:32",
+      "provider": "aws",
+      "region": "eu-central-1",
+      "instance_count": 6,
+      "instances": [
+        "T4G.MICRO",
+        "T4G.SMALL",
+        "C7I-FLEX.LARGE",
+        "M7I-FLEX.LARGE",
+        "T3.MICRO",
+        "T3.SMALL"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-21T17:22:32-aws-eu-central-1/summary.json",
+        "detail": "data/runs/2026-03-21T17:22:32-aws-eu-central-1/detail.json"
+      }
+    },
+    {
       "id": "2026-03-21T17:11:43-hetzner-fsn1",
       "timestamp": "2026-03-21T17:11:43",
       "provider": "hetzner",
@@ -372,6 +391,66 @@
     }
   ],
   "instance_index": {
+    "T4G.MICRO": [
+      "2026-03-21T17:22:32-aws-eu-central-1",
+      "2026-03-21T16:16:47-aws-eu-central-1",
+      "2026-03-21T15:31:33-aws-eu-central-1",
+      "2026-03-21T13:43:25-aws-eu-central-1",
+      "2026-03-21T12:26:06-aws-eu-central-1",
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "T4G.SMALL": [
+      "2026-03-21T17:22:32-aws-eu-central-1",
+      "2026-03-21T16:16:47-aws-eu-central-1",
+      "2026-03-21T15:31:33-aws-eu-central-1",
+      "2026-03-21T13:43:25-aws-eu-central-1",
+      "2026-03-21T12:26:06-aws-eu-central-1",
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "C7I-FLEX.LARGE": [
+      "2026-03-21T17:22:32-aws-eu-central-1",
+      "2026-03-21T16:16:47-aws-eu-central-1",
+      "2026-03-21T15:31:33-aws-eu-central-1",
+      "2026-03-21T13:43:25-aws-eu-central-1",
+      "2026-03-21T12:26:06-aws-eu-central-1",
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "M7I-FLEX.LARGE": [
+      "2026-03-21T17:22:32-aws-eu-central-1",
+      "2026-03-21T16:16:47-aws-eu-central-1",
+      "2026-03-21T15:31:33-aws-eu-central-1",
+      "2026-03-21T13:43:25-aws-eu-central-1",
+      "2026-03-21T12:26:06-aws-eu-central-1",
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "T3.MICRO": [
+      "2026-03-21T17:22:32-aws-eu-central-1",
+      "2026-03-21T16:16:47-aws-eu-central-1",
+      "2026-03-21T15:31:33-aws-eu-central-1",
+      "2026-03-21T13:43:25-aws-eu-central-1",
+      "2026-03-21T12:26:06-aws-eu-central-1",
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
+    "T3.SMALL": [
+      "2026-03-21T17:22:32-aws-eu-central-1",
+      "2026-03-21T16:16:47-aws-eu-central-1",
+      "2026-03-21T15:31:33-aws-eu-central-1",
+      "2026-03-21T13:43:25-aws-eu-central-1",
+      "2026-03-21T12:26:06-aws-eu-central-1",
+      "2026-03-19T21:52:32-aws-eu-central-1",
+      "2026-03-15T12:15:56-aws-eu-central-1",
+      "2026-03-15T11:19:32-aws-eu-central-1"
+    ],
     "CCX23": [
       "2026-03-21T17:11:43-hetzner-fsn1",
       "2026-03-21T16:08:42-hetzner-fsn1",
@@ -475,60 +554,6 @@
       "2026-03-21T15:54:38-ovhcloud-DE1",
       "2026-03-21T15:07:10-ovhcloud-DE1",
       "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "M7I-FLEX.LARGE": [
-      "2026-03-21T16:16:47-aws-eu-central-1",
-      "2026-03-21T15:31:33-aws-eu-central-1",
-      "2026-03-21T13:43:25-aws-eu-central-1",
-      "2026-03-21T12:26:06-aws-eu-central-1",
-      "2026-03-19T21:52:32-aws-eu-central-1",
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "C7I-FLEX.LARGE": [
-      "2026-03-21T16:16:47-aws-eu-central-1",
-      "2026-03-21T15:31:33-aws-eu-central-1",
-      "2026-03-21T13:43:25-aws-eu-central-1",
-      "2026-03-21T12:26:06-aws-eu-central-1",
-      "2026-03-19T21:52:32-aws-eu-central-1",
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "T4G.MICRO": [
-      "2026-03-21T16:16:47-aws-eu-central-1",
-      "2026-03-21T15:31:33-aws-eu-central-1",
-      "2026-03-21T13:43:25-aws-eu-central-1",
-      "2026-03-21T12:26:06-aws-eu-central-1",
-      "2026-03-19T21:52:32-aws-eu-central-1",
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "T4G.SMALL": [
-      "2026-03-21T16:16:47-aws-eu-central-1",
-      "2026-03-21T15:31:33-aws-eu-central-1",
-      "2026-03-21T13:43:25-aws-eu-central-1",
-      "2026-03-21T12:26:06-aws-eu-central-1",
-      "2026-03-19T21:52:32-aws-eu-central-1",
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "T3.SMALL": [
-      "2026-03-21T16:16:47-aws-eu-central-1",
-      "2026-03-21T15:31:33-aws-eu-central-1",
-      "2026-03-21T13:43:25-aws-eu-central-1",
-      "2026-03-21T12:26:06-aws-eu-central-1",
-      "2026-03-19T21:52:32-aws-eu-central-1",
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "T3.MICRO": [
-      "2026-03-21T16:16:47-aws-eu-central-1",
-      "2026-03-21T15:31:33-aws-eu-central-1",
-      "2026-03-21T13:43:25-aws-eu-central-1",
-      "2026-03-21T12:26:06-aws-eu-central-1",
-      "2026-03-19T21:52:32-aws-eu-central-1",
-      "2026-03-15T12:15:56-aws-eu-central-1",
-      "2026-03-15T11:19:32-aws-eu-central-1"
     ]
   }
 }
