@@ -17,10 +17,10 @@ Cloud instance pricing and performance characteristics vary significantly betwee
 
 ## Features
 
-- **Multi-provider support** — Hetzner Cloud and AWS EC2
+- **Multi-provider support** — Hetzner Cloud, AWS EC2, and OVHcloud
 - **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
 - **Cost analysis** — performance per dollar across instance types
-- **Currency support** — EUR (Hetzner) and USD (AWS) with toggle in dashboard
+- **Currency support** — EUR (Hetzner, OVHcloud) and USD (AWS) with toggle in dashboard
 - **Interactive dashboard** — React-based visualization with instance history tracking
 - **Historical data** — benchmark results persisted across runs on a dedicated data branch
 - **Automated infrastructure** — Terraform for provisioning, Ansible for execution
@@ -41,6 +41,12 @@ export HCLOUD_TOKEN="your-token"
 export AWS_ACCESS_KEY_ID="your-key"
 export AWS_SECRET_ACCESS_KEY="your-secret"
 PROVIDER=aws ./scripts/run-local.sh
+
+# OVHcloud
+export OVH_OPENSTACK_USERNAME="user-xxxxx"
+export OVH_OPENSTACK_PASSWORD="your-password"
+export OVH_CLOUD_PROJECT_ID="your-project-id"
+PROVIDER=ovhcloud ./scripts/run-local.sh
 
 # Or run via GitHub Actions: Actions → Run Benchmarks
 ```
@@ -75,18 +81,30 @@ providers:
         pricing:
           hourly: 0.00576
           monthly: 3.588
+  ovhcloud:
+    currency: EUR
+    instances:
+      - id: b3-8
+        name: B3-8
+        arch: X86
+        vcpu: 2
+        ram_gb: 8
+        disk_gb: 50
+        pricing:
+          hourly: 0.0300
+          monthly: 21.60
   aws:
     currency: USD
     instances:
-      - id: t3.medium
-        name: t3.medium
+      - id: t3.micro
+        name: t3.micro
         arch: X86
         vcpu: 2
-        ram_gb: 4
+        ram_gb: 1
         disk_gb: 20
         pricing:
-          hourly: 0.0416
-          monthly: 29.95
+          hourly: 0.012
+          monthly: 8.64
 ```
 
 ## Project Structure
@@ -110,7 +128,8 @@ cloud-bench/
 ├── terraform/            # Infrastructure provisioning
 │   └── modules/
 │       ├── hetzner/
-│       └── aws/
+│       ├── aws/
+│       └── ovhcloud/
 └── tests/                # Test suite
 ```
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useMemo } from 'react'
 import { Chart, registerables } from 'chart.js'
 import ScoreBar from './ScoreBar'
 import ProviderBadge from './ProviderBadge'
@@ -9,16 +9,46 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
   const chartRef = useRef(null)
   const chartInstance = useRef(null)
 
-  useEffect(() => {
-    if (!chartRef.current || !historyEntry?.runs?.length) return
-
-    chartInstance.current?.destroy()
+  // Calculate relative scores where best score for each metric across all runs = 100%
+  const runsWithRelativeScores = useMemo(() => {
+    if (!historyEntry?.runs?.length) return []
 
     const runs = [...historyEntry.runs].sort(
       (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
     )
 
-    const labels = runs.map(r =>
+    const maxMetrics = {
+      cpu_single: Math.max(...runs.map(r => r.metrics?.cpu_single_raw || 0)),
+      cpu_multi: Math.max(...runs.map(r => r.metrics?.cpu_multi_raw || 0)),
+      memory: Math.max(...runs.map(r => r.metrics?.mem_throughput_raw || 0)),
+      disk: Math.max(...runs.map(r => r.metrics?.disk_iops_raw || 0)),
+    }
+
+    return runs.map(run => ({
+      ...run,
+      relative_scores: {
+        single_core: maxMetrics.cpu_single > 0
+          ? ((run.metrics?.cpu_single_raw || 0) / maxMetrics.cpu_single) * 100
+          : 0,
+        multi_core: maxMetrics.cpu_multi > 0
+          ? ((run.metrics?.cpu_multi_raw || 0) / maxMetrics.cpu_multi) * 100
+          : 0,
+        memory: maxMetrics.memory > 0
+          ? ((run.metrics?.mem_throughput_raw || 0) / maxMetrics.memory) * 100
+          : 0,
+        disk: maxMetrics.disk > 0
+          ? ((run.metrics?.disk_iops_raw || 0) / maxMetrics.disk) * 100
+          : 0,
+      }
+    }))
+  }, [historyEntry])
+
+  useEffect(() => {
+    if (!chartRef.current || !runsWithRelativeScores.length) return
+
+    chartInstance.current?.destroy()
+
+    const labels = runsWithRelativeScores.map(r =>
       new Date(r.timestamp).toLocaleDateString(undefined, {
         month: 'short',
         day: 'numeric',
@@ -29,7 +59,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
     const datasets = [
       {
         label: 'Single Core',
-        data: runs.map(r => r.scores?.single_core ?? 0),
+        data: runsWithRelativeScores.map(r => r.relative_scores?.single_core ?? 0),
         borderColor: '#8b5cf6',
         backgroundColor: 'rgba(139, 92, 246, 0.1)',
         tension: 0.3,
@@ -38,7 +68,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
       },
       {
         label: 'Multi Core',
-        data: runs.map(r => r.scores?.multi_core ?? 0),
+        data: runsWithRelativeScores.map(r => r.relative_scores?.multi_core ?? 0),
         borderColor: '#22c55e',
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         tension: 0.3,
@@ -47,7 +77,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
       },
       {
         label: 'Memory',
-        data: runs.map(r => r.scores?.memory ?? 0),
+        data: runsWithRelativeScores.map(r => r.relative_scores?.memory ?? 0),
         borderColor: '#f59e0b',
         backgroundColor: 'rgba(245, 158, 11, 0.1)',
         tension: 0.3,
@@ -56,7 +86,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
       },
       {
         label: 'Disk',
-        data: runs.map(r => r.scores?.disk ?? 0),
+        data: runsWithRelativeScores.map(r => r.relative_scores?.disk ?? 0),
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.3,
@@ -93,7 +123,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
               afterBody(items) {
                 const idx = items[0]?.dataIndex
                 if (idx == null) return ''
-                const run = runs[idx]
+                const run = runsWithRelativeScores[idx]
                 const m = run.metrics || {}
                 return [
                   '',
@@ -122,7 +152,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
     })
 
     return () => chartInstance.current?.destroy()
-  }, [historyEntry])
+  }, [runsWithRelativeScores])
 
   if (!historyEntry) {
     return (
@@ -143,7 +173,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
   }
 
   const specs = historyEntry.specs || {}
-  const runs = [...historyEntry.runs].sort(
+  const displayRuns = [...runsWithRelativeScores].sort(
     (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
   )
 
@@ -187,12 +217,11 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
                 <th className="cell-numeric">Multi Core</th>
                 <th className="cell-numeric">Memory</th>
                 <th className="cell-numeric">Disk</th>
-                <th className="cell-numeric">Overall</th>
                 <th className="cell-numeric">Monthly Price</th>
               </tr>
             </thead>
             <tbody>
-              {runs.map((run, i) => (
+              {displayRuns.map((run, i) => (
                 <tr key={i}>
                   <td>
                     {new Date(run.timestamp).toLocaleDateString(undefined, {
@@ -204,30 +233,27 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.scores?.single_core ?? 0} />
-                      <span>{(run.scores?.single_core ?? 0).toFixed(0)}</span>
+                      <ScoreBar value={run.relative_scores?.single_core ?? 0} />
+                      <span>{(run.relative_scores?.single_core ?? 0).toFixed(0)}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.scores?.multi_core ?? 0} />
-                      <span>{(run.scores?.multi_core ?? 0).toFixed(0)}</span>
+                      <ScoreBar value={run.relative_scores?.multi_core ?? 0} />
+                      <span>{(run.relative_scores?.multi_core ?? 0).toFixed(0)}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.scores?.memory ?? 0} />
-                      <span>{(run.scores?.memory ?? 0).toFixed(0)}</span>
+                      <ScoreBar value={run.relative_scores?.memory ?? 0} />
+                      <span>{(run.relative_scores?.memory ?? 0).toFixed(0)}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.scores?.disk ?? 0} />
-                      <span>{(run.scores?.disk ?? 0).toFixed(0)}</span>
+                      <ScoreBar value={run.relative_scores?.disk ?? 0} />
+                      <span>{(run.relative_scores?.disk ?? 0).toFixed(0)}</span>
                     </div>
-                  </td>
-                  <td className="cell-numeric" style={{ color: 'var(--color-primary-light)', fontWeight: 500 }}>
-                    {(run.scores?.overall ?? 0).toFixed(0)}
                   </td>
                   <td className="price-cell cell-numeric">
                     {run.pricing?.monthly != null ? fp(run.pricing.monthly) : '—'}
@@ -239,7 +265,9 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
         </div>
 
         <p className="table-note">
-          Showing {runs.length} historical run{runs.length !== 1 ? 's' : ''} for {instanceType}.
+          Showing {displayRuns.length} historical run{displayRuns.length !== 1 ? 's' : ''} for {instanceType}.
+          <br />
+          Scores are relative to the best performance for this instance type (best = 100).
         </p>
       </div>
     </div>

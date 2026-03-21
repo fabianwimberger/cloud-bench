@@ -254,8 +254,14 @@ function App() {
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          {data?.metadata?.exchange_rates && (
+        <StatsOverview data={data} currency={currencyProps} />
+
+        <InstanceFilter
+          ranking={data?.ranking}
+          filters={filters}
+          onFilterChange={setFilters}
+          currency={currencyProps}
+          currencyToggle={data?.metadata?.exchange_rates && (
             <div className="filter-group">
               <label>Currency</label>
               <div style={{ display: 'flex', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
@@ -279,15 +285,6 @@ function App() {
               </div>
             </div>
           )}
-        </div>
-
-        <StatsOverview data={data} currency={currencyProps} />
-
-        <InstanceFilter
-          ranking={data?.ranking}
-          filters={filters}
-          onFilterChange={setFilters}
-          currency={currencyProps}
         />
 
         {selectedForComparison.length > 0 && (

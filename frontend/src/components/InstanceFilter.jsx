@@ -1,4 +1,4 @@
-function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
+function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyToggle }) {
   if (!ranking || ranking.length === 0) return null
 
   const arches = [...new Set(ranking.map(r => r.arch))].filter(Boolean).sort()
@@ -65,7 +65,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
           >
             <option value="">All</option>
             {providers.map(p => (
-              <option key={p} value={p}>{p.length <= 3 ? p.toUpperCase() : p.charAt(0).toUpperCase() + p.slice(1)}</option>
+              <option key={p} value={p}>{{ aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVHcloud' }[p] || p}</option>
             ))}
           </select>
         </div>
@@ -75,11 +75,10 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
         <label>vCPU</label>
         <input
           type="text"
-          className="filter-input"
+          className="filter-input filter-input-narrow"
           placeholder=">2"
           value={filters.vcpu}
           onChange={(e) => handleChange('vcpu', e.target.value)}
-          style={{ width: '70px' }}
         />
       </div>
 
@@ -87,11 +86,10 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
         <label>Memory (GB)</label>
         <input
           type="text"
-          className="filter-input"
+          className="filter-input filter-input-narrow"
           placeholder="<32"
           value={filters.ram}
           onChange={(e) => handleChange('ram', e.target.value)}
-          style={{ width: '70px' }}
         />
       </div>
 
@@ -99,11 +97,10 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
         <label>Disk (GB)</label>
         <input
           type="text"
-          className="filter-input"
+          className="filter-input filter-input-narrow"
           placeholder=">50"
           value={filters.disk}
           onChange={(e) => handleChange('disk', e.target.value)}
-          style={{ width: '70px' }}
         />
       </div>
 
@@ -147,7 +144,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
         </div>
       </div>
 
-      <div className="filter-group">
+      <div className="filter-group filter-group-grow">
         <label>Search</label>
         <input
           type="text"
@@ -155,9 +152,11 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency }) {
           placeholder="Instance type..."
           value={filters.search}
           onChange={(e) => handleChange('search', e.target.value)}
-          style={{ width: '140px' }}
+          style={{ width: '100%' }}
         />
       </div>
+
+      {currencyToggle}
 
       <div className="filter-actions">
         {hasActiveFilters && (

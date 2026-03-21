@@ -4,9 +4,9 @@
 
 ### Cleanup Failed - Resources Still Running
 
-**Symptom**: Workflow failed, servers still show in Hetzner Console or AWS Console.
+**Symptom**: Workflow failed, servers still show in Hetzner Console, AWS Console, or OVHcloud Horizon.
 
-**Auto-fix**: Scheduled cleanup workflows run every 6 hours and will clean up anything older than 2 hours (Hetzner) or tagged `cloud-bench` resources (AWS).
+**Auto-fix**: Scheduled cleanup workflows run every 6 hours (Hetzner, AWS) or manual trigger (OVHcloud) and will clean up anything older than 2 hours or tagged `cloud-bench` resources.
 
 **Manual fix (Hetzner)**:
 ```bash
@@ -95,17 +95,18 @@ If you need to stop everything RIGHT NOW:
 1. Go to Actions tab → Cancel any running workflows
 2. **Hetzner**: Go to Hetzner Console → Delete all `cloud-bench-*` servers, SSH keys, and firewalls
 3. **AWS**: Go to EC2 Console (eu-central-1) → Terminate all instances tagged `cloud-bench`, delete associated security groups and key pairs
+4. **OVHcloud**: Go to Horizon Dashboard → Delete all `cloud-bench-*` instances and associated key pairs
 
 ## Preventing Issues
 
 - **Always** wait for cleanup job to finish (green checkmark)
 - Don't run multiple benchmarks simultaneously (concurrency group prevents this)
-- Set a billing alert in Hetzner Console at €10 and in AWS Budgets at $10
-- The orphan cleanup workflows run every 6 hours as safety net
+- Set a billing alert in Hetzner Console at €10, in AWS Budgets at $10, and in OVHcloud at €10
+- The orphan cleanup workflows run every 6 hours (Hetzner, AWS) or manual trigger (OVHcloud) as safety net
 
 ## Getting Help
 
 If stuck, check:
 1. Workflow logs in GitHub Actions
-2. Hetzner Console / AWS EC2 Console for resource status
+2. Hetzner Console / AWS EC2 Console / OVHcloud Horizon for resource status
 3. `terraform/terraform.tfstate` if running locally

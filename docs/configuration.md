@@ -56,6 +56,17 @@ Add entries to the `instances` list. No code changes needed — Terraform, Ansib
   pricing:
     hourly: 0.0416
     monthly: 29.95
+
+# OVHcloud example
+- id: b3-8
+  name: B3-8
+  arch: X86
+  vcpu: 2
+  ram_gb: 8
+  disk_gb: 50
+  pricing:
+    hourly: 0.0300
+    monthly: 21.60
 ```
 
 ## Adding regions
@@ -72,6 +83,11 @@ regions:
 regions:
   eu-central-1:
     name: Frankfurt
+
+# OVHcloud
+regions:
+  DE1:
+    name: Frankfurt
 ```
 
 ## Adding providers
@@ -80,7 +96,7 @@ regions:
 2. Create a Terraform module at `terraform/modules/<provider>/`
 3. Update the `cloud_provider` validation in `terraform/variables.tf`
 4. Add the provider's credentials to GitHub Secrets
-5. Add a cleanup workflow for orphaned resources
+5. Add a cleanup workflow for orphaned resources (manual trigger only)
 
 ## Pricing updates
 

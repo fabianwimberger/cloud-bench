@@ -1,4 +1,4 @@
-# Data Format (v3.0)
+# Data Format (v2.0)
 
 ## Output files
 
@@ -19,7 +19,7 @@ frontend/public/data/
 
 ```json
 {
-  "schema_version": "3.0",
+  "schema_version": "2.0",
   "metadata": {
     "generated_at": "2026-02-21T09:15:00Z",
     "run_count": 3,
@@ -57,7 +57,7 @@ Full data including raw metrics and system info.
 
 ```json
 {
-  "schema_version": "3.0",
+  "schema_version": "2.0",
   "metadata": { "..." : "same as summary" },
   "instances": [
     {
@@ -91,7 +91,7 @@ Index for browsing historical runs. Persisted on the `benchmark-data` branch.
 
 ```json
 {
-  "schema_version": "3.0",
+  "schema_version": "2.0",
   "runs": [
     {
       "id": "2026-02-21-091512",
@@ -114,7 +114,7 @@ Pre-built per-instance history for the dashboard's history view. Built by `scrip
 
 ```json
 {
-  "schema_version": "3.0",
+  "schema_version": "2.0",
   "instances": {
     "cx23": {
       "runs": [
@@ -135,4 +135,4 @@ Extensible field for provider-specific data. No schema changes needed when addin
 
 ## Currency
 
-Prices are stored in the provider's native currency (EUR for Hetzner, USD for AWS). Exchange rates are included in metadata so the frontend can convert between currencies on the fly.
+Prices are stored in the provider's native currency (EUR for Hetzner and OVHcloud, USD for AWS). Exchange rates are included in metadata so the frontend can convert between currencies on the fly.

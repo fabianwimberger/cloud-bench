@@ -20,8 +20,8 @@ variable "cloud_provider" {
   default     = "hetzner"
 
   validation {
-    condition     = can(regex("^(hetzner|aws)$", var.cloud_provider))
-    error_message = "Provider must be 'hetzner' or 'aws'."
+    condition     = can(regex("^(hetzner|aws|ovhcloud)$", var.cloud_provider))
+    error_message = "Provider must be 'hetzner', 'aws', or 'ovhcloud'."
   }
 }
 
@@ -99,4 +99,25 @@ variable "aws_ebs_size" {
   description = "EBS volume size in GB for AWS instances"
   type        = number
   default     = 20
+}
+
+variable "ovh_openstack_username" {
+  description = "OVHcloud OpenStack user (from Public Cloud > Users & Roles)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_openstack_password" {
+  description = "OVHcloud OpenStack user password"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "ovh_cloud_project_id" {
+  description = "OVHcloud Public Cloud project ID (service_name)"
+  type        = string
+  sensitive   = true
+  default     = ""
 }

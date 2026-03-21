@@ -4,11 +4,15 @@ terraform {
   required_providers {
     hcloud = {
       source  = "hetznercloud/hcloud"
-      version = "~> 1.50"
+      version = "~> 1.60"
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.0"
+    }
+    openstack = {
+      source  = "terraform-provider-openstack/openstack"
+      version = "~> 3.0"
     }
   }
 
@@ -32,6 +36,15 @@ provider "aws" {
   skip_metadata_api_check     = var.cloud_provider != "aws"
 }
 
+provider "openstack" {
+  auth_url         = "https://auth.cloud.ovh.net/v3"
+  user_name        = var.ovh_openstack_username
+  password         = var.ovh_openstack_password
+  tenant_id        = var.ovh_cloud_project_id
+  user_domain_name = "Default"
+  region           = local.effective_region
+}
+
 locals {
   config = yamldecode(file("${path.module}/../config/instances.yaml"))
 
@@ -52,8 +65,9 @@ locals {
   # Auto-detect region based on provider if not explicitly set
   effective_region = var.default_region != "" ? var.default_region : lookup(
     {
-      hetzner = "fsn1"
-      aws     = "eu-central-1"
+      hetzner  = "fsn1"
+      aws      = "eu-central-1"
+      ovhcloud = "DE1"
     },
     var.cloud_provider,
     "fsn1"
@@ -101,16 +115,36 @@ module "aws_instances" {
   enable_unlimited_credits = true
 }
 
+module "ovhcloud_instances" {
+  source   = "./modules/ovhcloud"
+  for_each = var.cloud_provider == "ovhcloud" ? { for inst in local.instances : inst.id => inst } : {}
+
+  instance_name  = "cloud-bench-${var.cloud_provider}-${each.value.id}-${var.run_id}"
+  instance_type  = each.value.id
+  ssh_key_name   = "cloud-bench-${each.value.id}-${var.run_id}"
+  ssh_public_key = local.ssh_public_key
+  labels         = merge(local.common_labels, { instance_type = each.value.id })
+}
+
 locals {
-  all_instances = var.cloud_provider == "hetzner" ? {
-    for inst_id, mod in module.hetzner_instances : inst_id => {
-      host = mod.server_ip
-      name = mod.server_name
-    }
-    } : {
-    for inst_id, mod in module.aws_instances : inst_id => {
-      host = mod.server_ip
-      name = mod.server_name
-    }
-  }
+  all_instances = merge(
+    {
+      for inst_id, mod in module.hetzner_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+    {
+      for inst_id, mod in module.aws_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+    {
+      for inst_id, mod in module.ovhcloud_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+  )
 }

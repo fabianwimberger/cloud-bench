@@ -1,7 +1,17 @@
-# Copy to terraform.tfvars and fill in your values
+# Copy to terraform.tfvars and fill in values for the provider(s) you use
 
 run_id = "local"
 ssh_public_key_path = "~/.ssh/id_ed25519.pub"
 
+# Hetzner Cloud
 # Get token from: https://console.hetzner.cloud/projects/[PROJECT]/security/tokens
 hcloud_token = "your-hetzner-api-token"
+
+# AWS
+aws_access_key_id = "your-aws-access-key"
+aws_secret_access_key = "your-aws-secret-key"
+
+# OVHcloud
+ovh_openstack_username = "user-xxxxx"
+ovh_openstack_password = "your-password"
+ovh_cloud_project_id = "your-project-id"

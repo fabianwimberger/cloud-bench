@@ -1,5 +1,5 @@
 #!/bin/bash
-# Local benchmark runner script (supports Hetzner and AWS)
+# Local benchmark runner script (supports Hetzner, AWS, and OVHcloud)
 set -e
 
 # Configuration
@@ -11,9 +11,10 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 # Auto-detect region based on provider
 if [ -z "$REGION" ]; then
     case "$PROVIDER" in
-        hetzner) REGION="fsn1" ;;
-        aws)     REGION="eu-central-1" ;;
-        *)       REGION="fsn1" ;;
+        hetzner)  REGION="fsn1" ;;
+        aws)      REGION="eu-central-1" ;;
+        ovhcloud) REGION="DE1" ;;
+        *)        REGION="fsn1" ;;
     esac
 fi
 
@@ -74,6 +75,20 @@ validate_credentials() {
                 exit 1
             fi
             ;;
+        ovhcloud)
+            local ovh_missing=()
+            [ -z "$OVH_OPENSTACK_USERNAME" ] && ovh_missing+=("OVH_OPENSTACK_USERNAME")
+            [ -z "$OVH_OPENSTACK_PASSWORD" ] && ovh_missing+=("OVH_OPENSTACK_PASSWORD")
+            [ -z "$OVH_CLOUD_PROJECT_ID" ] && ovh_missing+=("OVH_CLOUD_PROJECT_ID")
+            if [ ${#ovh_missing[@]} -ne 0 ]; then
+                echo "[ERROR] OVHcloud credentials not set: ${ovh_missing[*]}"
+                echo "Set them with:"
+                echo "  export OVH_OPENSTACK_USERNAME=user-xxxxxxxxxxxxxxxx"
+                echo "  export OVH_OPENSTACK_PASSWORD=your-password"
+                echo "  export OVH_CLOUD_PROJECT_ID=your-project-id"
+                exit 1
+            fi
+            ;;
         *)
             echo "[ERROR] Unsupported provider: $PROVIDER"
             exit 1
@@ -120,20 +135,48 @@ build_tf_vars() {
         hetzner)
             common_vars+=(
                 -var="hcloud_token=$HCLOUD_TOKEN"
-                -var="aws_access_key_id="
-                -var="aws_secret_access_key="
+                -var="aws_access_key_id=unused"
+                -var="aws_secret_access_key=unused"
+                -var="ovh_openstack_username=unused"
+                -var="ovh_openstack_password=unused"
+                -var="ovh_cloud_project_id=unused"
             )
             ;;
         aws)
             common_vars+=(
-                -var="hcloud_token=unused"
+                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
                 -var="aws_access_key_id=$AWS_ACCESS_KEY_ID"
                 -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
+                -var="ovh_openstack_username=unused"
+                -var="ovh_openstack_password=unused"
+                -var="ovh_cloud_project_id=unused"
+            )
+            ;;
+        ovhcloud)
+            common_vars+=(
+                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
+                -var="aws_access_key_id=unused"
+                -var="aws_secret_access_key=unused"
+                -var="ovh_openstack_username=$OVH_OPENSTACK_USERNAME"
+                -var="ovh_openstack_password=$OVH_OPENSTACK_PASSWORD"
+                -var="ovh_cloud_project_id=$OVH_CLOUD_PROJECT_ID"
             )
             ;;
     esac
 
-    echo "${common_vars[@]}"
+    common_vars+=("$@")
+    printf '%s\n' "${common_vars[@]}"
+}
+
+# Run terraform with provider-specific vars
+run_terraform() {
+    local action="$1"
+    shift
+    local vars=()
+    while IFS= read -r line; do
+        vars+=("$line")
+    done < <(build_tf_vars "$action" "$@")
+    terraform "$action" -auto-approve "${vars[@]}"
 }
 
 # Main execution
@@ -150,7 +193,7 @@ main() {
 
     terraform init
 
-    eval terraform apply -auto-approve $(build_tf_vars apply) \
+    run_terraform apply \
         || {
             echo "[ERROR] Terraform apply failed!"
             exit 1
@@ -222,7 +265,7 @@ main() {
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "[INFO] Destroying infrastructure..."
         cd terraform
-        eval terraform destroy -auto-approve $(build_tf_vars destroy)
+        run_terraform destroy
         echo "[OK] Cleanup complete!"
     else
         echo "[WARN] Infrastructure left running. Don't forget to clean up!"

@@ -7,6 +7,7 @@ config/instances.yaml          # Single source of truth for instances & pricing
 ┌── Terraform ──────────────┐
 │  modules/hetzner/          │  Provisions servers, SSH keys, firewalls
 │  modules/aws/              │  EC2 instances, security groups, key pairs
+│  modules/ovhcloud/         │  OpenStack instances, key pairs
 └────────────┬──────────────┘
              ▼
 ┌── Ansible ────────────────┐
@@ -55,4 +56,4 @@ See [data-format.md](data-format.md) for the schema.
 - Fresh Ed25519 SSH key generated per run, never reused
 - Firewall/security group allows SSH from runner IP only (key-based auth)
 - `if: always()` cleanup in CI
-- Dedicated Hetzner project and AWS IAM user recommended for isolation
+- Dedicated Hetzner project, AWS IAM user, and OVHcloud OpenStack user recommended for isolation

@@ -86,6 +86,58 @@ providers:
       pricing:
         hourly: 0.05004
         monthly: 31.188
+  ovhcloud:
+    currency: EUR
+    default_region: DE1
+    regions:
+      DE1:
+        name: Frankfurt
+    instances:
+    - id: b3-8
+      name: B3-8
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 50
+      pricing:
+        hourly: 0.0300
+        monthly: 21.60
+    - id: b3-16
+      name: B3-16
+      arch: X86
+      vcpu: 4
+      ram_gb: 16
+      disk_gb: 100
+      pricing:
+        hourly: 0.0600
+        monthly: 43.20
+    - id: c3-4
+      name: C3-4
+      arch: X86
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 50
+      pricing:
+        hourly: 0.0280
+        monthly: 20.16
+    - id: c3-8
+      name: C3-8
+      arch: X86
+      vcpu: 4
+      ram_gb: 8
+      disk_gb: 100
+      pricing:
+        hourly: 0.0560
+        monthly: 40.32
+    - id: r3-16
+      name: R3-16
+      arch: X86
+      vcpu: 2
+      ram_gb: 16
+      disk_gb: 50
+      pricing:
+        hourly: 0.0380
+        monthly: 27.36
   aws:
     currency: USD
     default_region: eu-central-1
@@ -154,4 +206,4 @@ exchange_rates:
   source: Frankfurter API (ECB data)
 _metadata:
   last_pricing_update: '2026-03-15T11:01:09.218117'
-  source: Hetzner Cloud API / AWS Pricing API
+  source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API

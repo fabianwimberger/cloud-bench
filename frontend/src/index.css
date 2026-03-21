@@ -264,12 +264,19 @@ a:hover {
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.filter-group-grow {
+  flex: 1;
+  min-width: 120px;
 }
 
 .filter-group label {
@@ -290,6 +297,11 @@ a:hover {
   font-size: 0.8125rem;
   min-width: 100px;
   transition: border-color 0.15s;
+}
+
+.filter-input-narrow {
+  min-width: 0;
+  width: 3.5em;
 }
 
 .filter-input:focus,

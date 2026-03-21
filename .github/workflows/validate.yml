@@ -324,6 +324,70 @@ jobs:
           print('AWS currency check passed: USD')
           "
 
+      - name: Create Mock Results (OVHcloud)
+        run: |
+          rm -f results/*.json
+          cat > results/b3-8-mock.json << 'MOCKEOF'
+          {
+            "run_id": "test-mock-ovh",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "system": {
+              "provider": "ovhcloud",
+              "instance_type": "b3-8"
+            },
+            "provider_attributes": {
+              "arch": "x86_64",
+              "os": "Ubuntu 24.04",
+              "kernel": "6.8.0",
+              "vcpu": 2,
+              "memory_mb": 8192,
+              "hostname": "test-b3-8"
+            },
+            "cpu": {
+              "test": "sysbench-cpu",
+              "runs": 5,
+              "single_thread_events": 380,
+              "multi_thread_events": 760,
+              "threads": 2
+            },
+            "memory": {
+              "test": "sysbench-memory",
+              "runs": 5,
+              "read_mib_per_sec": 8200,
+              "write_mib_per_sec": 6200,
+              "total_throughput_mib": 14400
+            },
+            "disk": {
+              "test": "fio-randread",
+              "runs": 5,
+              "read_iops": 14000
+            }
+          }
+          MOCKEOF
+
+      - name: Test Result Processing (OVHcloud)
+        run: |
+          mkdir -p frontend/public/data-ovh/
+          python3 scripts/process_results.py \
+            --input results/ \
+            --output frontend/public/data-ovh/ \
+            --config config/instances.yaml \
+            --region DE1 \
+            --provider ovhcloud
+
+      - name: Verify OVHcloud Output Files
+        run: |
+          for f in benchmark-data.json benchmark-results.csv summary.md; do
+            test -f "frontend/public/data-ovh/$f" || (echo "$f missing" && exit 1)
+          done
+          # Verify currency is EUR
+          python3 -c "
+          import json
+          data = json.load(open('frontend/public/data-ovh/benchmark-data.json'))
+          assert data['metadata']['currency'] == 'EUR', f'Expected EUR, got {data[\"metadata\"][\"currency\"]}'
+          print('OVHcloud currency check passed: EUR')
+          "
+
       - name: Build Frontend with Real Data
         working-directory: frontend
         run: npm run build
