@@ -164,7 +164,19 @@ build_tf_vars() {
             ;;
     esac
 
-    printf '%q ' "${common_vars[@]}"
+    common_vars+=("$@")
+    printf '%s\n' "${common_vars[@]}"
+}
+
+# Run terraform with provider-specific vars
+run_terraform() {
+    local action="$1"
+    shift
+    local vars=()
+    while IFS= read -r line; do
+        vars+=("$line")
+    done < <(build_tf_vars "$action" "$@")
+    terraform "$action" -auto-approve "${vars[@]}"
 }
 
 # Main execution
@@ -181,7 +193,7 @@ main() {
 
     terraform init
 
-    eval terraform apply -auto-approve $(build_tf_vars apply) \
+    run_terraform apply \
         || {
             echo "[ERROR] Terraform apply failed!"
             exit 1
@@ -253,7 +265,7 @@ main() {
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "[INFO] Destroying infrastructure..."
         cd terraform
-        eval terraform destroy -auto-approve $(build_tf_vars destroy)
+        run_terraform destroy
         echo "[OK] Cleanup complete!"
     else
         echo "[WARN] Infrastructure left running. Don't forget to clean up!"

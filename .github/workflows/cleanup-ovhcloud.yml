@@ -45,11 +45,11 @@ jobs:
           # Find cloud-bench tagged instances older than 2 hours
           CUTOFF=$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -u -v-2H +%Y-%m-%dT%H:%M:%S)
 
-          SERVERS=$(openstack server list -f json 2>/dev/null | jq -r "
-            .[] | select(.Name | startswith(\"cloud-bench-\")) |
-            select(.\"Created At\" < \"$CUTOFF\") |
-            [.ID, .Name, .\"Created At\"] | @tsv
-          " || echo "")
+          SERVERS=$(openstack server list -f json 2>/dev/null | jq -r --arg cutoff "$CUTOFF" '
+            .[] | select(.Name | startswith("cloud-bench-")) |
+            select(."Created At" < $cutoff) |
+            [.ID, .Name, ."Created At"] | @tsv
+          ' || echo "")
 
           if [ -z "$SERVERS" ]; then
             echo "[OK] No orphaned OVHcloud instances found"

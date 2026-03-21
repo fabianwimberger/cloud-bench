@@ -206,4 +206,4 @@ exchange_rates:
   source: Frankfurter API (ECB data)
 _metadata:
   last_pricing_update: '2026-03-15T11:01:09.218117'
-  source: Hetzner Cloud API / AWS Pricing API
+  source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API

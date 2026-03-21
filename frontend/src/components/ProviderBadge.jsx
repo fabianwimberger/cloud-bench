@@ -9,6 +9,11 @@ const providerStyles = {
     color: '#f59e0b',
     label: 'AWS',
   },
+  ovhcloud: {
+    background: 'rgba(0, 0, 155, 0.2)',
+    color: '#6366f1',
+    label: 'OVHcloud',
+  },
 }
 
 function ProviderBadge({ provider }) {
