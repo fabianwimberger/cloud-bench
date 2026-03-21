@@ -2,6 +2,27 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-03-21T18:37:52-hetzner-fsn1",
+      "timestamp": "2026-03-21T18:37:52",
+      "provider": "hetzner",
+      "region": "fsn1",
+      "instance_count": 8,
+      "instances": [
+        "CPX32",
+        "CCX23",
+        "CPX22",
+        "CCX13",
+        "CAX21",
+        "CAX11",
+        "CX23",
+        "CX33"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-21T18:37:52-hetzner-fsn1/summary.json",
+        "detail": "data/runs/2026-03-21T18:37:52-hetzner-fsn1/detail.json"
+      }
+    },
+    {
       "id": "2026-03-21T18:30:48-ovhcloud-DE1",
       "timestamp": "2026-03-21T18:30:48",
       "provider": "ovhcloud",
@@ -408,6 +429,94 @@
     }
   ],
   "instance_index": {
+    "CPX32": [
+      "2026-03-21T18:37:52-hetzner-fsn1",
+      "2026-03-21T17:11:43-hetzner-fsn1",
+      "2026-03-21T16:08:42-hetzner-fsn1",
+      "2026-03-21T15:23:27-hetzner-fsn1",
+      "2026-03-21T12:14:57-hetzner-fsn1",
+      "2026-03-19T21:42:58-hetzner-fsn1",
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CCX23": [
+      "2026-03-21T18:37:52-hetzner-fsn1",
+      "2026-03-21T17:11:43-hetzner-fsn1",
+      "2026-03-21T16:08:42-hetzner-fsn1",
+      "2026-03-21T15:23:27-hetzner-fsn1",
+      "2026-03-21T12:14:57-hetzner-fsn1",
+      "2026-03-19T21:42:58-hetzner-fsn1",
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CPX22": [
+      "2026-03-21T18:37:52-hetzner-fsn1",
+      "2026-03-21T17:11:43-hetzner-fsn1",
+      "2026-03-21T16:08:42-hetzner-fsn1",
+      "2026-03-21T15:23:27-hetzner-fsn1",
+      "2026-03-21T12:14:57-hetzner-fsn1",
+      "2026-03-19T21:42:58-hetzner-fsn1",
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CCX13": [
+      "2026-03-21T18:37:52-hetzner-fsn1",
+      "2026-03-21T17:11:43-hetzner-fsn1",
+      "2026-03-21T16:08:42-hetzner-fsn1",
+      "2026-03-21T15:23:27-hetzner-fsn1",
+      "2026-03-21T12:14:57-hetzner-fsn1",
+      "2026-03-19T21:42:58-hetzner-fsn1",
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CAX21": [
+      "2026-03-21T18:37:52-hetzner-fsn1",
+      "2026-03-21T17:11:43-hetzner-fsn1",
+      "2026-03-21T16:08:42-hetzner-fsn1",
+      "2026-03-21T15:23:27-hetzner-fsn1",
+      "2026-03-21T12:14:57-hetzner-fsn1",
+      "2026-03-19T21:42:58-hetzner-fsn1",
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CAX11": [
+      "2026-03-21T18:37:52-hetzner-fsn1",
+      "2026-03-21T17:11:43-hetzner-fsn1",
+      "2026-03-21T16:08:42-hetzner-fsn1",
+      "2026-03-21T15:23:27-hetzner-fsn1",
+      "2026-03-21T12:14:57-hetzner-fsn1",
+      "2026-03-19T21:42:58-hetzner-fsn1",
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CX23": [
+      "2026-03-21T18:37:52-hetzner-fsn1",
+      "2026-03-21T17:11:43-hetzner-fsn1",
+      "2026-03-21T16:08:42-hetzner-fsn1",
+      "2026-03-21T15:23:27-hetzner-fsn1",
+      "2026-03-21T12:14:57-hetzner-fsn1",
+      "2026-03-19T21:42:58-hetzner-fsn1",
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
+    "CX33": [
+      "2026-03-21T18:37:52-hetzner-fsn1",
+      "2026-03-21T17:11:43-hetzner-fsn1",
+      "2026-03-21T16:08:42-hetzner-fsn1",
+      "2026-03-21T15:23:27-hetzner-fsn1",
+      "2026-03-21T12:14:57-hetzner-fsn1",
+      "2026-03-19T21:42:58-hetzner-fsn1",
+      "2026-03-15T12:55:25-hetzner-fsn1",
+      "2026-03-15T11:36:46-hetzner-fsn1",
+      "2026-03-15T11:11:03-hetzner-fsn1"
+    ],
     "C3-8": [
       "2026-03-21T18:30:48-ovhcloud-DE1",
       "2026-03-21T16:47:43-ovhcloud-DE1",
@@ -495,86 +604,6 @@
       "2026-03-19T21:52:32-aws-eu-central-1",
       "2026-03-15T12:15:56-aws-eu-central-1",
       "2026-03-15T11:19:32-aws-eu-central-1"
-    ],
-    "CCX23": [
-      "2026-03-21T17:11:43-hetzner-fsn1",
-      "2026-03-21T16:08:42-hetzner-fsn1",
-      "2026-03-21T15:23:27-hetzner-fsn1",
-      "2026-03-21T12:14:57-hetzner-fsn1",
-      "2026-03-19T21:42:58-hetzner-fsn1",
-      "2026-03-15T12:55:25-hetzner-fsn1",
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CPX32": [
-      "2026-03-21T17:11:43-hetzner-fsn1",
-      "2026-03-21T16:08:42-hetzner-fsn1",
-      "2026-03-21T15:23:27-hetzner-fsn1",
-      "2026-03-21T12:14:57-hetzner-fsn1",
-      "2026-03-19T21:42:58-hetzner-fsn1",
-      "2026-03-15T12:55:25-hetzner-fsn1",
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CCX13": [
-      "2026-03-21T17:11:43-hetzner-fsn1",
-      "2026-03-21T16:08:42-hetzner-fsn1",
-      "2026-03-21T15:23:27-hetzner-fsn1",
-      "2026-03-21T12:14:57-hetzner-fsn1",
-      "2026-03-19T21:42:58-hetzner-fsn1",
-      "2026-03-15T12:55:25-hetzner-fsn1",
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CPX22": [
-      "2026-03-21T17:11:43-hetzner-fsn1",
-      "2026-03-21T16:08:42-hetzner-fsn1",
-      "2026-03-21T15:23:27-hetzner-fsn1",
-      "2026-03-21T12:14:57-hetzner-fsn1",
-      "2026-03-19T21:42:58-hetzner-fsn1",
-      "2026-03-15T12:55:25-hetzner-fsn1",
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CAX21": [
-      "2026-03-21T17:11:43-hetzner-fsn1",
-      "2026-03-21T16:08:42-hetzner-fsn1",
-      "2026-03-21T15:23:27-hetzner-fsn1",
-      "2026-03-21T12:14:57-hetzner-fsn1",
-      "2026-03-19T21:42:58-hetzner-fsn1",
-      "2026-03-15T12:55:25-hetzner-fsn1",
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CAX11": [
-      "2026-03-21T17:11:43-hetzner-fsn1",
-      "2026-03-21T16:08:42-hetzner-fsn1",
-      "2026-03-21T15:23:27-hetzner-fsn1",
-      "2026-03-21T12:14:57-hetzner-fsn1",
-      "2026-03-19T21:42:58-hetzner-fsn1",
-      "2026-03-15T12:55:25-hetzner-fsn1",
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CX33": [
-      "2026-03-21T17:11:43-hetzner-fsn1",
-      "2026-03-21T16:08:42-hetzner-fsn1",
-      "2026-03-21T15:23:27-hetzner-fsn1",
-      "2026-03-21T12:14:57-hetzner-fsn1",
-      "2026-03-19T21:42:58-hetzner-fsn1",
-      "2026-03-15T12:55:25-hetzner-fsn1",
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "CX23": [
-      "2026-03-21T17:11:43-hetzner-fsn1",
-      "2026-03-21T16:08:42-hetzner-fsn1",
-      "2026-03-21T15:23:27-hetzner-fsn1",
-      "2026-03-21T12:14:57-hetzner-fsn1",
-      "2026-03-19T21:42:58-hetzner-fsn1",
-      "2026-03-15T12:55:25-hetzner-fsn1",
-      "2026-03-15T11:36:46-hetzner-fsn1",
-      "2026-03-15T11:11:03-hetzner-fsn1"
     ]
   }
 }
