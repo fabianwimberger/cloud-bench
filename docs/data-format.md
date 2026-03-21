@@ -135,4 +135,4 @@ Extensible field for provider-specific data. No schema changes needed when addin
 
 ## Currency
 
-Prices are stored in the provider's native currency (EUR for Hetzner, USD for AWS). Exchange rates are included in metadata so the frontend can convert between currencies on the fly.
+Prices are stored in the provider's native currency (EUR for Hetzner and OVHcloud, USD for AWS). Exchange rates are included in metadata so the frontend can convert between currencies on the fly.

@@ -10,6 +10,7 @@ Exact pricing depends on which instances are configured in `config/instances.yam
 |----------|-----------------|----------|
 | Hetzner  | ~€0.05          | EUR      |
 | AWS      | ~$0.15          | USD      |
+| OVHcloud | ~€0.15          | EUR      |
 
 ## Worst case
 
@@ -18,6 +19,7 @@ If cleanup fails and instances keep running, the maximum cost equals the sum of 
 **Safety nets:**
 - Set a billing alert in Hetzner Console (e.g. €10)
 - Set a budget alert in AWS Budgets (e.g. $10)
+- Set a budget alert in OVHcloud Control Panel (e.g. €10)
 - Orphan cleanup workflows run every 6 hours for both providers
 
 ## Provider comparison
