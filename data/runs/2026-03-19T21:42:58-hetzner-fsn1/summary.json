@@ -42,8 +42,8 @@
           "disk_iops": 74303.854875
         },
         "pricing": {
-          "hourly": 0.05004,
-          "monthly": 31.188
+          "hourly": 0.0417,
+          "monthly": 25.99
         },
         "value": 2.55,
         "specs": {
@@ -70,8 +70,8 @@
           "disk_iops": 59335.445903
         },
         "pricing": {
-          "hourly": 0.02016,
-          "monthly": 12.588
+          "hourly": 0.0168,
+          "monthly": 10.49
         },
         "value": 7.64,
         "specs": {
@@ -98,8 +98,8 @@
           "disk_iops": 73926.677947
         },
         "pricing": {
-          "hourly": 0.01152,
-          "monthly": 7.188
+          "hourly": 0.0096,
+          "monthly": 5.99
         },
         "value": 10.59,
         "specs": {
@@ -126,8 +126,8 @@
           "disk_iops": 75502.304147
         },
         "pricing": {
-          "hourly": 0.02508,
-          "monthly": 15.588
+          "hourly": 0.0209,
+          "monthly": 12.99
         },
         "value": 4.15,
         "specs": {
@@ -154,8 +154,8 @@
           "disk_iops": 54431.893688
         },
         "pricing": {
-          "hourly": 0.01152,
-          "monthly": 7.188
+          "hourly": 0.0096,
+          "monthly": 5.99
         },
         "value": 11.13,
         "specs": {
@@ -182,8 +182,8 @@
           "disk_iops": 56594.127807
         },
         "pricing": {
-          "hourly": 0.00636,
-          "monthly": 3.948
+          "hourly": 0.0053,
+          "monthly": 3.29
         },
         "value": 14.99,
         "specs": {
@@ -210,8 +210,8 @@
           "disk_iops": 38595.995289
         },
         "pricing": {
-          "hourly": 0.0096,
-          "monthly": 5.988
+          "hourly": 0.008,
+          "monthly": 4.99
         },
         "value": 6.38,
         "specs": {
@@ -238,8 +238,8 @@
           "disk_iops": 56037.622916
         },
         "pricing": {
-          "hourly": 0.00576,
-          "monthly": 3.588
+          "hourly": 0.0048,
+          "monthly": 2.99
         },
         "value": 4.57,
         "specs": {
