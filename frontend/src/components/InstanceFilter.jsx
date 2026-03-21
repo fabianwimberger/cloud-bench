@@ -65,7 +65,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
           >
             <option value="">All</option>
             {providers.map(p => (
-              <option key={p} value={p}>{{ aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVHcloud' }[p] || p}</option>
+              <option key={p} value={p}>{{ aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVH' }[p] || p}</option>
             ))}
           </select>
         </div>

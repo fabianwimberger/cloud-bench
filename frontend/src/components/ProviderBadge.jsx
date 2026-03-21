@@ -12,7 +12,7 @@ const providerStyles = {
   ovhcloud: {
     background: 'rgba(0, 0, 155, 0.2)',
     color: '#6366f1',
-    label: 'OVHcloud',
+    label: 'OVH',
   },
 }
 
