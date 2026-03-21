@@ -56,6 +56,21 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
       })
     )
 
+    // Compute dynamic y-axis range based on actual data
+    const allValues = runsWithRelativeScores.flatMap(r => [
+      r.relative_scores?.single_core ?? 0,
+      r.relative_scores?.multi_core ?? 0,
+      r.relative_scores?.memory ?? 0,
+      r.relative_scores?.disk ?? 0,
+    ])
+    const dataMin = Math.min(...allValues)
+    const dataMax = Math.max(...allValues)
+    const range = dataMax - dataMin
+    // Add 20% padding below, round down to nearest 5, ensure min range of 10
+    const paddedMin = Math.max(0, Math.floor((dataMin - Math.max(range * 0.2, 2)) / 5) * 5)
+    const yMin = Math.min(paddedMin, 90) // never start above 90
+    const yMax = Math.min(100, Math.ceil((dataMax + Math.max(range * 0.1, 1)) / 5) * 5)
+
     const datasets = [
       {
         label: 'Single Core',
@@ -138,8 +153,8 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
         },
         scales: {
           y: {
-            beginAtZero: true,
-            max: 100,
+            min: yMin,
+            max: yMax,
             grid: { color: '#2a2a3c' },
             ticks: { color: '#6b6b7b', font: { size: 11, family: 'Inter' } },
           },
