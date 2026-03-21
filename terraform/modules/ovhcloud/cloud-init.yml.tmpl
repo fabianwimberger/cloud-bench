@@ -1,6 +1,8 @@
 #cloud-config
 
 runcmd:
+  - systemctl disable --now unattended-upgrades || true
+  - systemctl disable --now apt-daily.timer apt-daily-upgrade.timer || true
   - mkdir -p /opt/cloud-bench
   - chmod 755 /opt/cloud-bench
   - sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
