@@ -272,12 +272,6 @@ jobs:
         run: |
           pip install ansible==${{ env.ANSIBLE_VERSION }}
 
-      - name: Wait for OVHcloud instances to settle
-        if: ${{ github.event.inputs.provider == 'ovhcloud' }}
-        run: |
-          echo "Waiting 100s for OVHcloud unattended-upgrades to finish..."
-          sleep 100
-
       - name: Wait for instances to be ready
         run: |
           for i in $(seq 1 10); do

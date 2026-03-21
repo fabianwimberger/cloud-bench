@@ -27,11 +27,20 @@
         state: directory
         mode: '0755'
 
-    - name: Wait for apt locks to be released
+    - name: Stop unattended-upgrades and wait for apt to be available
       shell: |
-        while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
-              fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
-          sleep 3
+        set -e
+        # Disable unattended-upgrades so it doesn't restart mid-install
+        systemctl stop unattended-upgrades.service 2>/dev/null || true
+        systemctl disable unattended-upgrades.service 2>/dev/null || true
+        # Also stop apt-daily timers that trigger unattended-upgrades
+        systemctl stop apt-daily.timer apt-daily-upgrade.timer 2>/dev/null || true
+        systemctl stop apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
+        # Wait for any running apt/dpkg processes to finish
+        while fuser /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend \
+                    /var/lib/apt/lists/lock /var/cache/apt/archives/lock >/dev/null 2>&1; do
+          echo "Waiting for apt/dpkg locks..."
+          sleep 5
         done
       changed_when: false
       timeout: 300
@@ -45,10 +54,13 @@
           - jq
         state: present
         update_cache: yes
+        dpkg_options: 'force-confdef,force-confold'
+      environment:
+        DEBIAN_FRONTEND: noninteractive
       register: apt_result
       until: apt_result is not failed
       retries: 5
-      delay: 10
+      delay: 15
 
     - name: Validate required tools are available
       command: "{{ item }}"
