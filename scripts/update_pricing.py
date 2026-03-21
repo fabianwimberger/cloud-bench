@@ -47,15 +47,16 @@ def parse_pricing(server_type: dict) -> Optional[dict]:
     hourly = location_pricing.get("price_hourly", {})
     monthly = location_pricing.get("price_monthly", {})
 
-    hourly_gross = hourly.get("gross")
-    monthly_gross = monthly.get("gross")
+    # Use net prices (without VAT) for consistency across providers
+    hourly_net = hourly.get("net")
+    monthly_net = monthly.get("net")
 
-    if not hourly_gross or not monthly_gross:
+    if not hourly_net or not monthly_net:
         return None
 
     return {
-        "hourly": float(hourly_gross),
-        "monthly": float(monthly_gross),
+        "hourly": float(hourly_net),
+        "monthly": float(monthly_net),
     }
 
 
@@ -249,10 +250,8 @@ def fetch_ovhcloud_pricing(config: dict) -> int:
         pricings = addon.get("pricings", [])
         for pricing in pricings:
             # OVH catalog returns net price + tax separately
-            # Use gross (price + tax) to match Hetzner's gross pricing
-            price_net = pricing.get("price", 0)
-            tax = pricing.get("tax", 0)
-            hourly = (price_net + tax) / 100_000_000
+            # Use net price (without VAT) for consistency
+            hourly = pricing.get("price", 0) / 100_000_000
             if hourly > 0:
                 flavor_prices[flavor_name] = hourly
                 break
