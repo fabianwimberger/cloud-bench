@@ -27,10 +27,19 @@
         state: directory
         mode: '0755'
 
+    - name: Wait for cloud-init to finish
+      command: cloud-init status --wait
+      changed_when: false
+      timeout: 300
+
     - name: Wait for apt locks to be released
       shell: |
         while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
-              fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
+              fuser /var/lib/dpkg/lock >/dev/null 2>&1 || \
+              fuser /var/lib/apt/lists/lock >/dev/null 2>&1 || \
+              pgrep -x apt-get >/dev/null 2>&1 || \
+              pgrep -x dpkg >/dev/null 2>&1 || \
+              pgrep -x unattended-upgr >/dev/null 2>&1; do
           sleep 3
         done
       changed_when: false
@@ -49,6 +58,7 @@
       until: apt_result is not failed
       retries: 5
       delay: 10
+      timeout: 300
 
     - name: Validate required tools are available
       command: "{{ item }}"
