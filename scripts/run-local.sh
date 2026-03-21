@@ -77,16 +77,14 @@ validate_credentials() {
             ;;
         ovhcloud)
             local ovh_missing=()
-            [ -z "$OVH_APPLICATION_KEY" ] && ovh_missing+=("OVH_APPLICATION_KEY")
-            [ -z "$OVH_APPLICATION_SECRET" ] && ovh_missing+=("OVH_APPLICATION_SECRET")
-            [ -z "$OVH_CONSUMER_KEY" ] && ovh_missing+=("OVH_CONSUMER_KEY")
+            [ -z "$OVH_OPENSTACK_USERNAME" ] && ovh_missing+=("OVH_OPENSTACK_USERNAME")
+            [ -z "$OVH_OPENSTACK_PASSWORD" ] && ovh_missing+=("OVH_OPENSTACK_PASSWORD")
             [ -z "$OVH_CLOUD_PROJECT_ID" ] && ovh_missing+=("OVH_CLOUD_PROJECT_ID")
             if [ ${#ovh_missing[@]} -ne 0 ]; then
                 echo "[ERROR] OVHcloud credentials not set: ${ovh_missing[*]}"
                 echo "Set them with:"
-                echo "  export OVH_APPLICATION_KEY=your-app-key"
-                echo "  export OVH_APPLICATION_SECRET=your-app-secret"
-                echo "  export OVH_CONSUMER_KEY=your-consumer-key"
+                echo "  export OVH_OPENSTACK_USERNAME=user-xxxxxxxxxxxxxxxx"
+                echo "  export OVH_OPENSTACK_PASSWORD=your-password"
                 echo "  export OVH_CLOUD_PROJECT_ID=your-project-id"
                 exit 1
             fi
@@ -137,39 +135,36 @@ build_tf_vars() {
         hetzner)
             common_vars+=(
                 -var="hcloud_token=$HCLOUD_TOKEN"
-                -var="aws_access_key_id="
-                -var="aws_secret_access_key="
-                -var="ovh_application_key="
-                -var="ovh_application_secret="
-                -var="ovh_consumer_key="
-                -var="ovh_cloud_project_id="
+                -var="aws_access_key_id=unused"
+                -var="aws_secret_access_key=unused"
+                -var="ovh_openstack_username=unused"
+                -var="ovh_openstack_password=unused"
+                -var="ovh_cloud_project_id=unused"
             )
             ;;
         aws)
             common_vars+=(
-                -var="hcloud_token=unused"
+                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
                 -var="aws_access_key_id=$AWS_ACCESS_KEY_ID"
                 -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
-                -var="ovh_application_key="
-                -var="ovh_application_secret="
-                -var="ovh_consumer_key="
+                -var="ovh_openstack_username=unused"
+                -var="ovh_openstack_password=unused"
                 -var="ovh_cloud_project_id="
             )
             ;;
         ovhcloud)
             common_vars+=(
-                -var="hcloud_token=unused"
-                -var="aws_access_key_id="
-                -var="aws_secret_access_key="
-                -var="ovh_application_key=$OVH_APPLICATION_KEY"
-                -var="ovh_application_secret=$OVH_APPLICATION_SECRET"
-                -var="ovh_consumer_key=$OVH_CONSUMER_KEY"
+                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
+                -var="aws_access_key_id=unused"
+                -var="aws_secret_access_key=unused"
+                -var="ovh_openstack_username=$OVH_OPENSTACK_USERNAME"
+                -var="ovh_openstack_password=$OVH_OPENSTACK_PASSWORD"
                 -var="ovh_cloud_project_id=$OVH_CLOUD_PROJECT_ID"
             )
             ;;
     esac
 
-    echo "${common_vars[@]}"
+    printf '%q ' "${common_vars[@]}"
 }
 
 # Main execution

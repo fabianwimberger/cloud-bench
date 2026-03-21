@@ -84,7 +84,7 @@ jobs:
         env:
           TOKEN_SET: ${{ secrets.HCLOUD_TOKEN != '' }}
           AWS_KEY_SET: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
-          OVH_KEY_SET: ${{ secrets.OVH_APPLICATION_KEY != '' }}
+          OVH_KEY_SET: ${{ secrets.OVH_OPENSTACK_USERNAME != '' }}
           INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
         run: |
           if [ "${{ github.event.inputs.provider }}" = "hetzner" ] && [ "$TOKEN_SET" != "true" ]; then
@@ -96,7 +96,7 @@ jobs:
             exit 1
           fi
           if [ "${{ github.event.inputs.provider }}" = "ovhcloud" ] && [ "$OVH_KEY_SET" != "true" ]; then
-            echo "::error::OVH_APPLICATION_KEY, OVH_APPLICATION_SECRET, OVH_CONSUMER_KEY, and OVH_CLOUD_PROJECT_ID secrets are required for OVHcloud"
+            echo "::error::OVH_OPENSTACK_USERNAME, OVH_OPENSTACK_PASSWORD, and OVH_CLOUD_PROJECT_ID secrets are required for OVHcloud"
             exit 1
           fi
           if [ -n "$INSTANCE_REGIONS" ] && [ "$INSTANCE_REGIONS" != "{}" ]; then
@@ -177,12 +177,11 @@ jobs:
             -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
             -var="default_region=${{ steps.resolve_region.outputs.region }}" \
             -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
-            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
-            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || '' }}" \
-            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || '' }}" \
-            -var="ovh_application_key=${{ secrets.OVH_APPLICATION_KEY || '' }}" \
-            -var="ovh_application_secret=${{ secrets.OVH_APPLICATION_SECRET || '' }}" \
-            -var="ovh_consumer_key=${{ secrets.OVH_CONSUMER_KEY || '' }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}" \
+            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
+            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
+            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || '' }}" \
+            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || '' }}" \
             -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || '' }}" \
             -var="ssh_public_key_path=~/.ssh/cloud_bench.pub" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
@@ -474,12 +473,11 @@ jobs:
             -var="enabled_instances=${{ needs.provision.outputs.instances_arg }}" \
             -var="default_region=${{ needs.provision.outputs.region }}" \
             -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
-            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
-            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || '' }}" \
-            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || '' }}" \
-            -var="ovh_application_key=${{ secrets.OVH_APPLICATION_KEY || '' }}" \
-            -var="ovh_application_secret=${{ secrets.OVH_APPLICATION_SECRET || '' }}" \
-            -var="ovh_consumer_key=${{ secrets.OVH_CONSUMER_KEY || '' }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}" \
+            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
+            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
+            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || '' }}" \
+            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || '' }}" \
             -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || '' }}" \
             -var="ssh_public_key_path=/dev/null" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
@@ -492,7 +490,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ needs.provision.outputs.region }}
-          OVH_APPLICATION_KEY: ${{ secrets.OVH_APPLICATION_KEY }}
+          OVH_OPENSTACK_USERNAME: ${{ secrets.OVH_OPENSTACK_USERNAME }}
         run: |
           echo "Verifying cleanup..."
 
@@ -540,7 +538,7 @@ jobs:
 
           elif [ "${{ github.event.inputs.provider }}" = "ovhcloud" ]; then
             # Verify OVH instances are cleaned up via API
-            if [ -n "$OVH_APPLICATION_KEY" ]; then
+            if [ -n "$OVH_OPENSTACK_USERNAME" ]; then
               echo "Checking OVH instances via Terraform state (already destroyed)..."
               echo "[OK] OVH resources cleaned up via Terraform destroy"
             else
