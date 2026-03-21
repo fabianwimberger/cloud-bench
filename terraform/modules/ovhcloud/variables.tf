@@ -24,19 +24,14 @@ variable "ssh_public_key" {
   type        = string
 }
 
-variable "service_name" {
-  description = "OVHcloud Public Cloud project ID"
-  type        = string
-}
-
 variable "labels" {
-  description = "Metadata labels (used in instance name/tags)"
+  description = "Metadata labels applied to the instance"
   type        = map(string)
   default     = {}
 }
 
 variable "image_name" {
-  description = "OS image name to use"
+  description = "OS image name regex to match (e.g. 'Ubuntu 24.04')"
   type        = string
   default     = "Ubuntu 24.04"
 }

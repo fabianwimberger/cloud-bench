@@ -1,17 +1,14 @@
 output "server_ip" {
   description = "Public IPv4 address of the instance"
-  value = [
-    for addr in ovh_cloud_project_instance.benchmark.addresses :
-    addr.ip if addr.version == 4
-  ][0]
+  value       = openstack_compute_instance_v2.benchmark.network[0].fixed_ip_v4
 }
 
 output "server_name" {
   description = "Name of the instance"
-  value       = var.instance_name
+  value       = openstack_compute_instance_v2.benchmark.name
 }
 
 output "instance_id" {
-  description = "OVHcloud instance ID"
-  value       = ovh_cloud_project_instance.benchmark.id
+  description = "OpenStack instance ID"
+  value       = openstack_compute_instance_v2.benchmark.id
 }

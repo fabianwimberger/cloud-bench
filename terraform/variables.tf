@@ -101,22 +101,15 @@ variable "aws_ebs_size" {
   default     = 20
 }
 
-variable "ovh_application_key" {
-  description = "OVHcloud application key"
+variable "ovh_openstack_username" {
+  description = "OVHcloud OpenStack user (from Public Cloud > Users & Roles)"
   type        = string
   sensitive   = true
   default     = ""
 }
 
-variable "ovh_application_secret" {
-  description = "OVHcloud application secret"
-  type        = string
-  sensitive   = true
-  default     = ""
-}
-
-variable "ovh_consumer_key" {
-  description = "OVHcloud consumer key"
+variable "ovh_openstack_password" {
+  description = "OVHcloud OpenStack user password"
   type        = string
   sensitive   = true
   default     = ""

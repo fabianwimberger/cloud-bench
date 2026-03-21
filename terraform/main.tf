@@ -10,9 +10,9 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    ovh = {
-      source  = "ovh/ovh"
-      version = "~> 2.12"
+    openstack = {
+      source  = "terraform-provider-openstack/openstack"
+      version = "~> 2.0"
     }
   }
 
@@ -36,11 +36,13 @@ provider "aws" {
   skip_metadata_api_check     = var.cloud_provider != "aws"
 }
 
-provider "ovh" {
-  endpoint           = "ovh-eu"
-  application_key    = var.ovh_application_key
-  application_secret = var.ovh_application_secret
-  consumer_key       = var.ovh_consumer_key
+provider "openstack" {
+  auth_url         = "https://auth.cloud.ovh.net/v3"
+  user_name        = var.ovh_openstack_username
+  password         = var.ovh_openstack_password
+  tenant_id        = var.ovh_cloud_project_id
+  user_domain_name = "Default"
+  region           = local.effective_region
 }
 
 locals {
@@ -122,7 +124,6 @@ module "ovhcloud_instances" {
   region         = local.effective_region
   ssh_key_name   = "cloud-bench-${each.value.id}-${var.run_id}"
   ssh_public_key = local.ssh_public_key
-  service_name   = var.ovh_cloud_project_id
   labels         = merge(local.common_labels, { instance_type = each.value.id })
 }
 

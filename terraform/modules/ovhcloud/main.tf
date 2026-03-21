@@ -1,45 +1,27 @@
 terraform {
   required_providers {
-    ovh = {
-      source  = "ovh/ovh"
-      version = "~> 2.12"
+    openstack = {
+      source  = "terraform-provider-openstack/openstack"
+      version = "~> 2.0"
     }
   }
 }
 
-locals {
-  cloud_init = templatefile("${path.module}/cloud-init.yml.tmpl", {
-    ssh_public_key = var.ssh_public_key
-  })
+resource "openstack_compute_keypair_v2" "benchmark" {
+  name       = var.ssh_key_name
+  public_key = var.ssh_public_key
 }
 
-resource "ovh_cloud_project_ssh_key" "benchmark" {
-  service_name = var.service_name
-  name         = var.ssh_key_name
-  public_key   = var.ssh_public_key
-}
-
-resource "ovh_cloud_project_instance" "benchmark" {
-  service_name   = var.service_name
-  name           = var.instance_name
-  region         = var.region
-  billing_period = "hourly"
-
-  flavor {
-    flavor_id = local.flavor.id
-  }
-
-  boot_from {
-    image_id = local.image.id
-  }
+resource "openstack_compute_instance_v2" "benchmark" {
+  name        = var.instance_name
+  flavor_name = var.instance_type
+  image_id    = data.openstack_images_image_v2.os.id
+  key_pair    = openstack_compute_keypair_v2.benchmark.name
+  user_data   = file("${path.module}/cloud-init.yml.tmpl")
 
   network {
-    public = true
+    name = "Ext-Net"
   }
 
-  ssh_key {
-    name = ovh_cloud_project_ssh_key.benchmark.name
-  }
-
-  user_data = local.cloud_init
+  metadata = var.labels
 }
