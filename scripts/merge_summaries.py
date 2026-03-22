@@ -46,44 +46,87 @@ def main():
         print("[WARN] No runs in manifest", file=sys.stderr)
         sys.exit(0)
 
-    # Find latest run per provider
-    latest_per_provider: dict[str, dict] = {}
+    # Group runs by provider
+    runs_by_provider: dict[str, list[dict]] = {}
     for run in runs:
         provider = run.get("provider", "unknown")
-        if provider not in latest_per_provider:
-            latest_per_provider[provider] = run
+        runs_by_provider.setdefault(provider, []).append(run)
 
-    print(f"Found latest runs for: {', '.join(latest_per_provider.keys())}")
+    print(f"Found providers: {', '.join(runs_by_provider.keys())}")
 
-    # Merge summaries
+    # Load all summaries and average metrics per instance across runs
     all_instances = []
     all_labels = []
     exchange_rates = {}
     providers_seen = []
 
-    for provider, run in latest_per_provider.items():
-        raw_path = run["files"]["summary"]
-        # Strip leading "data/" prefix since --data-dir already points to data/
-        if raw_path.startswith("data/"):
-            raw_path = raw_path[5:]
-        summary_path = os.path.join(args.data_dir, raw_path)
-        summary = load_json(summary_path)
-        if not summary:
-            print(f"  [WARN] No summary for {provider} run {run['id']}")
+    metrics_keys = [
+        "cpu_single_events",
+        "cpu_multi_events",
+        "memory_mib_per_sec",
+        "disk_iops",
+    ]
+
+    for provider, provider_runs in runs_by_provider.items():
+        # Collect all instances across all runs for this provider
+        # instance_id -> list of instance dicts (one per run)
+        instance_runs: dict[str, list[dict]] = {}
+        latest_meta: dict = {}
+
+        for run in provider_runs:
+            raw_path = run["files"]["summary"]
+            # Strip leading "data/" prefix since --data-dir already points to data/
+            if raw_path.startswith("data/"):
+                raw_path = raw_path[5:]
+            summary_path = os.path.join(args.data_dir, raw_path)
+            summary = load_json(summary_path)
+            if not summary:
+                print(f"  [WARN] No summary for {provider} run {run['id']}")
+                continue
+
+            meta = summary.get("metadata", {})
+            if not latest_meta:
+                latest_meta = meta
+
+            for inst in summary.get("summary", {}).get("instances", []):
+                inst_id = inst.get("id", "")
+                if inst_id:
+                    instance_runs.setdefault(inst_id, []).append(inst)
+
+        if not instance_runs:
             continue
 
         providers_seen.append(provider)
-        meta = summary.get("metadata", {})
-        if not exchange_rates and meta.get("exchange_rates"):
-            exchange_rates = meta["exchange_rates"]
+        if not exchange_rates and latest_meta.get("exchange_rates"):
+            exchange_rates = latest_meta["exchange_rates"]
 
-        currency = meta.get("currency", "USD")
-        eur_to_usd = meta.get("exchange_rates", {}).get("eur_to_usd", 1.0)
+        currency = latest_meta.get("currency", "USD")
+        eur_to_usd = latest_meta.get("exchange_rates", {}).get("eur_to_usd", 1.0)
 
-        for inst in summary.get("summary", {}).get("instances", []):
+        run_count_for_provider = len(provider_runs)
+
+        for inst_id, inst_list in instance_runs.items():
+            # Start from the most recent run's data as the base
+            inst = json.loads(json.dumps(inst_list[-1]))
+
+            # Average raw metrics across all runs for this instance
+            if len(inst_list) > 1:
+                metrics = inst.get("metrics", {})
+                for mk in metrics_keys:
+                    values = [
+                        r.get("metrics", {}).get(mk, 0)
+                        for r in inst_list
+                        if r.get("metrics", {}).get(mk, 0) > 0
+                    ]
+                    if values:
+                        metrics[mk] = round(sum(values) / len(values), 1)
+                print(
+                    f"  [AVG] {inst_id}: averaged {len(inst_list)} runs"
+                )
+
             # Tag each instance with its provider for the frontend
             inst["provider"] = provider
-            inst["region"] = run.get("region", "")
+            inst["region"] = provider_runs[-1].get("region", "")
 
             # Normalize all prices to USD
             if currency == "EUR":
@@ -95,7 +138,7 @@ def main():
             all_labels.append(inst["id"])
 
         print(
-            f"  [OK] {provider}: {len(summary.get('summary', {}).get('instances', []))} instances"
+            f"  [OK] {provider}: {len(instance_runs)} instances (from {run_count_for_provider} runs)"
         )
 
     # Re-score across all instances so scores are comparable
