@@ -1,0 +1,203 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-03-22T10:38:52.252980",
+    "run_count": 5,
+    "currency": "EUR",
+    "provider": "ovhcloud",
+    "region": "DE1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1555,
+      "usd_to_eur": 0.8654,
+      "last_updated": "2026-03-20",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "instances": [
+    {
+      "id": "C3-8",
+      "name": "C3-8 (X86)",
+      "scores": {
+        "single_core": 86.1,
+        "multi_core": 100.0,
+        "memory": 94.3,
+        "disk": 100.0,
+        "overall": 95.2
+      },
+      "metrics": {
+        "cpu_single_raw": 1440.11,
+        "cpu_multi_raw": 5755.68,
+        "mem_read_raw": 17323.58,
+        "mem_write_raw": 5975.27,
+        "mem_throughput_raw": 23298.850000000002,
+        "disk_iops_raw": 41243.549402
+      },
+      "pricing": {
+        "hourly": 0.083,
+        "monthly": 59.76
+      },
+      "value": 1.56,
+      "specs": {
+        "vcpu": 4,
+        "ram_gb": 8,
+        "disk_gb": 100,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 4,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "R3-16",
+      "name": "R3-16 (X86)",
+      "scores": {
+        "single_core": 100.0,
+        "multi_core": 58.1,
+        "memory": 100.0,
+        "disk": 49.2,
+        "overall": 78.9
+      },
+      "metrics": {
+        "cpu_single_raw": 1672.21,
+        "cpu_multi_raw": 3345.9,
+        "mem_read_raw": 14639.74,
+        "mem_write_raw": 10076.72,
+        "mem_throughput_raw": 24716.46,
+        "disk_iops_raw": 20308.645801
+      },
+      "pricing": {
+        "hourly": 0.0602,
+        "monthly": 43.34
+      },
+      "value": 1.82,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 16,
+        "disk_gb": 50,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 16384
+      }
+    },
+    {
+      "id": "B3-8",
+      "name": "B3-8 (X86)",
+      "scores": {
+        "single_core": 86.3,
+        "multi_core": 50.0,
+        "memory": 75.5,
+        "disk": 49.2,
+        "overall": 66.0
+      },
+      "metrics": {
+        "cpu_single_raw": 1442.33,
+        "cpu_multi_raw": 2876.34,
+        "mem_read_raw": 10034.64,
+        "mem_write_raw": 8627.14,
+        "mem_throughput_raw": 18661.78,
+        "disk_iops_raw": 20308.645801
+      },
+      "pricing": {
+        "hourly": 0.0465,
+        "monthly": 33.48
+      },
+      "value": 2.04,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 8,
+        "disk_gb": 50,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "C3-4",
+      "name": "C3-4 (X86)",
+      "scores": {
+        "single_core": 85.9,
+        "multi_core": 49.9,
+        "memory": 73.0,
+        "disk": 49.2,
+        "overall": 65.0
+      },
+      "metrics": {
+        "cpu_single_raw": 1436.28,
+        "cpu_multi_raw": 2873.04,
+        "mem_read_raw": 9867.57,
+        "mem_write_raw": 8178.37,
+        "mem_throughput_raw": 18045.94,
+        "disk_iops_raw": 20308.645801
+      },
+      "pricing": {
+        "hourly": 0.0415,
+        "monthly": 29.88
+      },
+      "value": 2.27,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 50,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    },
+    {
+      "id": "D2-4",
+      "name": "D2-4 (X86)",
+      "scores": {
+        "single_core": 17.2,
+        "multi_core": 9.8,
+        "memory": 51.7,
+        "disk": 29.4,
+        "overall": 30.8
+      },
+      "metrics": {
+        "cpu_single_raw": 287.28,
+        "cpu_multi_raw": 563.09,
+        "mem_read_raw": 7825.39,
+        "mem_write_raw": 4947.96,
+        "mem_throughput_raw": 12773.35,
+        "disk_iops_raw": 12110.505405
+      },
+      "pricing": {
+        "hourly": 0.0198,
+        "monthly": 14.26
+      },
+      "value": 0.95,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 50,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    }
+  ]
+}
