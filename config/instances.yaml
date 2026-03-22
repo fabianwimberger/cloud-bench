@@ -93,6 +93,15 @@ providers:
       DE1:
         name: Frankfurt
     instances:
+    - id: d2-4
+      name: D2-4
+      arch: X86
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 50
+      pricing:
+        hourly: 0.0198
+        monthly: 14.26
     - id: b3-8
       name: B3-8
       arch: X86
