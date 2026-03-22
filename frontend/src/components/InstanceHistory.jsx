@@ -228,10 +228,10 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
               <tr>
                 <th>Date</th>
                 <th>Region</th>
-                <th className="cell-numeric">Single Core</th>
-                <th className="cell-numeric">Multi Core</th>
+                <th className="cell-numeric">CPU Single</th>
+                <th className="cell-numeric">CPU Multi</th>
                 <th className="cell-numeric">Memory</th>
-                <th className="cell-numeric">Disk</th>
+                <th className="cell-numeric">Disk IOPS</th>
                 <th className="cell-numeric">Monthly Price</th>
               </tr>
             </thead>
@@ -248,26 +248,26 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.scores?.single_core ?? 0} />
-                      <span>{(run.scores?.single_core ?? 0).toFixed(1)}</span>
+                      <ScoreBar value={run.relative_scores?.single_core ?? 0} />
+                      <span>{Math.round(run.metrics?.cpu_single_raw || 0).toLocaleString()}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.scores?.multi_core ?? 0} />
-                      <span>{(run.scores?.multi_core ?? 0).toFixed(1)}</span>
+                      <ScoreBar value={run.relative_scores?.multi_core ?? 0} />
+                      <span>{Math.round(run.metrics?.cpu_multi_raw || 0).toLocaleString()}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.scores?.memory ?? 0} />
-                      <span>{(run.scores?.memory ?? 0).toFixed(1)}</span>
+                      <ScoreBar value={run.relative_scores?.memory ?? 0} />
+                      <span>{Math.round(run.metrics?.mem_throughput_raw || 0).toLocaleString()} <span className="metric-unit">MiB/s</span></span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.scores?.disk ?? 0} />
-                      <span>{(run.scores?.disk ?? 0).toFixed(1)}</span>
+                      <ScoreBar value={run.relative_scores?.disk ?? 0} />
+                      <span>{Math.round(run.metrics?.disk_iops_raw || 0).toLocaleString()}</span>
                     </div>
                   </td>
                   <td className="price-cell cell-numeric">
@@ -282,7 +282,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
         <p className="table-note">
           Showing {displayRuns.length} historical run{displayRuns.length !== 1 ? 's' : ''} for {instanceType}.
           <br />
-          Chart shows relative performance (best run = 100). Table shows actual scores from each run.
+          Chart shows relative performance (best run = 100). Table shows raw metrics from each run.
         </p>
       </div>
     </div>
