@@ -73,3 +73,7 @@ htmlcov/
 
 # Logs
 *.log
+
+# Local benchmark artifacts
+bench-*.json
+randread.*

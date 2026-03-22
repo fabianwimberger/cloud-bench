@@ -248,26 +248,26 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.relative_scores?.single_core ?? 0} />
-                      <span>{(run.relative_scores?.single_core ?? 0).toFixed(0)}</span>
+                      <ScoreBar value={run.scores?.single_core ?? 0} />
+                      <span>{(run.scores?.single_core ?? 0).toFixed(1)}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.relative_scores?.multi_core ?? 0} />
-                      <span>{(run.relative_scores?.multi_core ?? 0).toFixed(0)}</span>
+                      <ScoreBar value={run.scores?.multi_core ?? 0} />
+                      <span>{(run.scores?.multi_core ?? 0).toFixed(1)}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.relative_scores?.memory ?? 0} />
-                      <span>{(run.relative_scores?.memory ?? 0).toFixed(0)}</span>
+                      <ScoreBar value={run.scores?.memory ?? 0} />
+                      <span>{(run.scores?.memory ?? 0).toFixed(1)}</span>
                     </div>
                   </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <ScoreBar value={run.relative_scores?.disk ?? 0} />
-                      <span>{(run.relative_scores?.disk ?? 0).toFixed(0)}</span>
+                      <ScoreBar value={run.scores?.disk ?? 0} />
+                      <span>{(run.scores?.disk ?? 0).toFixed(1)}</span>
                     </div>
                   </td>
                   <td className="price-cell cell-numeric">
@@ -282,7 +282,7 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
         <p className="table-note">
           Showing {displayRuns.length} historical run{displayRuns.length !== 1 ? 's' : ''} for {instanceType}.
           <br />
-          Scores are relative to the best performance for this instance type (best = 100).
+          Chart shows relative performance (best run = 100). Table shows actual scores from each run.
         </p>
       </div>
     </div>
