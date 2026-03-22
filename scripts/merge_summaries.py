@@ -120,9 +120,7 @@ def main():
                     ]
                     if values:
                         metrics[mk] = round(sum(values) / len(values), 1)
-                print(
-                    f"  [AVG] {inst_id}: averaged {len(inst_list)} runs"
-                )
+                print(f"  [AVG] {inst_id}: averaged {len(inst_list)} runs")
 
             # Tag each instance with its provider for the frontend
             inst["provider"] = provider
