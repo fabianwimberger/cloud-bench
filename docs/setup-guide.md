@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- GitHub account
-- Hetzner Cloud account, AWS account, and/or OVHcloud account
+- GitHub account (for Actions-based benchmarking)
+- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud
 
 ## Hetzner Setup
 
@@ -67,7 +67,7 @@ In [OVHcloud Control Panel](https://www.ovh.com/manager/), go to **Public Cloud 
 Download the OpenStack RC file or note the:
 - Username (format: `user-xxxxx`)
 - Password
-- Project ID
+- Project ID (found in Public Cloud > Project Settings)
 
 ### 3. Add secrets to GitHub
 
@@ -84,7 +84,11 @@ In OVHcloud Control Panel, set a budget alert as a safety net.
 
 Go to **Actions > Run Benchmarks > Run workflow**. Select provider `ovhcloud` and region `DE1`.
 
-## Local run
+Note: OVHcloud uses the OpenStack API and does not support security groups. Instances are protected by SSH key authentication only.
+
+## Local Run (Cloud Provisioning)
+
+Run the full benchmark pipeline locally (provisions cloud instances, runs benchmarks, processes results):
 
 ```bash
 # Hetzner
@@ -105,23 +109,32 @@ PROVIDER=ovhcloud ./scripts/run-local.sh
 
 The script auto-detects your IP for the firewall/security group. It provisions, benchmarks, processes results, and prompts to destroy.
 
+## Local Run (No Cloud)
+
+To benchmark your own machine without cloud credentials:
+
+```bash
+sudo bash scripts/run-local-bench.sh
+```
+
+See [local-benchmark.md](local-benchmark.md) for details.
+
 ## Verifying
 
 ```bash
 cd terraform
 terraform init
+
 # Hetzner
 terraform plan -var="run_id=test" -var="hcloud_token=$HCLOUD_TOKEN" -var='allowed_ssh_ips=["YOUR_IP/32"]'
+
 # AWS
 terraform plan -var="run_id=test" -var="cloud_provider=aws" -var='allowed_ssh_ips=["YOUR_IP/32"]'
+
 # OVHcloud
 terraform plan -var="run_id=test" -var="cloud_provider=ovhcloud" -var='allowed_ssh_ips=["YOUR_IP/32"]'
 ```
 
 ## Troubleshooting
 
-**SSH failures**: The workflow auto-whitelists the runner IP. For local runs, check that `ALLOWED_SSH_IPS` is set correctly. AWS and OVHcloud use `ubuntu` as the SSH user (not `root`).
-
-**Terraform errors**: Run `terraform init` and `terraform validate`. If state is stale, `terraform state list` to inspect.
-
-**Cleanup didn't run**: Delete resources manually in Hetzner Console / AWS EC2 Console / OVHcloud Horizon, or run `terraform destroy` from the `terraform/` directory.
+See [runbook.md](runbook.md) for common issues and fixes.

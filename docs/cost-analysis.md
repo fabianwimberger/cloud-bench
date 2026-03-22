@@ -1,32 +1,43 @@
-# Cost
+# Cost Analysis
 
-## Per run
+## Per Run
 
-A benchmark run creates all configured instances for a single provider for ~10 minutes. This costs a few cents per run.
+A benchmark run provisions all configured instances for a single provider for ~10 minutes, then destroys them. Costs a few cents.
 
-Exact pricing depends on which instances are configured in `config/instances.yaml`.
+| Provider | Instances | Typical Cost |
+|----------|-----------|-------------|
+| Hetzner  | 8         | ~€0.05      |
+| AWS      | 6         | ~$0.15      |
+| OVHcloud | 5         | ~€0.15      |
 
-| Provider | Typical run cost | Currency |
-|----------|-----------------|----------|
-| Hetzner  | ~€0.05          | EUR      |
-| AWS      | ~$0.15          | USD      |
-| OVHcloud | ~€0.15          | EUR      |
+Exact cost depends on which instances are configured in `config/instances.yaml`. The cost-guard workflow estimates this before each run and blocks anything over $5 or 15 instances.
 
-## Worst case
+## Worst Case
 
-If cleanup fails and instances keep running, the maximum cost equals the sum of hourly prices for all configured instances. Check `config/instances.yaml` for current pricing.
+If cleanup fails and instances keep running, the maximum hourly cost is the sum of all configured hourly prices:
 
-**Safety nets:**
-- Set a billing alert in Hetzner Console (e.g. €10)
-- Set a budget alert in AWS Budgets (e.g. $10)
-- Set a budget alert in OVHcloud Control Panel (e.g. €10)
-- Orphan cleanup workflows run every 6 hours (Hetzner, AWS) or manual trigger (OVHcloud) as safety net
+| Provider | All instances hourly | All instances monthly |
+|----------|---------------------|----------------------|
+| Hetzner  | €0.1167             | €72.72               |
+| AWS      | $0.2792             | $198.91              |
+| OVHcloud | €0.2310             | €180.72              |
 
-## Provider comparison
+## Safety Nets
+
+1. **Cost guard** — pre-run estimation blocks expensive configurations
+2. **Billing alerts** — set in each provider's console (recommended: €10 / $10)
+3. **Auto-cleanup** — `if: always()` in CI destroys infrastructure even on failure
+4. **Orphan cleanup** — scheduled workflows terminate instances older than 2 hours
+   - Hetzner: every 6 hours (automated)
+   - AWS: every 6 hours (automated)
+   - OVHcloud: manual trigger
+
+## Provider Comparison
 
 | | Hetzner | AWS | OVHcloud |
 |---|---------|-----|----------|
-| Pricing model | Simple, predictable | On-demand, region-dependent | Simple, hourly/monthly |
+| Pricing | Simple, flat hourly/monthly | On-demand, region-dependent | Hourly consumption billing |
 | Hidden fees | None | Egress, EBS IOPS (minimal for benchmarks) | None |
-| Entry-level cost | ~€3.50/mo (CX23) | ~$24/mo (t4g.medium) | ~€20/mo (C3-4) |
+| Cheapest instance | €2.99/mo (CX23) | $6.91/mo (t4g.micro) | €14.26/mo (D2-4) |
 | Cleanup | hcloud CLI / scheduled workflow | AWS CLI / scheduled workflow | OpenStack CLI / manual workflow |
+| Billing granularity | Hourly | Per-second | Hourly |

@@ -4,29 +4,72 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Results](https://img.shields.io/badge/Live%20Results-View%20Dashboard-blue)](https://fabianwimberger.github.io/cloud-bench/)
 
-A cloud instance benchmarking suite comparing CPU, memory, and disk performance across instance types and providers with cost analysis.
+A cloud instance benchmarking suite comparing CPU, memory, and disk performance across providers with cost analysis. 19 instance types across Hetzner Cloud, AWS EC2, and OVHcloud.
 
 ## Why This Project?
 
-Cloud instance pricing and performance characteristics vary significantly between providers and instance types. $20/month can get you vastly different compute capabilities depending on your choice. This project provides reproducible, data-driven benchmarks to make informed infrastructure decisions based on actual performance rather than marketing specifications.
+Cloud instance pricing and performance vary significantly between providers and instance types. $20/month can get you vastly different compute capabilities depending on your choice. This project provides reproducible, data-driven benchmarks to make informed infrastructure decisions based on actual performance rather than marketing specs.
 
 **Goals:**
 - Compare instance types objectively using standardized benchmarks
 - Factor in cost to determine real value (performance per dollar)
 - Provide reproducible results that can be independently verified
 
-## Features
+## Live Dashboard
 
-- **Multi-provider support** — Hetzner Cloud, AWS EC2, and OVHcloud
-- **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
-- **Cost analysis** — performance per dollar across instance types
-- **Currency support** — EUR (Hetzner, OVHcloud) and USD (AWS) with toggle in dashboard
-- **Interactive dashboard** — React-based visualization with instance history tracking
-- **Historical data** — benchmark results persisted across runs on a dedicated data branch
-- **Automated infrastructure** — Terraform for provisioning, Ansible for execution
-- **Security-first** — fresh SSH keys per run, automatic cleanup
+View the latest results at **[fabianwimberger.github.io/cloud-bench](https://fabianwimberger.github.io/cloud-bench/)**
 
-## Quick Start
+Scores shown are averaged across all benchmark runs for each instance type, not just the latest run.
+
+## Instance Types
+
+### Hetzner Cloud (8 instances, EUR)
+
+| ID | vCPU | RAM | Disk | Monthly |
+|----|------|-----|------|---------|
+| cx23 | 2 | 4 GB | 40 GB | €2.99 |
+| cx33 | 4 | 8 GB | 80 GB | €4.99 |
+| cax11 (ARM) | 2 | 4 GB | 40 GB | €3.29 |
+| cax21 (ARM) | 4 | 8 GB | 80 GB | €5.99 |
+| cpx22 | 2 | 4 GB | 80 GB | €5.99 |
+| cpx32 | 4 | 8 GB | 160 GB | €10.49 |
+| ccx13 | 2 | 8 GB | 80 GB | €12.99 |
+| ccx23 | 4 | 16 GB | 160 GB | €25.99 |
+
+### AWS EC2 (6 instances, USD, eu-central-1)
+
+| ID | vCPU | RAM | Disk | Monthly |
+|----|------|-----|------|---------|
+| t3.micro | 2 | 1 GB | 20 GB | $8.64 |
+| t3.small | 2 | 2 GB | 20 GB | $17.28 |
+| t4g.micro (ARM) | 2 | 1 GB | 20 GB | $6.91 |
+| t4g.small (ARM) | 2 | 2 GB | 20 GB | $13.82 |
+| c7i-flex.large | 2 | 4 GB | 20 GB | $69.67 |
+| m7i-flex.large | 2 | 8 GB | 20 GB | $82.59 |
+
+### OVHcloud (5 instances, EUR, DE1)
+
+| ID | vCPU | RAM | Disk | Monthly |
+|----|------|-----|------|---------|
+| d2-4 | 2 | 4 GB | 50 GB | €14.26 |
+| b3-8 | 2 | 8 GB | 50 GB | €33.48 |
+| c3-4 | 2 | 4 GB | 50 GB | €29.88 |
+| c3-8 | 4 | 8 GB | 100 GB | €59.76 |
+| r3-16 | 2 | 16 GB | 50 GB | €43.34 |
+
+## Run Benchmarks Locally
+
+Compare your own machine against the official results — no cloud credentials needed:
+
+```bash
+git clone https://github.com/fabianwimberger/cloud-bench.git
+cd cloud-bench
+sudo bash scripts/run-local-bench.sh
+```
+
+Runs the exact same sysbench/fio benchmarks and outputs a JSON file + terminal summary. See [docs/local-benchmark.md](docs/local-benchmark.md) for details.
+
+## Quick Start (Cloud Benchmarks)
 
 ```bash
 # Clone and configure
@@ -48,20 +91,22 @@ export OVH_OPENSTACK_PASSWORD="your-password"
 export OVH_CLOUD_PROJECT_ID="your-project-id"
 PROVIDER=ovhcloud ./scripts/run-local.sh
 
-# Or run via GitHub Actions: Actions → Run Benchmarks
+# Or run via GitHub Actions: Actions > Run Benchmarks
 ```
 
 ## How It Works
 
 ```
-Terraform → Ansible (sysbench/fio) → Python (scoring) → React Dashboard
+config/instances.yaml → Terraform → Ansible (sysbench/fio) → Python (scoring) → React Dashboard
 ```
 
 **Methodology:**
 - 5 runs per test, median value used for consistency
 - Scores normalized 0-100 per category
 - Weights: CPU 40%, Memory 35%, Disk 25%
+- Raw metrics averaged across all historical runs per instance
 - Cost-efficiency calculated from monthly price and composite score
+- All benchmarks run on Ubuntu 24.04 in EU (Frankfurt) regions
 
 ## Configuration
 
@@ -71,6 +116,7 @@ Edit `config/instances.yaml` to add/remove instances:
 providers:
   hetzner:
     currency: EUR
+    default_region: fsn1
     instances:
       - id: cx23
         name: CX23
@@ -79,81 +125,91 @@ providers:
         ram_gb: 4
         disk_gb: 40
         pricing:
-          hourly: 0.00576
-          monthly: 3.588
-  ovhcloud:
-    currency: EUR
-    instances:
-      - id: b3-8
-        name: B3-8
-        arch: X86
-        vcpu: 2
-        ram_gb: 8
-        disk_gb: 50
-        pricing:
-          hourly: 0.0300
-          monthly: 21.60
-  aws:
-    currency: USD
-    instances:
-      - id: t3.micro
-        name: t3.micro
-        arch: X86
-        vcpu: 2
-        ram_gb: 1
-        disk_gb: 20
-        pricing:
-          hourly: 0.012
-          monthly: 8.64
+          hourly: 0.0048
+          monthly: 2.99
 ```
+
+No code changes needed — Terraform, Ansible, and the frontend all pick up config changes automatically. See [docs/configuration.md](docs/configuration.md) for details.
 
 ## Project Structure
 
 ```
 cloud-bench/
-├── ansible/              # Benchmark playbooks
-│   └── playbooks/
-│       └── benchmark.yml
-├── config/               # Instance configurations
+├── ansible/              # Benchmark playbook + templates
+│   ├── playbooks/
+│   │   └── benchmark.yml
+│   └── templates/
+├── config/               # Instance types, specs, pricing
 │   └── instances.yaml
 ├── docs/                 # Documentation
-├── frontend/             # React dashboard
+├── frontend/             # React dashboard (Vite + Chart.js)
 │   └── src/
-├── scripts/              # Helper scripts
+│       └── components/
+├── scripts/              # Processing, pricing, utilities
 │   ├── process_results.py
+│   ├── merge_summaries.py
+│   ├── build_history.py
 │   ├── update_pricing.py
 │   ├── update_manifest.py
-│   ├── build_history.py
-│   └── run-local.sh
+│   ├── estimate_cost.py
+│   ├── validate.py
+│   ├── run-local.sh
+│   ├── run-local-bench.sh
+│   └── parse-instances.sh
 ├── terraform/            # Infrastructure provisioning
 │   └── modules/
 │       ├── hetzner/
 │       ├── aws/
 │       └── ovhcloud/
-└── tests/                # Test suite
+└── tests/
 ```
+
+## Features
+
+- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud (19 instance types)
+- **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
+- **Metric averaging** — scores based on all historical runs, not just the latest
+- **Cost analysis** — performance per dollar with EUR/USD toggle
+- **Interactive dashboard** — filtering, comparison, per-instance history charts
+- **Automated pricing** — live pricing from provider APIs + ECB exchange rates
+- **Security-first** — fresh SSH keys per run, firewall whitelisting, automatic cleanup
+- **Cost guards** — pre-run estimation blocks expensive configurations ($5 / 15 instance limit)
+- **Local benchmarking** — standalone script for users to compare their own hardware
 
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
+- Firewall/security group allows SSH from runner IP only
 - Auto-cleanup via `if: always()` — infrastructure destroyed even if benchmarks fail
-- Cost guard — estimation before each run blocks expensive configurations
+- Orphan cleanup workflows as safety net (every 6 hours for Hetzner/AWS, manual for OVHcloud)
 
 ## Cost
 
-~10 minutes per run, costs a few cents. Infrastructure is destroyed automatically even if benchmarks fail.
+~10 minutes per run, costs a few cents. Infrastructure is destroyed automatically.
 
-**Protection:**
-- Cost estimation before each run (blocks >$5 or >15 instances)
-- Orphan cleanup every 6 hours (Hetzner and AWS)
+| Provider | Typical run cost |
+|----------|-----------------|
+| Hetzner  | ~€0.05          |
+| AWS      | ~$0.15          |
+| OVHcloud | ~€0.15          |
+
+**Protection:** Cost estimation before each run (blocks >$5 or >15 instances), billing alerts recommended.
+
+## Documentation
+
+- [Setup Guide](docs/setup-guide.md) — credentials and first run
+- [Configuration](docs/configuration.md) — instances, regions, providers
+- [Architecture](docs/architecture.md) — system design and scoring
+- [Data Format](docs/data-format.md) — JSON schemas
+- [Cost Analysis](docs/cost-analysis.md) — per-run costs and safety nets
+- [Runbook](docs/runbook.md) — troubleshooting
+- [Local Benchmark](docs/local-benchmark.md) — run benchmarks on your own machine
 
 ## License
 
 MIT License — see [LICENSE](LICENSE) file.
 
 ### Third-Party Licenses
-
-This project uses the following open-source components:
 
 | Component | License | Source |
 |-----------|---------|--------|

@@ -1,112 +1,122 @@
-# Runbook: When Things Go Wrong
+# Runbook
 
-## Quick Fixes
+## Cleanup Failed — Resources Still Running
 
-### Cleanup Failed - Resources Still Running
+**Symptom**: Workflow failed, servers still running in provider console.
 
-**Symptom**: Workflow failed, servers still show in Hetzner Console, AWS Console, or OVHcloud Horizon.
-
-**Auto-fix**: Scheduled cleanup workflows run every 6 hours (Hetzner, AWS) or manual trigger (OVHcloud) and will clean up anything older than 2 hours or tagged `cloud-bench` resources.
+**Auto-fix**: Orphan cleanup workflows run every 6 hours (Hetzner, AWS) or manual trigger (OVHcloud) and clean up anything older than 2 hours tagged `cloud-bench`.
 
 **Manual fix (Hetzner)**:
 ```bash
-# Install hcloud CLI
-brew install hcloud  # macOS
-# or download from https://github.com/hetznercloud/cli/releases
-
-# Set your token
 export HCLOUD_TOKEN="your-token"
 
 # List cloud-bench servers
 hcloud server list | grep cloud-bench
 
-# Delete specific server
-hcloud server delete <server-name>
-
-# Or delete all cloud-bench servers
-hcloud server list -o json | jq -r '.[] | select(.name | contains("cloud-bench")) | .id' | xargs -I {} hcloud server delete {}
+# Delete all cloud-bench servers
+hcloud server list -o json | jq -r '.[] | select(.name | contains("cloud-bench")) | .id' \
+  | xargs -I {} hcloud server delete {}
 ```
 
 **Manual fix (AWS)**:
 ```bash
-# Using AWS CLI
 export AWS_DEFAULT_REGION=eu-central-1
 
 # List cloud-bench instances
 aws ec2 describe-instances --filters "Name=tag:project,Values=cloud-bench" \
   --query 'Reservations[].Instances[].[InstanceId,State.Name,Tags[?Key==`Name`].Value|[0]]' --output table
 
-# Terminate specific instance
-aws ec2 terminate-instances --instance-ids <instance-id>
-
 # Terminate all cloud-bench instances
 aws ec2 describe-instances --filters "Name=tag:project,Values=cloud-bench" "Name=instance-state-name,Values=running" \
-  --query 'Reservations[].Instances[].InstanceId' --output text | xargs aws ec2 terminate-instances --instance-ids
+  --query 'Reservations[].Instances[].InstanceId' --output text \
+  | xargs aws ec2 terminate-instances --instance-ids
 ```
 
-### SSH Connection Failures
+**Manual fix (OVHcloud)**:
+```bash
+# Using OpenStack CLI
+export OS_AUTH_URL=https://auth.cloud.ovh.net/v3
+export OS_USERNAME="user-xxxxx"
+export OS_PASSWORD="your-password"
+export OS_PROJECT_ID="your-project-id"
+export OS_REGION_NAME=DE1
+
+# List cloud-bench instances
+openstack server list | grep cloud-bench
+
+# Delete all cloud-bench instances
+openstack server list -f value -c ID -c Name | grep cloud-bench | awk '{print $1}' \
+  | xargs -I {} openstack server delete {}
+```
+
+## SSH Connection Failures
 
 **Symptom**: "Failed to connect to the host via ssh"
 
-**Check**:
-1. Your IP may have changed mid-run (rare but happens)
-2. Hetzner's firewall may not have updated
-3. Instance is still booting
+**Causes**:
+1. Runner IP changed mid-run
+2. Firewall not yet updated
+3. Instance still booting (especially OVHcloud — can take longer)
 
-**Fix**: Just re-run the workflow. The IP whitelist is regenerated each run.
+**Fix**: Re-run the workflow. The IP whitelist is regenerated each run. OVHcloud does not use security groups, so SSH failures there are usually boot timing.
 
-### Terraform State Locked/Corrupted
+## Terraform State Locked/Corrupted
 
-**Symptom**: "Error acquiring the state lock" or weird plan output
+**Symptom**: "Error acquiring the state lock" or unexpected plan output
 
 **Fix**:
 ```bash
 cd terraform
 rm -f terraform.tfstate.lock.info
 terraform init
-# If state is really broken, delete it (you'll need to manually clean up resources)
+# If state is really broken, delete it (manually clean up resources first)
 rm terraform.tfstate
 ```
 
-### Cost Guard Blocked My Run
+## Cost Guard Blocked My Run
 
 **Symptom**: "Estimated cost $X exceeds limit"
 
-**Fix**: You're trying to run too many instances at once. Either:
-1. Run with fewer instances
-2. Increase `MAX_COST_USD` in `.github/workflows/cost-guard.yml` (not recommended)
-3. Use `skip_cost_guard: true` (not recommended unless you know what you're doing)
+**Fix**: You're trying to run too many or too expensive instances. Either:
+1. Run with fewer instances (use the `instances` input to select specific ones)
+2. Use `skip_cost_guard: true` in the workflow dispatch (not recommended)
 
-### Frontend Shows "Something Went Wrong"
+The default limits are $5 per run and 15 instances max.
+
+## Frontend Shows "Something Went Wrong"
 
 **Symptom**: Error boundary caught an error
 
 **Check**:
 1. Open browser console (F12) for details
-2. Check that `benchmark-data.json` exists in `frontend/public/data/`
-3. Verify JSON is valid: `cat frontend/public/data/benchmark-data.json | jq .`
+2. Verify `benchmark-data.json` exists in `frontend/public/data/`
+3. Validate JSON: `cat frontend/public/data/benchmark-data.json | jq .`
 
-**Fix**: Re-run the process job: `python scripts/process_results.py ...`
+**Fix**: Re-run the deploy step or manually run `merge_summaries.py` and `build_history.py`.
+
+## Pricing Out of Date
+
+**Symptom**: Dashboard shows old prices
+
+**Fix**: Run the pricing update workflow (Actions > Update Pricing) or manually:
+```bash
+python scripts/update_pricing.py --provider all
+```
+
+This fetches live prices from all provider APIs and updates exchange rates from the ECB.
 
 ## Emergency Stop
 
-If you need to stop everything RIGHT NOW:
+If you need to stop everything immediately:
 
-1. Go to Actions tab → Cancel any running workflows
-2. **Hetzner**: Go to Hetzner Console → Delete all `cloud-bench-*` servers, SSH keys, and firewalls
-3. **AWS**: Go to EC2 Console (eu-central-1) → Terminate all instances tagged `cloud-bench`, delete associated security groups and key pairs
-4. **OVHcloud**: Go to Horizon Dashboard → Delete all `cloud-bench-*` instances and associated key pairs
+1. Go to **Actions** tab — cancel any running workflows
+2. **Hetzner**: Hetzner Console → delete all `cloud-bench-*` servers, SSH keys, firewalls
+3. **AWS**: EC2 Console (eu-central-1) → terminate all `cloud-bench` tagged instances, delete security groups and key pairs
+4. **OVHcloud**: Horizon Dashboard (DE1) → delete all `cloud-bench-*` instances and key pairs
 
 ## Preventing Issues
 
-- **Always** wait for cleanup job to finish (green checkmark)
-- Don't run multiple benchmarks simultaneously (concurrency group prevents this)
-- Set a billing alert in Hetzner Console at €10, in AWS Budgets at $10, and in OVHcloud at €10
-- The orphan cleanup workflows run every 6 hours (Hetzner, AWS) or manual trigger (OVHcloud) as safety net
-
-## Getting Help
-
-If stuck, check:
-1. Workflow logs in GitHub Actions
-2. Hetzner Console / AWS EC2 Console / OVHcloud Horizon for resource status
-3. `terraform/terraform.tfstate` if running locally
+- Always wait for the cleanup job to finish (green checkmark)
+- Don't run multiple benchmarks simultaneously (concurrency group prevents this in CI)
+- Set billing alerts: €10 in Hetzner, $10 in AWS, €10 in OVHcloud
+- Keep pricing updated — stale prices affect value calculations
