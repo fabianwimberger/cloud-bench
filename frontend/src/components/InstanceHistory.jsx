@@ -5,7 +5,7 @@ import ProviderBadge from './ProviderBadge'
 
 Chart.register(...registerables)
 
-function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
+function InstanceHistory({ instanceType, historyEntry, historyError, onClose, currency }) {
   const chartRef = useRef(null)
   const chartInstance = useRef(null)
 
@@ -177,7 +177,9 @@ function InstanceHistory({ instanceType, historyEntry, onClose, currency }) {
             <div>
               <strong style={{ fontSize: '1.125rem' }}>{instanceType}</strong>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8125rem', marginTop: '0.25rem' }}>
-                No historical data available for this instance.
+                {historyError
+                  ? `Failed to load history: ${historyError}`
+                  : 'No historical data available for this instance.'}
               </p>
             </div>
             <button className="btn btn-ghost btn-small" onClick={onClose}>Close</button>
