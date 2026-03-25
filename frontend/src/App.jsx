@@ -13,13 +13,13 @@ import './App.css'
 const DataAPI = {
   async loadBenchmarkData() {
     const response = await fetch('./data/benchmark-data.json')
-    if (!response.ok) throw new Error('Failed to load benchmark data')
+    if (!response.ok) throw new Error(`Failed to load benchmark-data.json (${response.status} ${response.statusText})`)
     return await response.json()
   },
 
   async loadHistory() {
     const response = await fetch('./data/history.json')
-    if (!response.ok) throw new Error('Failed to load history')
+    if (!response.ok) throw new Error(`Failed to load history.json (${response.status} ${response.statusText})`)
     return await response.json()
   }
 }
@@ -40,7 +40,7 @@ function parseExprFilter(expr, value) {
 
 function transformData(data) {
   if (!data || data.schema_version !== '2.0') {
-    throw new Error('Unsupported data format')
+    throw new Error(`Unsupported data format: expected schema v2.0, got v${data?.schema_version ?? 'unknown'}`)
   }
 
   const instances = data.summary?.instances || []
@@ -196,7 +196,7 @@ function App() {
         setHistoryData(data)
       } catch (err) {
         console.error('Failed to load history:', err)
-        setHistoryData({ instances: {} })
+        setHistoryData({ instances: {}, error: err.message })
       }
     }
   }, [historyData])
@@ -316,6 +316,7 @@ function App() {
         <InstanceHistory
           instanceType={selectedHistoryInstance}
           historyEntry={historyData?.instances?.[selectedHistoryInstance] || null}
+          historyError={historyData?.error || null}
           onClose={handleCloseHistory}
           currency={currencyProps}
         />
