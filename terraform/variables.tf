@@ -20,8 +20,8 @@ variable "cloud_provider" {
   default     = "hetzner"
 
   validation {
-    condition     = can(regex("^(hetzner|aws|ovhcloud)$", var.cloud_provider))
-    error_message = "Provider must be 'hetzner', 'aws', or 'ovhcloud'."
+    condition     = can(regex("^(hetzner|aws|ovhcloud|oci)$", var.cloud_provider))
+    error_message = "Provider must be 'hetzner', 'aws', 'ovhcloud', or 'oci'."
   }
 }
 
@@ -117,6 +117,41 @@ variable "ovh_openstack_password" {
 
 variable "ovh_cloud_project_id" {
   description = "OVHcloud Public Cloud project ID (service_name)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "oci_tenancy_ocid" {
+  description = "OCI tenancy OCID"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "oci_user_ocid" {
+  description = "OCI user OCID"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "oci_fingerprint" {
+  description = "OCI API key fingerprint"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "oci_private_key" {
+  description = "OCI API private key content (PEM format)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "oci_compartment_id" {
+  description = "OCI compartment OCID for resource creation"
   type        = string
   sensitive   = true
   default     = ""
