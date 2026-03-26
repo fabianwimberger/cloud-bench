@@ -14,6 +14,11 @@ const providerStyles = {
     color: '#6366f1',
     label: 'OVH',
   },
+  oci: {
+    background: 'rgba(196, 18, 48, 0.2)',
+    color: '#f87171',
+    label: 'OCI',
+  },
 }
 
 function ProviderBadge({ provider }) {
