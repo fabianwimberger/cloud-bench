@@ -1,0 +1,77 @@
+name: Cleanup OCI Orphans
+
+on:
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Find and terminate orphaned OCI instances
+        env:
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }}
+        run: |
+          if [ -z "$OCI_TENANCY_OCID" ]; then
+            echo "OCI credentials not configured, skipping"
+            exit 0
+          fi
+
+          pip install oci
+
+          python3 - <<'PYSCRIPT'
+          import oci
+          import os
+          from datetime import datetime, timezone, timedelta
+
+          config = {
+              "tenancy": os.environ["OCI_TENANCY_OCID"],
+              "user": os.environ["OCI_USER_OCID"],
+              "fingerprint": os.environ["OCI_FINGERPRINT"],
+              "key_content": os.environ["OCI_PRIVATE_KEY"],
+              "region": "eu-frankfurt-1",
+          }
+          compartment_id = os.environ["OCI_COMPARTMENT_ID"]
+          cutoff = datetime.now(timezone.utc) - timedelta(hours=2)
+
+          compute = oci.core.ComputeClient(config)
+          instances = compute.list_instances(
+              compartment_id,
+              lifecycle_state="RUNNING",
+          ).data
+
+          terminated = 0
+          for inst in instances:
+              if not inst.display_name.startswith("cloud-bench-"):
+                  continue
+              created = inst.time_created
+              if created.replace(tzinfo=timezone.utc) < cutoff:
+                  print(f"Terminating orphaned instance: {inst.display_name} ({inst.id})")
+                  compute.terminate_instance(inst.id)
+                  terminated += 1
+              else:
+                  print(f"Keeping recent instance: {inst.display_name}")
+
+          if terminated == 0:
+              print("[OK] No orphaned OCI instances found")
+          else:
+              print(f"\nSummary: Terminated {terminated} orphaned instance(s)")
+
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+                  f.write(f"## OCI Orphan Cleanup\n")
+                  f.write(f"Terminated **{terminated}** orphaned instance(s) older than 2 hours.\n")
+          PYSCRIPT
