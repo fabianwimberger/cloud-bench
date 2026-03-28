@@ -1,0 +1,314 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-03-28T15:52:10.258583",
+    "run_count": 8,
+    "currency": "EUR",
+    "provider": "hetzner",
+    "region": "fsn1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1517,
+      "usd_to_eur": 0.8683,
+      "last_updated": "2026-03-27",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "instances": [
+    {
+      "id": "CPX32",
+      "name": "CPX32 (X86)",
+      "scores": {
+        "single_core": 97.8,
+        "multi_core": 100.0,
+        "memory": 92.7,
+        "disk": 90.3,
+        "overall": 94.6
+      },
+      "metrics": {
+        "cpu_single_raw": 1624.73,
+        "cpu_multi_raw": 6497.42,
+        "mem_read_raw": 18928.72,
+        "mem_write_raw": 18864.78,
+        "mem_throughput_raw": 37793.5,
+        "disk_iops_raw": 68337.851929
+      },
+      "pricing": {
+        "hourly": 0.0168,
+        "monthly": 10.49
+      },
+      "value": 9.43,
+      "specs": {
+        "vcpu": 4,
+        "ram_gb": 8,
+        "disk_gb": 160,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 4,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "CCX23",
+      "name": "CCX23 (X86)",
+      "scores": {
+        "single_core": 100.0,
+        "multi_core": 55.4,
+        "memory": 100.0,
+        "disk": 95.4,
+        "overall": 89.9
+      },
+      "metrics": {
+        "cpu_single_raw": 1660.66,
+        "cpu_multi_raw": 3599.22,
+        "mem_read_raw": 24069.67,
+        "mem_write_raw": 16686.67,
+        "mem_throughput_raw": 40756.34,
+        "disk_iops_raw": 72176.211454
+      },
+      "pricing": {
+        "hourly": 0.0417,
+        "monthly": 25.99
+      },
+      "value": 2.99,
+      "specs": {
+        "vcpu": 4,
+        "ram_gb": 16,
+        "disk_gb": 160,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 4,
+        "memory_mb": 16384
+      }
+    },
+    {
+      "id": "CPX22",
+      "name": "CPX22 (X86)",
+      "scores": {
+        "single_core": 99.1,
+        "multi_core": 50.7,
+        "memory": 51.3,
+        "disk": 97.1,
+        "overall": 72.2
+      },
+      "metrics": {
+        "cpu_single_raw": 1645.26,
+        "cpu_multi_raw": 3294.4,
+        "mem_read_raw": 10493.58,
+        "mem_write_raw": 10422.15,
+        "mem_throughput_raw": 20915.73,
+        "disk_iops_raw": 73470.852018
+      },
+      "pricing": {
+        "hourly": 0.0096,
+        "monthly": 5.99
+      },
+      "value": 12.5,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 80,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    },
+    {
+      "id": "CCX13",
+      "name": "CCX13 (X86)",
+      "scores": {
+        "single_core": 99.6,
+        "multi_core": 27.7,
+        "memory": 55.6,
+        "disk": 100.0,
+        "overall": 69.9
+      },
+      "metrics": {
+        "cpu_single_raw": 1653.9,
+        "cpu_multi_raw": 1798.97,
+        "mem_read_raw": 12644.4,
+        "mem_write_raw": 10025.29,
+        "mem_throughput_raw": 22669.690000000002,
+        "disk_iops_raw": 75676.674365
+      },
+      "pricing": {
+        "hourly": 0.0209,
+        "monthly": 12.99
+      },
+      "value": 4.9,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 8,
+        "disk_gb": 80,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "CAX21",
+      "name": "CAX21 (ARM64)",
+      "scores": {
+        "single_core": 76.6,
+        "multi_core": 78.3,
+        "memory": 47.0,
+        "disk": 70.6,
+        "overall": 65.1
+      },
+      "metrics": {
+        "cpu_single_raw": 1271.31,
+        "cpu_multi_raw": 5085.97,
+        "mem_read_raw": 13581.76,
+        "mem_write_raw": 5591.18,
+        "mem_throughput_raw": 19172.940000000002,
+        "disk_iops_raw": 53433.346922
+      },
+      "pricing": {
+        "hourly": 0.0096,
+        "monthly": 5.99
+      },
+      "value": 12.92,
+      "specs": {
+        "vcpu": 4,
+        "ram_gb": 8,
+        "disk_gb": 80,
+        "arch": "ARM64"
+      },
+      "provider_attributes": {
+        "arch": "ARM64",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 4,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "CAX11",
+      "name": "CAX11 (ARM64)",
+      "scores": {
+        "single_core": 76.6,
+        "multi_core": 39.1,
+        "memory": 31.5,
+        "disk": 74.8,
+        "overall": 52.8
+      },
+      "metrics": {
+        "cpu_single_raw": 1272.78,
+        "cpu_multi_raw": 2540.31,
+        "mem_read_raw": 7531.86,
+        "mem_write_raw": 5320.59,
+        "mem_throughput_raw": 12852.45,
+        "disk_iops_raw": 56594.127807
+      },
+      "pricing": {
+        "hourly": 0.0053,
+        "monthly": 3.29
+      },
+      "value": 17.57,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 40,
+        "arch": "ARM64"
+      },
+      "provider_attributes": {
+        "arch": "ARM64",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    },
+    {
+      "id": "CX33",
+      "name": "CX33 (X86)",
+      "scores": {
+        "single_core": 36.4,
+        "multi_core": 37.4,
+        "memory": 58.9,
+        "disk": 66.7,
+        "overall": 52.0
+      },
+      "metrics": {
+        "cpu_single_raw": 604.93,
+        "cpu_multi_raw": 2432.56,
+        "mem_read_raw": 16714.37,
+        "mem_write_raw": 7282.19,
+        "mem_throughput_raw": 23996.559999999998,
+        "disk_iops_raw": 50509.441233
+      },
+      "pricing": {
+        "hourly": 0.008,
+        "monthly": 4.99
+      },
+      "value": 7.39,
+      "specs": {
+        "vcpu": 4,
+        "ram_gb": 8,
+        "disk_gb": 80,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 4,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "CX23",
+      "name": "CX23 (X86)",
+      "scores": {
+        "single_core": 36.3,
+        "multi_core": 18.6,
+        "memory": 37.3,
+        "disk": 57.4,
+        "overall": 38.4
+      },
+      "metrics": {
+        "cpu_single_raw": 603.05,
+        "cpu_multi_raw": 1205.9,
+        "mem_read_raw": 11609.56,
+        "mem_write_raw": 3581.4,
+        "mem_throughput_raw": 15190.96,
+        "disk_iops_raw": 43415.700563
+      },
+      "pricing": {
+        "hourly": 0.0048,
+        "monthly": 2.99
+      },
+      "value": 9.16,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 40,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    }
+  ]
+}
