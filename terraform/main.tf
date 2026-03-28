@@ -14,6 +14,10 @@ terraform {
       source  = "terraform-provider-openstack/openstack"
       version = "~> 3.0"
     }
+    oci = {
+      source  = "oracle/oci"
+      version = "~> 6.0"
+    }
   }
 
   backend "local" {
@@ -45,6 +49,14 @@ provider "openstack" {
   region           = local.effective_region
 }
 
+provider "oci" {
+  tenancy_ocid = var.oci_tenancy_ocid
+  user_ocid    = var.oci_user_ocid
+  fingerprint  = var.oci_fingerprint
+  private_key  = var.oci_private_key
+  region       = var.cloud_provider == "oci" ? local.effective_region : "eu-frankfurt-1"
+}
+
 locals {
   config = yamldecode(file("${path.module}/../config/instances.yaml"))
 
@@ -68,6 +80,7 @@ locals {
       hetzner  = "fsn1"
       aws      = "eu-central-1"
       ovhcloud = "DE1"
+      oci      = "eu-frankfurt-1"
     },
     var.cloud_provider,
     "fsn1"
@@ -126,6 +139,21 @@ module "ovhcloud_instances" {
   labels         = merge(local.common_labels, { instance_type = each.value.id })
 }
 
+module "oci_instances" {
+  source   = "./modules/oci"
+  for_each = var.cloud_provider == "oci" ? { for inst in local.instances : inst.id => inst } : {}
+
+  instance_name      = "cloud-bench-${var.cloud_provider}-${each.value.id}-${var.run_id}"
+  instance_shape     = each.value.shape
+  instance_ocpus     = each.value.ocpus
+  instance_memory_gb = each.value.ram_gb
+  instance_arch      = lookup(local.arch_map, each.value.arch, "x86_64")
+  compartment_id     = var.oci_compartment_id
+  ssh_public_key     = local.ssh_public_key
+  allowed_ssh_ips    = var.allowed_ssh_ips
+  labels             = merge(local.common_labels, { instance_type = each.value.id })
+}
+
 locals {
   all_instances = merge(
     {
@@ -142,6 +170,12 @@ locals {
     },
     {
       for inst_id, mod in module.ovhcloud_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+    {
+      for inst_id, mod in module.oci_instances : inst_id => {
         host = mod.server_ip
         name = mod.server_name
       }

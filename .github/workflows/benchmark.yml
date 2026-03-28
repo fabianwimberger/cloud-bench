@@ -12,6 +12,7 @@ on:
           - hetzner
           - aws
           - ovhcloud
+          - oci
 
       instances:
         description: 'Instance IDs (comma-separated, or "all")'
@@ -75,6 +76,7 @@ jobs:
               hetzner)  REGION="fsn1" ;;
               aws)      REGION="eu-central-1" ;;
               ovhcloud) REGION="DE1" ;;
+              oci)      REGION="eu-frankfurt-1" ;;
             esac
           fi
           echo "region=$REGION" >> $GITHUB_OUTPUT
@@ -97,6 +99,11 @@ jobs:
           fi
           if [ "${{ github.event.inputs.provider }}" = "ovhcloud" ] && [ "$OVH_KEY_SET" != "true" ]; then
             echo "::error::OVH_OPENSTACK_USERNAME, OVH_OPENSTACK_PASSWORD, and OVH_CLOUD_PROJECT_ID secrets are required for OVHcloud"
+            exit 1
+          fi
+          OCI_KEY_SET="${{ secrets.OCI_TENANCY_OCID != '' }}"
+          if [ "${{ github.event.inputs.provider }}" = "oci" ] && [ "$OCI_KEY_SET" != "true" ]; then
+            echo "::error::OCI_TENANCY_OCID, OCI_USER_OCID, OCI_FINGERPRINT, OCI_PRIVATE_KEY, and OCI_COMPARTMENT_ID secrets are required for OCI"
             exit 1
           fi
           if [ -n "$INSTANCE_REGIONS" ] && [ "$INSTANCE_REGIONS" != "{}" ]; then
@@ -183,6 +190,11 @@ jobs:
             -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
             -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}" \
             -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}" \
+            -var="oci_tenancy_ocid=${{ secrets.OCI_TENANCY_OCID || 'unused' }}" \
+            -var="oci_user_ocid=${{ secrets.OCI_USER_OCID || 'unused' }}" \
+            -var="oci_fingerprint=${{ secrets.OCI_FINGERPRINT || 'unused' }}" \
+            -var="oci_private_key=${{ secrets.OCI_PRIVATE_KEY || 'unused' }}" \
+            -var="oci_compartment_id=${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}" \
             -var="ssh_public_key_path=~/.ssh/cloud_bench.pub" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
@@ -479,6 +491,11 @@ jobs:
             -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
             -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}" \
             -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}" \
+            -var="oci_tenancy_ocid=${{ secrets.OCI_TENANCY_OCID || 'unused' }}" \
+            -var="oci_user_ocid=${{ secrets.OCI_USER_OCID || 'unused' }}" \
+            -var="oci_fingerprint=${{ secrets.OCI_FINGERPRINT || 'unused' }}" \
+            -var="oci_private_key=${{ secrets.OCI_PRIVATE_KEY || 'unused' }}" \
+            -var="oci_compartment_id=${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}" \
             -var="ssh_public_key_path=/dev/null" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
@@ -547,6 +564,19 @@ jobs:
               exit 1
             else
               echo "[OK] OVH resources cleaned up successfully"
+            fi
+
+          elif [ "${{ github.event.inputs.provider }}" = "oci" ]; then
+            # Verify OCI instances are cleaned up by checking Terraform state
+            cd terraform
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "oci_core_instance" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: OCI instances still in Terraform state after cleanup!"
+              terraform state list | grep "oci_core_instance"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] OCI resources cleaned up successfully"
             fi
           fi
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Local benchmark runner script (supports Hetzner, AWS, and OVHcloud)
+# Local benchmark runner script (supports Hetzner, AWS, OVHcloud, and OCI)
 set -e
 
 # Configuration
@@ -14,6 +14,7 @@ if [ -z "$REGION" ]; then
         hetzner)  REGION="fsn1" ;;
         aws)      REGION="eu-central-1" ;;
         ovhcloud) REGION="DE1" ;;
+        oci)      REGION="eu-frankfurt-1" ;;
         *)        REGION="fsn1" ;;
     esac
 fi
@@ -89,6 +90,24 @@ validate_credentials() {
                 exit 1
             fi
             ;;
+        oci)
+            local oci_missing=()
+            [ -z "$OCI_TENANCY_OCID" ] && oci_missing+=("OCI_TENANCY_OCID")
+            [ -z "$OCI_USER_OCID" ] && oci_missing+=("OCI_USER_OCID")
+            [ -z "$OCI_FINGERPRINT" ] && oci_missing+=("OCI_FINGERPRINT")
+            [ -z "$OCI_PRIVATE_KEY" ] && oci_missing+=("OCI_PRIVATE_KEY")
+            [ -z "$OCI_COMPARTMENT_ID" ] && oci_missing+=("OCI_COMPARTMENT_ID")
+            if [ ${#oci_missing[@]} -ne 0 ]; then
+                echo "[ERROR] OCI credentials not set: ${oci_missing[*]}"
+                echo "Set them with:"
+                echo "  export OCI_TENANCY_OCID=ocid1.tenancy.oc1..xxx"
+                echo "  export OCI_USER_OCID=ocid1.user.oc1..xxx"
+                echo "  export OCI_FINGERPRINT=aa:bb:cc:..."
+                echo "  export OCI_PRIVATE_KEY=\$(cat ~/.oci/oci_api_key.pem)"
+                echo "  export OCI_COMPARTMENT_ID=ocid1.compartment.oc1..xxx"
+                exit 1
+            fi
+            ;;
         *)
             echo "[ERROR] Unsupported provider: $PROVIDER"
             exit 1
@@ -160,6 +179,21 @@ build_tf_vars() {
                 -var="ovh_openstack_username=$OVH_OPENSTACK_USERNAME"
                 -var="ovh_openstack_password=$OVH_OPENSTACK_PASSWORD"
                 -var="ovh_cloud_project_id=$OVH_CLOUD_PROJECT_ID"
+            )
+            ;;
+        oci)
+            common_vars+=(
+                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
+                -var="aws_access_key_id=unused"
+                -var="aws_secret_access_key=unused"
+                -var="ovh_openstack_username=unused"
+                -var="ovh_openstack_password=unused"
+                -var="ovh_cloud_project_id=unused"
+                -var="oci_tenancy_ocid=$OCI_TENANCY_OCID"
+                -var="oci_user_ocid=$OCI_USER_OCID"
+                -var="oci_fingerprint=$OCI_FINGERPRINT"
+                -var="oci_private_key=$OCI_PRIVATE_KEY"
+                -var="oci_compartment_id=$OCI_COMPARTMENT_ID"
             )
             ;;
     esac

@@ -276,6 +276,129 @@ def fetch_ovhcloud_pricing(config: dict) -> int:
     return updated
 
 
+def _fetch_oci_shape_rates() -> dict[str, dict[str, float]]:
+    """Fetch per-unit OCI compute rates from the public Oracle APEX pricing API.
+    Returns a dict mapping shape family key (e.g. "E4") to
+    {"ocpu_hr": float, "gb_hr": float}."""
+    url = "https://apexapps.oracle.com/pls/apex/cetools/api/v1/products/"
+    try:
+        response = requests.get(url, params={"currencyCode": "USD"}, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+    except requests.RequestException as e:
+        print(f"  [WARN] Failed to fetch OCI pricing catalog: {e}")
+        return {}
+
+    # Items use inconsistent naming across shape generations:
+    #   "Compute - Standard - E4 - OCPU"
+    #   "Compute - Standard - E4  - Memory"  (double space)
+    #   "Compute - Standard - A2 OCPU"       (no dash separator)
+    #   "OCI - Compute - Standard - E6 - OCPU"  (OCI prefix)
+    # We normalize by stripping the "OCI - " prefix and extracting
+    # the family key and rate type via pattern matching.
+    import re
+
+    rates: dict[str, dict[str, float]] = {}
+    for item in data.get("items", []):
+        name = item.get("displayName", "")
+
+        # Strip optional "OCI - " prefix
+        name = re.sub(r"^OCI\s*-\s*", "", name)
+
+        if not name.startswith("Compute - Standard - "):
+            continue
+
+        # Strip prefix, left with e.g. "E4 - OCPU", "E4  - Memory", "A2 OCPU"
+        remainder = name.removeprefix("Compute - Standard - ").strip()
+
+        # Extract family key and rate type
+        m = re.match(r"^([A-Z]\d+)\s*[-\s]\s*(OCPU|Memory)", remainder, re.IGNORECASE)
+        if not m:
+            continue
+        family = m.group(1)  # e.g. "E5", "X9", "A1", "A2"
+        rate_type = m.group(2).lower()  # "ocpu" or "memory"
+
+        # Extract PAY_AS_YOU_GO price (take the highest non-zero value;
+        # A1 returns [0, 0.01] for free-tier + paid)
+        price = 0.0
+        for loc in item.get("currencyCodeLocalizations", []):
+            if loc.get("currencyCode") != "USD":
+                continue
+            for p in loc.get("prices", []):
+                if p.get("model") == "PAY_AS_YOU_GO":
+                    price = max(price, p.get("value", 0.0))
+
+        if family not in rates:
+            rates[family] = {}
+        if rate_type == "ocpu":
+            rates[family]["ocpu_hr"] = price
+        elif rate_type == "memory":
+            rates[family]["gb_hr"] = price
+
+    return rates
+
+
+# Map OCI shape names to the family key used in the APEX pricing API
+_OCI_SHAPE_FAMILY: dict[str, str] = {
+    "VM.Standard.E5.Flex": "E5",
+    "VM.Standard3.Flex": "X9",
+    "VM.Standard.A1.Flex": "A1",
+    "VM.Standard.A2.Flex": "A2",
+}
+
+
+def fetch_oci_pricing(config: dict, oci_region: str = "eu-frankfurt-1") -> int:
+    """Fetch OCI pricing from the public Oracle APEX pricing API (no auth needed).
+    Returns count of updated instances."""
+    oci_config = config.get("providers", {}).get("oci", {})
+    instances = oci_config.get("instances", [])
+    if not instances:
+        print("  [WARN] No OCI instances in config")
+        return 0
+
+    rates = _fetch_oci_shape_rates()
+    if not rates:
+        print("  [WARN] Could not fetch OCI pricing rates")
+        return 0
+
+    print(
+        f"  [OK] Fetched rates for {len(rates)} shape families: "
+        f"{', '.join(sorted(rates.keys()))}"
+    )
+
+    updated = 0
+    for inst in instances:
+        inst_id = inst.get("id", "")
+        shape_name = inst.get("shape", "")
+        ocpus = inst.get("ocpus", 1)
+        ram_gb = inst.get("ram_gb", 4)
+
+        family = _OCI_SHAPE_FAMILY.get(shape_name)
+        if not family or family not in rates:
+            print(f"  [WARN] No pricing for shape '{shape_name}' (instance {inst_id})")
+            continue
+
+        family_rates = rates[family]
+        ocpu_rate = family_rates.get("ocpu_hr", 0)
+        mem_rate = family_rates.get("gb_hr", 0)
+
+        hourly = round(ocpus * ocpu_rate + ram_gb * mem_rate, 4)
+        monthly = round(hourly * 720, 2)
+
+        old_pricing = inst.get("pricing", {})
+        if old_pricing.get("hourly") != hourly or old_pricing.get("monthly") != monthly:
+            inst["pricing"] = {"hourly": hourly, "monthly": monthly}
+            updated += 1
+            print(
+                f"  [UPDATED] {inst_id}: ${monthly}/mo "
+                f"(${ocpu_rate}/OCPU-hr + ${mem_rate}/GB-hr)"
+            )
+        else:
+            print(f"  [OK] {inst_id}: ${monthly}/mo (unchanged)")
+
+    return updated
+
+
 def fetch_exchange_rates() -> dict:
     """Fetch EUR/USD rate from Frankfurter API (ECB data, free, no key)."""
     try:
@@ -326,6 +449,11 @@ def update_config(
         print("\nUpdating OVHcloud pricing...")
         total_updated += fetch_ovhcloud_pricing(config)
 
+    # Update OCI pricing
+    if provider in ("all", "oci"):
+        print("\nUpdating OCI pricing...")
+        total_updated += fetch_oci_pricing(config)
+
     # Update exchange rates
     print("\nFetching exchange rates...")
     exchange_rates = fetch_exchange_rates()
@@ -343,7 +471,7 @@ def update_config(
     if not dry_run and total_updated > 0:
         config["_metadata"] = {
             "last_pricing_update": datetime.now().isoformat(),
-            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API",
+            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing API",
         }
         with open(config_path, "w") as f:
             yaml.dump(
@@ -370,7 +498,7 @@ def main():
         "--provider",
         "-p",
         default="all",
-        choices=["hetzner", "aws", "ovhcloud", "all"],
+        choices=["hetzner", "aws", "ovhcloud", "oci", "all"],
         help="Provider to update pricing for",
     )
     parser.add_argument(

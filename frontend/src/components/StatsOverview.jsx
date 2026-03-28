@@ -47,7 +47,7 @@ function StatsOverview({ data, currency }) {
     },
     {
       label: 'Providers',
-      value: [...new Set(ranking.map(r => r.provider))].filter(Boolean).map(p => ({ aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVH' }[p] || p)).join(', ') || 'Unknown',
+      value: [...new Set(ranking.map(r => r.provider))].filter(Boolean).map(p => ({ aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVH', oci: 'OCI' }[p] || p)).join(', ') || 'Unknown',
       subtext: [...new Set(ranking.map(r => r.region))].filter(Boolean).join(', ')
     },
   ]
