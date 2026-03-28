@@ -49,6 +49,24 @@ openstack server list -f value -c ID -c Name | grep cloud-bench | awk '{print $1
   | xargs -I {} openstack server delete {}
 ```
 
+**Manual fix (OCI)**:
+```bash
+# Using OCI CLI
+export OCI_TENANCY_OCID="ocid1.tenancy.oc1..xxx"
+export OCI_USER_OCID="ocid1.user.oc1..xxx"
+export OCI_FINGERPRINT="aa:bb:cc:..."
+export OCI_PRIVATE_KEY="$(cat ~/.oci/oci_api_key.pem)"
+export OCI_COMPARTMENT_ID="ocid1.compartment.oc1..xxx"
+export OCI_REGION="eu-frankfurt-1"
+
+# List cloud-bench instances
+oci compute instance list --compartment-id $OCI_COMPARTMENT_ID \
+  --lifecycle-state RUNNING --query "data[?contains(\"display-name\", 'cloud-bench')].{Name:\"display-name\", ID:id}" --output table
+
+# Terminate all cloud-bench instances (run for each ID)
+oci compute instance terminate --instance-id <INSTANCE_OCID> --force
+```
+
 ## SSH Connection Failures
 
 **Symptom**: "Failed to connect to the host via ssh"
@@ -56,9 +74,9 @@ openstack server list -f value -c ID -c Name | grep cloud-bench | awk '{print $1
 **Causes**:
 1. Runner IP changed mid-run
 2. Firewall not yet updated
-3. Instance still booting (especially OVHcloud — can take longer)
+3. Instance still booting (especially OVHcloud and OCI — can take longer)
 
-**Fix**: Re-run the workflow. The IP whitelist is regenerated each run. OVHcloud does not use security groups, so SSH failures there are usually boot timing.
+**Fix**: Re-run the workflow. The IP whitelist is regenerated each run. OVHcloud does not use security groups, so SSH failures there are usually boot timing. For OCI, the benchmark job now updates security lists with the new runner IP automatically.
 
 ## Terraform State Locked/Corrupted
 
@@ -113,6 +131,7 @@ If you need to stop everything immediately:
 2. **Hetzner**: Hetzner Console → delete all `cloud-bench-*` servers, SSH keys, firewalls
 3. **AWS**: EC2 Console (eu-central-1) → terminate all `cloud-bench` tagged instances, delete security groups and key pairs
 4. **OVHcloud**: Horizon Dashboard (DE1) → delete all `cloud-bench-*` instances and key pairs
+5. **OCI**: OCI Console → Compute → Instances → terminate all `cloud-bench-*` instances in your compartment
 
 ## Preventing Issues
 

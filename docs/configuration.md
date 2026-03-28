@@ -37,6 +37,7 @@ exchange_rates:
 | Hetzner  | EUR | fsn1 (Falkenstein) | 8 (cx23, cx33, cax11, cax21, cpx22, cpx32, ccx13, ccx23) |
 | AWS      | USD | eu-central-1 (Frankfurt) | 6 (t3.micro, t3.small, t4g.micro, t4g.small, c7i-flex.large, m7i-flex.large) |
 | OVHcloud | EUR | DE1 (Frankfurt) | 5 (d2-4, b3-8, c3-4, c3-8, r3-16) |
+| OCI      | USD | eu-frankfurt-1 (Frankfurt) | 3 (e5-flex-1-4, std3-flex-1-4, a2-flex-2-4) |
 
 ## Adding Instances
 
@@ -127,6 +128,7 @@ APIs used:
 - **Hetzner**: `api.hetzner.cloud/v1/pricing` (public, no auth)
 - **AWS**: `api.pricing.us-east-1.amazonaws.com` (requires AWS credentials)
 - **OVHcloud**: `api.ovh.com/v1/order/catalog/public/cloud` (public, no auth)
+- **OCI**: `apex.oracle.com/pricing` (public, no auth, via APEX API)
 - **Exchange rates**: Frankfurter API (ECB data)
 
 ## Validation

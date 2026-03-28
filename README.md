@@ -21,42 +21,6 @@ View the latest results at **[fabianwimberger.github.io/cloud-bench](https://fab
 
 Scores shown are averaged across all benchmark runs for each instance type, not just the latest run.
 
-## Instance Types
-
-### Hetzner Cloud (8 instances, EUR)
-
-| ID | vCPU | RAM | Disk | Monthly |
-|----|------|-----|------|---------|
-| cx23 | 2 | 4 GB | 40 GB | €2.99 |
-| cx33 | 4 | 8 GB | 80 GB | €4.99 |
-| cax11 (ARM) | 2 | 4 GB | 40 GB | €3.29 |
-| cax21 (ARM) | 4 | 8 GB | 80 GB | €5.99 |
-| cpx22 | 2 | 4 GB | 80 GB | €5.99 |
-| cpx32 | 4 | 8 GB | 160 GB | €10.49 |
-| ccx13 | 2 | 8 GB | 80 GB | €12.99 |
-| ccx23 | 4 | 16 GB | 160 GB | €25.99 |
-
-### AWS EC2 (6 instances, USD, eu-central-1)
-
-| ID | vCPU | RAM | Disk | Monthly |
-|----|------|-----|------|---------|
-| t3.micro | 2 | 1 GB | 20 GB | $8.64 |
-| t3.small | 2 | 2 GB | 20 GB | $17.28 |
-| t4g.micro (ARM) | 2 | 1 GB | 20 GB | $6.91 |
-| t4g.small (ARM) | 2 | 2 GB | 20 GB | $13.82 |
-| c7i-flex.large | 2 | 4 GB | 20 GB | $69.67 |
-| m7i-flex.large | 2 | 8 GB | 20 GB | $82.59 |
-
-### OVHcloud (5 instances, EUR, DE1)
-
-| ID | vCPU | RAM | Disk | Monthly |
-|----|------|-----|------|---------|
-| d2-4 | 2 | 4 GB | 50 GB | €14.26 |
-| b3-8 | 2 | 8 GB | 50 GB | €33.48 |
-| c3-4 | 2 | 4 GB | 50 GB | €29.88 |
-| c3-8 | 4 | 8 GB | 100 GB | €59.76 |
-| r3-16 | 2 | 16 GB | 50 GB | €43.34 |
-
 ## Run Benchmarks Locally
 
 Compare your own machine against the official results — no cloud credentials needed:
