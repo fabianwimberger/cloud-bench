@@ -132,8 +132,8 @@ jobs:
 
       - name: Check Python dependencies
         run: |
-          pip install safety
-          safety check -r scripts/requirements.txt -r tests/requirements-test.txt || {
+          pip install pip-audit
+          pip-audit -r scripts/requirements.txt -r tests/requirements-test.txt || {
             echo "::error::Python security vulnerabilities detected. Review and update dependencies."
             exit 1
           }
