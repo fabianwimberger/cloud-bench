@@ -204,21 +204,11 @@ jobs:
         run: |
           terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
-      - name: Encrypt and Upload Terraform State
-        run: |
-          # Derive key from run-scoped secret so both provision and cleanup jobs can compute it independently
-          STATE_KEY=$(echo -n "${{ github.token }}-${{ env.RUN_ID }}-tfstate" | sha256sum | cut -d' ' -f1)
-          openssl enc -aes-256-cbc -pbkdf2 -salt \
-            -in terraform/terraform.tfstate \
-            -out terraform/terraform.tfstate.enc \
-            -pass "pass:$STATE_KEY"
-          rm terraform/terraform.tfstate
-
-      - name: Upload Encrypted Terraform State
+      - name: Upload Terraform State
         uses: actions/upload-artifact@v7
         with:
           name: terraform-state
-          path: terraform/terraform.tfstate.enc
+          path: terraform/terraform.tfstate
           retention-days: 1
 
       - name: Upload Ansible Inventory
@@ -553,15 +543,6 @@ jobs:
         with:
           name: terraform-state
           path: terraform/
-
-      - name: Decrypt Terraform State
-        run: |
-          STATE_KEY=$(echo -n "${{ github.token }}-${{ env.RUN_ID }}-tfstate" | sha256sum | cut -d' ' -f1)
-          openssl enc -aes-256-cbc -pbkdf2 -d \
-            -in terraform/terraform.tfstate.enc \
-            -out terraform/terraform.tfstate \
-            -pass "pass:$STATE_KEY"
-          rm terraform/terraform.tfstate.enc
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
