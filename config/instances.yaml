@@ -199,6 +199,57 @@ providers:
       pricing:
         hourly: 0.11471
         monthly: 82.59
+  oci:
+    currency: USD
+    default_region: eu-frankfurt-1
+    regions:
+      eu-frankfurt-1:
+        name: Frankfurt
+    instances:
+    - id: e5-flex-1-4
+      name: E5.Flex 1/4
+      shape: VM.Standard.E5.Flex
+      arch: X86
+      ocpus: 1
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 50
+      pricing:
+        hourly: 0.038
+        monthly: 27.36
+    - id: std3-flex-1-4
+      name: Standard3.Flex 1/4
+      shape: VM.Standard3.Flex
+      arch: X86
+      ocpus: 1
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 50
+      pricing:
+        hourly: 0.046
+        monthly: 33.12
+    - id: a1-flex-2-4
+      name: A1.Flex 2/4
+      shape: VM.Standard.A1.Flex
+      arch: ARM64
+      ocpus: 2
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 50
+      pricing:
+        hourly: 0.026
+        monthly: 18.72
+    - id: a2-flex-2-4
+      name: A2.Flex 2/4
+      shape: VM.Standard.A2.Flex
+      arch: ARM64
+      ocpus: 2
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 50
+      pricing:
+        hourly: 0.036
+        monthly: 25.92
 exchange_rates:
   eur_to_usd: 1.1592
   usd_to_eur: 0.8627

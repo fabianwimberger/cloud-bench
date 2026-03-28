@@ -56,7 +56,7 @@ jobs:
           commit-message: 'chore: update instance pricing from cloud APIs'
           title: 'chore: Update instance pricing'
           body: |
-            Automated pricing update from Hetzner Cloud API, AWS Pricing API, and OVH Catalog API.
+            Automated pricing update from Hetzner Cloud API, AWS Pricing API, OVH Catalog API, and OCI Pricing.
 
             Changes detected in `config/instances.yaml`.
 

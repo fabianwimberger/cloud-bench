@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - GitHub account (for Actions-based benchmarking)
-- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud
+- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud, Oracle Cloud (OCI)
 
 ## Hetzner Setup
 
@@ -86,6 +86,75 @@ Go to **Actions > Run Benchmarks > Run workflow**. Select provider `ovhcloud` an
 
 Note: OVHcloud uses the OpenStack API and does not support security groups. Instances are protected by SSH key authentication only.
 
+## OCI (Oracle Cloud) Setup
+
+### 1. Create an Oracle Cloud account
+
+Sign up at [cloud.oracle.com](https://cloud.oracle.com/). New accounts get an Always Free tier plus $300 in credits for 30 days.
+
+### 2. Create a dedicated compartment
+
+Compartments isolate resources and let you scope permissions tightly.
+
+**Identity & Security > Compartments > Create Compartment**:
+- Name: `cloud-bench`
+- Description: Cloud benchmark resources
+
+Note the **Compartment OCID** — this is your `OCI_COMPARTMENT_ID`.
+
+### 3. Create a dedicated user and group
+
+**Identity & Security > Users > Create User**:
+- Name: `cloud-bench`
+- Description: Cloud-bench automation user
+
+**Identity & Security > Groups > Create Group**:
+- Name: `cloud-bench-group`
+- Add the `cloud-bench` user to this group
+
+### 4. Create a least-privilege policy
+
+**Identity & Security > Policies > Create Policy** (create it in the root compartment):
+- Name: `cloud-bench-policy`
+- Statements (one per line):
+
+```
+Allow group cloud-bench-group to manage virtual-network-family in compartment cloud-bench
+Allow group cloud-bench-group to manage instance-family in compartment cloud-bench
+Allow group cloud-bench-group to read app-catalog-listing in compartment cloud-bench
+Allow group cloud-bench-group to use image-family in compartment cloud-bench
+```
+
+This grants only what the Terraform module needs: VCN/subnet/security list/gateway (virtual-network-family), compute instances (instance-family), and Ubuntu image lookup (image-family, app-catalog-listing) — scoped to the `cloud-bench` compartment only.
+
+### 5. Generate an API signing key
+
+Navigate to the `cloud-bench` user: **Identity & Security > Users > cloud-bench > API keys > Add API key**.
+
+Choose "Generate API key pair", download the private key (`.pem`), and note the **fingerprint**.
+
+### 6. Collect required identifiers
+
+| Secret | Where to find it |
+|---|---|
+| `OCI_TENANCY_OCID` | Profile > Tenancy — copy the OCID |
+| `OCI_USER_OCID` | Identity > Users > cloud-bench — copy the OCID |
+| `OCI_FINGERPRINT` | Shown after adding the API key (`aa:bb:cc:...`) |
+| `OCI_PRIVATE_KEY` | The `.pem` file content (including BEGIN/END lines) |
+| `OCI_COMPARTMENT_ID` | Identity > Compartments > cloud-bench — copy the OCID |
+
+### 7. Add secrets to GitHub
+
+**Repository Settings > Secrets and variables > Actions** — add all five secrets above.
+
+### 8. Set a budget alert
+
+In OCI Console, go to **Billing & Cost Management > Budgets** and create a budget at e.g. $10.
+
+### 9. Run
+
+Go to **Actions > Run Benchmarks > Run workflow**. Select provider `oci` and region `eu-frankfurt-1`.
+
 ## Local Run (Cloud Provisioning)
 
 Run the full benchmark pipeline locally (provisions cloud instances, runs benchmarks, processes results):
@@ -105,6 +174,14 @@ export OVH_OPENSTACK_USERNAME="user-xxxxx"
 export OVH_OPENSTACK_PASSWORD="your-password"
 export OVH_CLOUD_PROJECT_ID="your-project-id"
 PROVIDER=ovhcloud ./scripts/run-local.sh
+
+# OCI
+export OCI_TENANCY_OCID="ocid1.tenancy.oc1..xxx"
+export OCI_USER_OCID="ocid1.user.oc1..xxx"
+export OCI_FINGERPRINT="aa:bb:cc:..."
+export OCI_PRIVATE_KEY="$(cat ~/.oci/oci_api_key.pem)"
+export OCI_COMPARTMENT_ID="ocid1.compartment.oc1..xxx"
+PROVIDER=oci ./scripts/run-local.sh
 ```
 
 The script auto-detects your IP for the firewall/security group. It provisions, benchmarks, processes results, and prompts to destroy.
@@ -133,6 +210,9 @@ terraform plan -var="run_id=test" -var="cloud_provider=aws" -var='allowed_ssh_ip
 
 # OVHcloud
 terraform plan -var="run_id=test" -var="cloud_provider=ovhcloud" -var='allowed_ssh_ips=["YOUR_IP/32"]'
+
+# OCI
+terraform plan -var="run_id=test" -var="cloud_provider=oci" -var='allowed_ssh_ips=["YOUR_IP/32"]'
 ```
 
 ## Troubleshooting
