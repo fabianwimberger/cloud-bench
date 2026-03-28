@@ -64,7 +64,7 @@ variable "labels" {
 }
 
 variable "image_name" {
-  description = "OS image display name pattern to match (regex)"
+  description = "OS image display name pattern to match (regex). Leave empty for auto-detection based on architecture."
   type        = string
-  default     = "Canonical-Ubuntu-24.04-2"
+  default     = ""
 }
