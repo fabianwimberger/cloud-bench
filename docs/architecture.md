@@ -10,6 +10,7 @@ config/instances.yaml            # Single source of truth for instances & pricin
 │  modules/hetzner/          │   Provisions servers, SSH keys, firewalls
 │  modules/aws/              │   EC2 instances, security groups, key pairs
 │  modules/ovhcloud/         │   OpenStack instances, key pairs (no security groups)
+│  modules/oci/              │   OCI instances, VCN, subnets, security lists
 └────────────┬──────────────┘
              ▼
 ┌── Ansible ────────────────┐
@@ -86,11 +87,11 @@ See [data-format.md](data-format.md) for full schemas.
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
-- Firewall/security group allows SSH from runner IP only (Hetzner + AWS)
+- Firewall/security group allows SSH from runner IP only (Hetzner, AWS, OCI)
 - OVHcloud does not support security groups — SSH key auth only
 - `if: always()` cleanup in CI ensures infrastructure destruction
-- Orphan cleanup workflows: every 6 hours (Hetzner, AWS), manual trigger (OVHcloud)
-- Dedicated project/IAM user/OpenStack user recommended for isolation
+- Orphan cleanup workflows: every 6 hours (Hetzner, AWS), manual trigger (OVHcloud, OCI)
+- Dedicated project/IAM user/OpenStack user/compartment recommended for isolation
 
 ## Workflows
 
@@ -104,3 +105,4 @@ See [data-format.md](data-format.md) for full schemas.
 | `update-pricing.yml` | Manual | Fetch live pricing from provider APIs + ECB exchange rates |
 | `cleanup-aws.yml` | Manual | Terminate orphaned AWS instances older than 2 hours |
 | `cleanup-ovhcloud.yml` | Manual | Terminate orphaned OVHcloud instances older than 2 hours |
+| `cleanup-oci.yml` | Manual | Terminate orphaned OCI instances older than 2 hours |
