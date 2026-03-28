@@ -95,39 +95,6 @@ providers:
 
 No code changes needed — Terraform, Ansible, and the frontend all pick up config changes automatically. See [docs/configuration.md](docs/configuration.md) for details.
 
-## Project Structure
-
-```
-cloud-bench/
-├── ansible/              # Benchmark playbook + templates
-│   ├── playbooks/
-│   │   └── benchmark.yml
-│   └── templates/
-├── config/               # Instance types, specs, pricing
-│   └── instances.yaml
-├── docs/                 # Documentation
-├── frontend/             # React dashboard (Vite + Chart.js)
-│   └── src/
-│       └── components/
-├── scripts/              # Processing, pricing, utilities
-│   ├── process_results.py
-│   ├── merge_summaries.py
-│   ├── build_history.py
-│   ├── update_pricing.py
-│   ├── update_manifest.py
-│   ├── estimate_cost.py
-│   ├── validate.py
-│   ├── run-local.sh
-│   ├── run-local-bench.sh
-│   └── parse-instances.sh
-├── terraform/            # Infrastructure provisioning
-│   └── modules/
-│       ├── hetzner/
-│       ├── aws/
-│       └── ovhcloud/
-└── tests/
-```
-
 ## Features
 
 - **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, OCI (23 instance types)
@@ -145,19 +112,7 @@ cloud-bench/
 - Fresh Ed25519 SSH key generated per run, never reused
 - Firewall/security group allows SSH from runner IP only
 - Auto-cleanup via `if: always()` — infrastructure destroyed even if benchmarks fail
-- Orphan cleanup workflows as safety net (every 6 hours for Hetzner/AWS, manual for OVHcloud)
-
-## Cost
-
-~10 minutes per run, costs a few cents. Infrastructure is destroyed automatically.
-
-| Provider | Typical run cost |
-|----------|-----------------|
-| Hetzner  | ~€0.05          |
-| AWS      | ~$0.15          |
-| OVHcloud | ~€0.15          |
-
-**Protection:** Cost estimation before each run (blocks >$5 or >15 instances), billing alerts recommended.
+- Orphan cleanup workflows as safety net (every 6 hours for AWS, manual for OVHcloud/OCI)
 
 ## Documentation
 

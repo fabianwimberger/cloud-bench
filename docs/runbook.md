@@ -4,7 +4,7 @@
 
 **Symptom**: Workflow failed, servers still running in provider console.
 
-**Auto-fix**: Orphan cleanup workflows run every 6 hours (Hetzner, AWS) or manual trigger (OVHcloud) and clean up anything older than 2 hours tagged `cloud-bench`.
+**Auto-fix**: Orphan cleanup workflows run every 6 hours (AWS) or manual trigger (OVHcloud, OCI) and clean up anything older than 2 hours tagged `cloud-bench`.
 
 **Manual fix (Hetzner)**:
 ```bash
@@ -131,11 +131,11 @@ If you need to stop everything immediately:
 2. **Hetzner**: Hetzner Console → delete all `cloud-bench-*` servers, SSH keys, firewalls
 3. **AWS**: EC2 Console (eu-central-1) → terminate all `cloud-bench` tagged instances, delete security groups and key pairs
 4. **OVHcloud**: Horizon Dashboard (DE1) → delete all `cloud-bench-*` instances and key pairs
-5. **OCI**: OCI Console → Compute → Instances → terminate all `cloud-bench-*` instances in your compartment
+5. **OCI**: OCI Console → Compute → Instances → terminate all `cloud-bench-*` instances in your compartment, delete VCNs and security lists
 
 ## Preventing Issues
 
 - Always wait for the cleanup job to finish (green checkmark)
 - Don't run multiple benchmarks simultaneously (concurrency group prevents this in CI)
-- Set billing alerts: €10 in Hetzner, $10 in AWS, €10 in OVHcloud
+- Set billing alerts: €10 in Hetzner, $10 in AWS, €10 in OVHcloud, $10 in OCI
 - Keep pricing updated — stale prices affect value calculations
