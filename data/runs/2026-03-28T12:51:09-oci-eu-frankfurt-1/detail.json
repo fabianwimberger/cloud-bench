@@ -1,0 +1,129 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-03-28T12:51:09.514442",
+    "run_count": 3,
+    "currency": "USD",
+    "provider": "oci",
+    "region": "eu-frankfurt-1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1517,
+      "usd_to_eur": 0.8683,
+      "last_updated": "2026-03-27",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "instances": [
+    {
+      "id": "E5-FLEX-1-4",
+      "name": "E5-FLEX-1-4 (X86)",
+      "scores": {
+        "single_core": 100.0,
+        "multi_core": 100.0,
+        "memory": 100.0,
+        "disk": 99.5,
+        "overall": 99.9
+      },
+      "metrics": {
+        "cpu_single_raw": 1630.43,
+        "cpu_multi_raw": 1795.84,
+        "mem_read_raw": 12864.31,
+        "mem_write_raw": 10155.98,
+        "mem_throughput_raw": 23020.29,
+        "disk_iops_raw": 3022.215566
+      },
+      "pricing": {
+        "hourly": 0.038,
+        "monthly": 27.36
+      },
+      "value": 3.65,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 50,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    },
+    {
+      "id": "STD3-FLEX-1-4",
+      "name": "STD3-FLEX-1-4 (X86)",
+      "scores": {
+        "single_core": 66.0,
+        "multi_core": 62.5,
+        "memory": 72.5,
+        "disk": 99.8,
+        "overall": 76.0
+      },
+      "metrics": {
+        "cpu_single_raw": 1076.87,
+        "cpu_multi_raw": 1121.74,
+        "mem_read_raw": 9530.89,
+        "mem_write_raw": 7156.79,
+        "mem_throughput_raw": 16687.68,
+        "disk_iops_raw": 3030.552643
+      },
+      "pricing": {
+        "hourly": 0.046,
+        "monthly": 33.12
+      },
+      "value": 1.94,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 50,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    },
+    {
+      "id": "A2-FLEX-2-4",
+      "name": "A2-FLEX-2-4 (ARM64)",
+      "scores": {
+        "single_core": 18.1,
+        "multi_core": 65.4,
+        "memory": 79.3,
+        "disk": 100.0,
+        "overall": 69.5
+      },
+      "metrics": {
+        "cpu_single_raw": 294.4,
+        "cpu_multi_raw": 1174.58,
+        "mem_read_raw": 10615.13,
+        "mem_write_raw": 7630.21,
+        "mem_throughput_raw": 18245.34,
+        "disk_iops_raw": 3037.190495
+      },
+      "pricing": {
+        "hourly": 0.036,
+        "monthly": 25.92
+      },
+      "value": 1.61,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 50,
+        "arch": "ARM64"
+      },
+      "provider_attributes": {
+        "arch": "ARM64",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    }
+  ]
+}

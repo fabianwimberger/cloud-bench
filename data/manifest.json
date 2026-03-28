@@ -2,6 +2,22 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-03-28T12:51:09-oci-eu-frankfurt-1",
+      "timestamp": "2026-03-28T12:51:09",
+      "provider": "oci",
+      "region": "eu-frankfurt-1",
+      "instance_count": 3,
+      "instances": [
+        "E5-FLEX-1-4",
+        "STD3-FLEX-1-4",
+        "A2-FLEX-2-4"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-28T12:51:09-oci-eu-frankfurt-1/summary.json",
+        "detail": "data/runs/2026-03-28T12:51:09-oci-eu-frankfurt-1/detail.json"
+      }
+    },
+    {
       "id": "2026-03-25T19:46:30-ovhcloud-DE1",
       "timestamp": "2026-03-25T19:46:30",
       "provider": "ovhcloud",
@@ -541,6 +557,15 @@
     }
   ],
   "instance_index": {
+    "E5-FLEX-1-4": [
+      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
+    ],
+    "STD3-FLEX-1-4": [
+      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
+    ],
+    "A2-FLEX-2-4": [
+      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
+    ],
     "C3-8": [
       "2026-03-25T19:46:30-ovhcloud-DE1",
       "2026-03-22T10:38:52-ovhcloud-DE1",

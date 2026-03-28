@@ -1,0 +1,44 @@
+{
+  "run_id": "23685490295-1",
+  "hostname": "cloud-bench-oci-a2-flex-2-4-23685490295-1",
+  "timestamp": "2026-03-28T12:50:49Z",
+  "benchmark_runs": 5,
+  "aggregation": "median",
+  "system": {
+    "schema_version": "2.0",
+    "provider": "oci",
+    "instance_type": "a2-flex-2-4",
+    "timestamp": "2026-03-28T12:46:31Z",
+    "provider_attributes": {
+      "arch": "aarch64",
+      "os": "Ubuntu 24.04",
+      "kernel": "6.17.0-1007-oracle",
+      "vcpu": 4,
+      "memory_mb": 3897,
+      "hostname": "cloud-bench-oci-a2-flex-2-4-23685490295-1"
+    },
+    "benchmark_config": {
+      "runs": 5,
+      "aggregation": "median"
+    }
+  },
+  "cpu": {
+    "test": "sysbench-cpu",
+    "runs": 5,
+    "single_thread_events": 294.4,
+    "multi_thread_events": 1174.58,
+    "threads": 4
+  },
+  "memory": {
+    "test": "sysbench-memory",
+    "runs": 5,
+    "read_mib_per_sec": 10615.13,
+    "write_mib_per_sec": 7630.21,
+    "total_throughput_mib": 18245.34
+  },
+  "disk": {
+    "test": "fio-randread",
+    "runs": 5,
+    "read_iops": 3037.190495
+  }
+}
