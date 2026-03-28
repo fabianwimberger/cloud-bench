@@ -30,6 +30,7 @@
     - name: Wait for cloud-init to finish (OVHcloud)
       command: cloud-init status --wait
       changed_when: false
+      failed_when: false
       timeout: 180
       when: provider | default('') == 'ovhcloud'
 
