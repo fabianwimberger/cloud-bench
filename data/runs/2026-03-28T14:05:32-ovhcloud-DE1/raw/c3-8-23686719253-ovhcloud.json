@@ -1,0 +1,44 @@
+{
+  "run_id": "23686719253-ovhcloud",
+  "hostname": "cloud-bench-ovhcloud-c3-8-23686719253-ovhcloud",
+  "timestamp": "2026-03-28T14:04:32Z",
+  "benchmark_runs": 5,
+  "aggregation": "median",
+  "system": {
+    "schema_version": "2.0",
+    "provider": "ovhcloud",
+    "instance_type": "c3-8",
+    "timestamp": "2026-03-28T13:59:49Z",
+    "provider_attributes": {
+      "arch": "x86_64",
+      "os": "Ubuntu 24.04",
+      "kernel": "6.8.0-86-generic",
+      "vcpu": 4,
+      "memory_mb": 7747,
+      "hostname": "cloud-bench-ovhcloud-c3-8-23686719253-ovhcloud"
+    },
+    "benchmark_config": {
+      "runs": 5,
+      "aggregation": "median"
+    }
+  },
+  "cpu": {
+    "test": "sysbench-cpu",
+    "runs": 5,
+    "single_thread_events": 1433.29,
+    "multi_thread_events": 5751.33,
+    "threads": 4
+  },
+  "memory": {
+    "test": "sysbench-memory",
+    "runs": 5,
+    "read_mib_per_sec": 17349.72,
+    "write_mib_per_sec": 5439.85,
+    "total_throughput_mib": 22789.57
+  },
+  "disk": {
+    "test": "fio-randread",
+    "runs": 5,
+    "read_iops": 41243.549402
+  }
+}

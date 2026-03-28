@@ -1,0 +1,136 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-03-28T14:04:05.079628",
+    "run_count": 3,
+    "currency": "USD",
+    "provider": "oci",
+    "region": "eu-frankfurt-1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1517,
+      "usd_to_eur": 0.8683,
+      "last_updated": "2026-03-27",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "E5-FLEX-1-4",
+      "STD3-FLEX-1-4",
+      "A2-FLEX-2-4"
+    ],
+    "instances": [
+      {
+        "id": "E5-FLEX-1-4",
+        "name": "E5-FLEX-1-4 (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 99.5,
+          "overall": 99.9
+        },
+        "metrics": {
+          "cpu_single_events": 1633.28,
+          "cpu_multi_events": 1798.67,
+          "memory_mib_per_sec": 23040.14,
+          "disk_iops": 3022.0669
+        },
+        "pricing": {
+          "hourly": 0.038,
+          "monthly": 27.36
+        },
+        "value": 3.65,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 50,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "STD3-FLEX-1-4",
+        "name": "STD3-FLEX-1-4 (X86)",
+        "scores": {
+          "single_core": 66.0,
+          "multi_core": 62.4,
+          "memory": 71.9,
+          "disk": 99.6,
+          "overall": 75.7
+        },
+        "metrics": {
+          "cpu_single_events": 1077.52,
+          "cpu_multi_events": 1122.1,
+          "memory_mib_per_sec": 16564.83,
+          "disk_iops": 3025.90984
+        },
+        "pricing": {
+          "hourly": 0.046,
+          "monthly": 33.12
+        },
+        "value": 1.94,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 50,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "A2-FLEX-2-4",
+        "name": "A2-FLEX-2-4 (ARM64)",
+        "scores": {
+          "single_core": 18.0,
+          "multi_core": 65.3,
+          "memory": 84.2,
+          "disk": 100.0,
+          "overall": 71.1
+        },
+        "metrics": {
+          "cpu_single_events": 294.3,
+          "cpu_multi_events": 1174.84,
+          "memory_mib_per_sec": 19403.32,
+          "disk_iops": 3038.739953
+        },
+        "pricing": {
+          "hourly": 0.036,
+          "monthly": 25.92
+        },
+        "value": 1.6,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 50,
+          "arch": "ARM64"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0,
+        66.0,
+        18.0
+      ],
+      "multi_core": [
+        100.0,
+        62.4,
+        65.3
+      ],
+      "memory": [
+        100.0,
+        71.9,
+        84.2
+      ],
+      "disk": [
+        99.5,
+        99.6,
+        100.0
+      ],
+      "value": [
+        3.65,
+        1.94,
+        1.6
+      ]
+    }
+  }
+}

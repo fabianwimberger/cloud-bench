@@ -1,0 +1,44 @@
+{
+  "run_id": "23686719253-aws",
+  "hostname": "cloud-bench-aws-c7i-flex-large-23686719253-aws",
+  "timestamp": "2026-03-28T14:03:20Z",
+  "benchmark_runs": 5,
+  "aggregation": "median",
+  "system": {
+    "schema_version": "2.0",
+    "provider": "aws",
+    "instance_type": "c7i-flex.large",
+    "timestamp": "2026-03-28T13:58:50Z",
+    "provider_attributes": {
+      "arch": "x86_64",
+      "os": "Ubuntu 24.04",
+      "kernel": "6.17.0-1009-aws",
+      "vcpu": 2,
+      "memory_mb": 3814,
+      "hostname": "cloud-bench-aws-c7i-flex-large-23686719253-aws"
+    },
+    "benchmark_config": {
+      "runs": 5,
+      "aggregation": "median"
+    }
+  },
+  "cpu": {
+    "test": "sysbench-cpu",
+    "runs": 5,
+    "single_thread_events": 1056.87,
+    "multi_thread_events": 1090.43,
+    "threads": 2
+  },
+  "memory": {
+    "test": "sysbench-memory",
+    "runs": 5,
+    "read_mib_per_sec": 10966.8,
+    "write_mib_per_sec": 4109.2,
+    "total_throughput_mib": 15076.0
+  },
+  "disk": {
+    "test": "fio-randread",
+    "runs": 5,
+    "read_iops": 3042.176803
+  }
+}
