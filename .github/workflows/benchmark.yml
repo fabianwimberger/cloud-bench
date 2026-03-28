@@ -340,7 +340,7 @@ jobs:
                   source=new_ip + "/32",
                   source_type="CIDR_BLOCK",
                   is_stateless=False,
-                  icmp_options=oci.core.models.IcmpOptions(type=8, code=-1),
+                  icmp_options=oci.core.models.IcmpOptions(type=8, code=0),
               )
               new_ingress.append(icmp_rule)
 
