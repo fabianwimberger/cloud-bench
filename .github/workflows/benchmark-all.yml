@@ -24,13 +24,13 @@ jobs:
           echo "| Provider | Instances | Est. Cost |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-----------|-----------|" >> $GITHUB_STEP_SUMMARY
           echo "| Hetzner  | 8         | ~€0.05    |" >> $GITHUB_STEP_SUMMARY
-          echo "| AWS      | 6         | ~$0.15    |" >> $GITHUB_STEP_SUMMARY
+          echo "| AWS      | 6         | ~\$0.15    |" >> $GITHUB_STEP_SUMMARY
           echo "| OVHcloud | 5         | ~€0.15    |" >> $GITHUB_STEP_SUMMARY
-          echo "| OCI      | 3         | ~$0.10    |" >> $GITHUB_STEP_SUMMARY
+          echo "| OCI      | 3         | ~\$0.10    |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total estimated cost: ~$0.50 / run**" >> $GITHUB_STEP_SUMMARY
+          echo "**Total estimated cost: ~\$0.50 / run**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Individual provider limits still apply (>$5 blocks)." >> $GITHUB_STEP_SUMMARY
+          echo "Individual provider limits still apply (>\$5 blocks)." >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ inputs.skip_cost_guard }}" != "true" ]; then
             echo "Cost guard passed. Proceeding..."
@@ -157,7 +157,7 @@ jobs:
         run: |
           export RUN_ID="${{ github.run_id }}-${{ matrix.provider }}"
           export ANSIBLE_HOST_KEY_CHECKING=False
-          ansible-playbook -i ../inventory_${{ matrix.provider }}.ini playbooks/benchmark.yml \
+          ansible-playbook -i inventory_${{ matrix.provider }}.ini playbooks/benchmark.yml \
             --private-key ~/.ssh/cloud_bench_${{ matrix.provider }} \
             --extra-vars "run_id=${{ github.run_id }}-${{ matrix.provider }}"
 
@@ -206,7 +206,7 @@ jobs:
             -var="oci_private_key=${{ secrets.OCI_PRIVATE_KEY || 'unused' }}" \
             -var="oci_compartment_id=${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}" \
             -var="ssh_public_key_path=/dev/null" \
-            -var="allowed_ssh_ips=[]" || true
+            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" || true
 
   # Serialize access to benchmark-data branch to prevent race conditions
   persist-results:
