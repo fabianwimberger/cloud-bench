@@ -27,6 +27,12 @@
         state: directory
         mode: '0755'
 
+    - name: Wait for cloud-init to finish (OVHcloud)
+      command: cloud-init status --wait
+      changed_when: false
+      timeout: 180
+      when: provider | default('') == 'ovhcloud'
+
     - name: Stop unattended-upgrades and wait for apt to be available
       shell:
         cmd: |
