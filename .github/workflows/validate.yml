@@ -391,13 +391,13 @@ jobs:
       - name: Create Mock Results (OCI)
         run: |
           rm -f results/*.json
-          cat > results/e4-flex-1-4-mock.json << 'MOCKEOF'
+          cat > results/e5-flex-1-4-mock.json << 'MOCKEOF'
           {
             "run_id": "test-mock-oci",
             "timestamp": "2026-01-01T00:00:00Z",
             "system": {
               "provider": "oci",
-              "instance_type": "e4-flex-1-4"
+              "instance_type": "e5-flex-1-4"
             },
             "provider_attributes": {
               "arch": "x86_64",
@@ -405,7 +405,7 @@ jobs:
               "kernel": "6.8.0",
               "vcpu": 2,
               "memory_mb": 8192,
-              "hostname": "test-e4-flex-1-4"
+              "hostname": "test-e5-flex-1-4"
             },
             "cpu": {
               "test": "sysbench-cpu",
