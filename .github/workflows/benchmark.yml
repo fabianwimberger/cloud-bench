@@ -64,7 +64,6 @@ jobs:
       ssh_key_b64: ${{ steps.export_key.outputs.key_b64 }}
       ssh_pub_key: ${{ steps.export_key.outputs.pub_key }}
       region: ${{ steps.resolve_region.outputs.region }}
-      state_key: ${{ steps.state_key.outputs.key }}
     steps:
       - uses: actions/checkout@v6
 
@@ -206,12 +205,9 @@ jobs:
           terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
       - name: Encrypt and Upload Terraform State
-        id: state_key
         run: |
-          # Generate a random passphrase for this run (passed to cleanup via job output)
-          STATE_KEY=$(openssl rand -hex 32)
-          echo "::add-mask::$STATE_KEY"
-          echo "key=$STATE_KEY" >> $GITHUB_OUTPUT
+          # Derive key from run-scoped secret so both provision and cleanup jobs can compute it independently
+          STATE_KEY=$(echo -n "${{ github.token }}-${{ env.RUN_ID }}-tfstate" | sha256sum | cut -d' ' -f1)
           openssl enc -aes-256-cbc -pbkdf2 -salt \
             -in terraform/terraform.tfstate \
             -out terraform/terraform.tfstate.enc \
@@ -560,10 +556,11 @@ jobs:
 
       - name: Decrypt Terraform State
         run: |
+          STATE_KEY=$(echo -n "${{ github.token }}-${{ env.RUN_ID }}-tfstate" | sha256sum | cut -d' ' -f1)
           openssl enc -aes-256-cbc -pbkdf2 -d \
             -in terraform/terraform.tfstate.enc \
             -out terraform/terraform.tfstate \
-            -pass "pass:${{ needs.provision.outputs.state_key }}"
+            -pass "pass:$STATE_KEY"
           rm terraform/terraform.tfstate.enc
 
       - name: Setup Terraform
