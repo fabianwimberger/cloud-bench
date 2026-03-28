@@ -90,14 +90,15 @@ See [data-format.md](data-format.md) for full schemas.
 - Firewall/security group allows SSH from runner IP only (Hetzner, AWS, OCI)
 - OVHcloud does not support security groups — SSH key auth only
 - `if: always()` cleanup in CI ensures infrastructure destruction
-- Orphan cleanup workflows: every 6 hours (Hetzner, AWS), manual trigger (OVHcloud, OCI)
+- Orphan cleanup workflows: every 6 hours (AWS), manual trigger (OVHcloud, OCI)
 - Dedicated project/IAM user/OpenStack user/compartment recommended for isolation
 
 ## Workflows
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `benchmark.yml` | Manual | Full benchmark pipeline: provision → benchmark → process → deploy |
+| `benchmark-all.yml` | Manual | Run all providers in parallel (Hetzner, AWS, OVHcloud, OCI) |
+| `benchmark.yml` | Manual | Single provider benchmark pipeline: provision → benchmark → process → deploy |
 | `validate.yml` | Push/PR | CI: terraform, ansible, python (ruff/mypy/pytest), frontend, trivy |
 | `pr-check.yml` | PR | Terraform format, init, validate, plan |
 | `cost-guard.yml` | Called | Reusable cost estimation (blocks >$5 or >15 instances) |

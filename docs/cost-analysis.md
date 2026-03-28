@@ -9,6 +9,7 @@ A benchmark run provisions all configured instances for a single provider for ~1
 | Hetzner  | 8         | ~€0.05      |
 | AWS      | 6         | ~$0.15      |
 | OVHcloud | 5         | ~€0.15      |
+| OCI      | 3         | ~$0.10      |
 
 Exact cost depends on which instances are configured in `config/instances.yaml`. The cost-guard workflow estimates this before each run and blocks anything over $5 or 15 instances.
 
@@ -21,6 +22,7 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
 | Hetzner  | €0.1167             | €72.72               |
 | AWS      | $0.2792             | $198.91              |
 | OVHcloud | €0.2310             | €180.72              |
+| OCI      | $0.0684             | $48.51               |
 
 ## Safety Nets
 
@@ -31,13 +33,14 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
    - Hetzner: every 6 hours (automated)
    - AWS: every 6 hours (automated)
    - OVHcloud: manual trigger
+   - OCI: manual trigger
 
 ## Provider Comparison
 
-| | Hetzner | AWS | OVHcloud |
-|---|---------|-----|----------|
-| Pricing | Simple, flat hourly/monthly | On-demand, region-dependent | Hourly consumption billing |
-| Hidden fees | None | Egress, EBS IOPS (minimal for benchmarks) | None |
-| Cheapest instance | €2.99/mo (CX23) | $6.91/mo (t4g.micro) | €14.26/mo (D2-4) |
-| Cleanup | hcloud CLI / scheduled workflow | AWS CLI / scheduled workflow | OpenStack CLI / manual workflow |
-| Billing granularity | Hourly | Per-second | Hourly |
+| | Hetzner | AWS | OVHcloud | OCI |
+|---|---------|-----|----------|-----|
+| Pricing | Simple, flat hourly/monthly | On-demand, region-dependent | Hourly consumption billing | Pay-as-you-go |
+| Hidden fees | None | Egress, EBS IOPS (minimal for benchmarks) | None | Egress |
+| Cheapest instance | €2.99/mo (CX23) | $6.91/mo (t4g.micro) | €14.26/mo (D2-4) | Free tier eligible |
+| Cleanup | hcloud CLI / scheduled workflow | AWS CLI / scheduled workflow | OpenStack CLI / manual workflow | OCI CLI / manual workflow |
+| Billing granularity | Hourly | Per-second | Hourly | Per-second |
