@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Results](https://img.shields.io/badge/Live%20Results-View%20Dashboard-blue)](https://fabianwimberger.github.io/cloud-bench/)
 
-A cloud instance benchmarking suite comparing CPU, memory, and disk performance across providers with cost analysis. 19 instance types across Hetzner Cloud, AWS EC2, and OVHcloud.
+A cloud instance benchmarking suite comparing CPU, memory, and disk performance across providers with cost analysis. 23 instance types across Hetzner Cloud, AWS EC2, OVHcloud, and Oracle Cloud (OCI).
 
 ## Why This Project?
 
