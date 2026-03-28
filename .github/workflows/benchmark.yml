@@ -329,7 +329,7 @@ jobs:
                   protocol="6",
                   source=new_ip + "/32",
                   source_type="CIDR_BLOCK",
-                  stateless=False,
+                  is_stateless=False,
                   tcp_options=oci.core.models.TcpOptions(destination_port_range=oci.core.models.PortRange(min=22, max=22)),
               )
               new_ingress.append(ssh_rule)
@@ -339,7 +339,7 @@ jobs:
                   protocol="1",
                   source=new_ip + "/32",
                   source_type="CIDR_BLOCK",
-                  stateless=False,
+                  is_stateless=False,
                   icmp_options=oci.core.models.IcmpOptions(type=8, code=-1),
               )
               new_ingress.append(icmp_rule)
