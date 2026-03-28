@@ -64,6 +64,7 @@ jobs:
       ssh_key_b64: ${{ steps.export_key.outputs.key_b64 }}
       ssh_pub_key: ${{ steps.export_key.outputs.pub_key }}
       region: ${{ steps.resolve_region.outputs.region }}
+      state_key: ${{ steps.state_key.outputs.key }}
     steps:
       - uses: actions/checkout@v6
 
@@ -177,6 +178,17 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}
+          TF_VAR_ovh_openstack_username: ${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}
+          TF_VAR_ovh_openstack_password: ${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}
+          TF_VAR_ovh_cloud_project_id: ${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}
+          TF_VAR_oci_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID || 'unused' }}
+          TF_VAR_oci_user_ocid: ${{ secrets.OCI_USER_OCID || 'unused' }}
+          TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
+          TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY || 'unused' }}
+          TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
         run: |
           terraform apply -auto-approve \
             -var="run_id=${{ env.RUN_ID }}" \
@@ -184,17 +196,6 @@ jobs:
             -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
             -var="default_region=${{ steps.resolve_region.outputs.region }}" \
             -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
-            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}" \
-            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
-            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
-            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
-            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}" \
-            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}" \
-            -var="oci_tenancy_ocid=${{ secrets.OCI_TENANCY_OCID || 'unused' }}" \
-            -var="oci_user_ocid=${{ secrets.OCI_USER_OCID || 'unused' }}" \
-            -var="oci_fingerprint=${{ secrets.OCI_FINGERPRINT || 'unused' }}" \
-            -var="oci_private_key=${{ secrets.OCI_PRIVATE_KEY || 'unused' }}" \
-            -var="oci_compartment_id=${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}" \
             -var="ssh_public_key_path=~/.ssh/cloud_bench.pub" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
@@ -204,11 +205,24 @@ jobs:
         run: |
           terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
-      - name: Upload Terraform State
+      - name: Encrypt and Upload Terraform State
+        id: state_key
+        run: |
+          # Generate a random passphrase for this run (passed to cleanup via job output)
+          STATE_KEY=$(openssl rand -hex 32)
+          echo "::add-mask::$STATE_KEY"
+          echo "key=$STATE_KEY" >> $GITHUB_OUTPUT
+          openssl enc -aes-256-cbc -pbkdf2 -salt \
+            -in terraform/terraform.tfstate \
+            -out terraform/terraform.tfstate.enc \
+            -pass "pass:$STATE_KEY"
+          rm terraform/terraform.tfstate
+
+      - name: Upload Encrypted Terraform State
         uses: actions/upload-artifact@v7
         with:
           name: terraform-state
-          path: terraform/terraform.tfstate
+          path: terraform/terraform.tfstate.enc
           retention-days: 1
 
       - name: Upload Ansible Inventory
@@ -538,11 +552,19 @@ jobs:
           echo "ip=${RUNNER_IP}" >> $GITHUB_OUTPUT
           echo "Runner IP for cleanup: ${RUNNER_IP}"
 
-      - name: Download Terraform State
+      - name: Download Encrypted Terraform State
         uses: actions/download-artifact@v8
         with:
           name: terraform-state
           path: terraform/
+
+      - name: Decrypt Terraform State
+        run: |
+          openssl enc -aes-256-cbc -pbkdf2 -d \
+            -in terraform/terraform.tfstate.enc \
+            -out terraform/terraform.tfstate \
+            -pass "pass:${{ needs.provision.outputs.state_key }}"
+          rm terraform/terraform.tfstate.enc
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
@@ -559,6 +581,17 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}
+          TF_VAR_ovh_openstack_username: ${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}
+          TF_VAR_ovh_openstack_password: ${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}
+          TF_VAR_ovh_cloud_project_id: ${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}
+          TF_VAR_oci_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID || 'unused' }}
+          TF_VAR_oci_user_ocid: ${{ secrets.OCI_USER_OCID || 'unused' }}
+          TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
+          TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY || 'unused' }}
+          TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
         run: |
           terraform destroy -auto-approve \
             -var="run_id=${{ env.RUN_ID }}" \
@@ -566,17 +599,6 @@ jobs:
             -var="enabled_instances=${{ needs.provision.outputs.instances_arg }}" \
             -var="default_region=${{ needs.provision.outputs.region }}" \
             -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
-            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}" \
-            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
-            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
-            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
-            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}" \
-            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}" \
-            -var="oci_tenancy_ocid=${{ secrets.OCI_TENANCY_OCID || 'unused' }}" \
-            -var="oci_user_ocid=${{ secrets.OCI_USER_OCID || 'unused' }}" \
-            -var="oci_fingerprint=${{ secrets.OCI_FINGERPRINT || 'unused' }}" \
-            -var="oci_private_key=${{ secrets.OCI_PRIVATE_KEY || 'unused' }}" \
-            -var="oci_compartment_id=${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}" \
             -var="ssh_public_key_path=/dev/null" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
             -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
