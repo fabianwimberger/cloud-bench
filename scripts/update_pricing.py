@@ -315,7 +315,7 @@ def _fetch_oci_shape_rates() -> dict[str, dict[str, float]]:
         m = re.match(r"^([A-Z]\d+)\s*[-\s]\s*(OCPU|Memory)", remainder, re.IGNORECASE)
         if not m:
             continue
-        family = m.group(1)  # e.g. "E4", "E5", "E6", "A1", "A2"
+        family = m.group(1)  # e.g. "E5", "X9", "A1", "A2"
         rate_type = m.group(2).lower()  # "ocpu" or "memory"
 
         # Extract PAY_AS_YOU_GO price (take the highest non-zero value;
@@ -340,9 +340,8 @@ def _fetch_oci_shape_rates() -> dict[str, dict[str, float]]:
 
 # Map OCI shape names to the family key used in the APEX pricing API
 _OCI_SHAPE_FAMILY: dict[str, str] = {
-    "VM.Standard.E4.Flex": "E4",
     "VM.Standard.E5.Flex": "E5",
-    "VM.Standard.E6.Flex": "E6",
+    "VM.Standard3.Flex": "X9",
     "VM.Standard.A1.Flex": "A1",
     "VM.Standard.A2.Flex": "A2",
 }
