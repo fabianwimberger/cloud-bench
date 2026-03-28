@@ -2,6 +2,24 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-03-28T16:11:23-ovhcloud-DE1",
+      "timestamp": "2026-03-28T16:11:23",
+      "provider": "ovhcloud",
+      "region": "DE1",
+      "instance_count": 5,
+      "instances": [
+        "C3-8",
+        "R3-16",
+        "B3-8",
+        "C3-4",
+        "D2-4"
+      ],
+      "files": {
+        "summary": "data/runs/2026-03-28T16:11:23-ovhcloud-DE1/summary.json",
+        "detail": "data/runs/2026-03-28T16:11:23-ovhcloud-DE1/detail.json"
+      }
+    },
+    {
       "id": "2026-03-28T15:52:11-hetzner-fsn1",
       "timestamp": "2026-03-28T15:52:11",
       "provider": "hetzner",
@@ -806,6 +824,60 @@
     }
   ],
   "instance_index": {
+    "C3-8": [
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1",
+      "2026-03-21T18:56:30-ovhcloud-DE1",
+      "2026-03-21T18:30:48-ovhcloud-DE1",
+      "2026-03-21T16:47:43-ovhcloud-DE1",
+      "2026-03-21T15:54:38-ovhcloud-DE1",
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "R3-16": [
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1",
+      "2026-03-21T18:56:30-ovhcloud-DE1",
+      "2026-03-21T18:30:48-ovhcloud-DE1",
+      "2026-03-21T16:47:43-ovhcloud-DE1",
+      "2026-03-21T15:54:38-ovhcloud-DE1",
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "B3-8": [
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1",
+      "2026-03-21T18:56:30-ovhcloud-DE1",
+      "2026-03-21T18:30:48-ovhcloud-DE1",
+      "2026-03-21T16:47:43-ovhcloud-DE1",
+      "2026-03-21T15:54:38-ovhcloud-DE1",
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "C3-4": [
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1",
+      "2026-03-21T18:56:30-ovhcloud-DE1",
+      "2026-03-21T18:30:48-ovhcloud-DE1",
+      "2026-03-21T16:47:43-ovhcloud-DE1",
+      "2026-03-21T15:54:38-ovhcloud-DE1",
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "D2-4": [
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1"
+    ],
     "CPX32": [
       "2026-03-28T15:52:11-hetzner-fsn1",
       "2026-03-28T15:35:20-hetzner-fsn1",
@@ -1057,55 +1129,6 @@
       "2026-03-28T15:10:22-oci-eu-frankfurt-1",
       "2026-03-28T14:05:32-oci-eu-frankfurt-1",
       "2026-03-28T12:51:09-oci-eu-frankfurt-1"
-    ],
-    "C3-8": [
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1",
-      "2026-03-21T18:56:30-ovhcloud-DE1",
-      "2026-03-21T18:30:48-ovhcloud-DE1",
-      "2026-03-21T16:47:43-ovhcloud-DE1",
-      "2026-03-21T15:54:38-ovhcloud-DE1",
-      "2026-03-21T15:07:10-ovhcloud-DE1",
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "B3-8": [
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1",
-      "2026-03-21T18:56:30-ovhcloud-DE1",
-      "2026-03-21T18:30:48-ovhcloud-DE1",
-      "2026-03-21T16:47:43-ovhcloud-DE1",
-      "2026-03-21T15:54:38-ovhcloud-DE1",
-      "2026-03-21T15:07:10-ovhcloud-DE1",
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "R3-16": [
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1",
-      "2026-03-21T18:56:30-ovhcloud-DE1",
-      "2026-03-21T18:30:48-ovhcloud-DE1",
-      "2026-03-21T16:47:43-ovhcloud-DE1",
-      "2026-03-21T15:54:38-ovhcloud-DE1",
-      "2026-03-21T15:07:10-ovhcloud-DE1",
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "C3-4": [
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1",
-      "2026-03-21T18:56:30-ovhcloud-DE1",
-      "2026-03-21T18:30:48-ovhcloud-DE1",
-      "2026-03-21T16:47:43-ovhcloud-DE1",
-      "2026-03-21T15:54:38-ovhcloud-DE1",
-      "2026-03-21T15:07:10-ovhcloud-DE1",
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "D2-4": [
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1"
     ]
   }
 }
