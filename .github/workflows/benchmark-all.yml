@@ -24,13 +24,13 @@ jobs:
           echo "| Provider | Instances | Est. Cost |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-----------|-----------|" >> $GITHUB_STEP_SUMMARY
           echo "| Hetzner  | 8         | ~€0.05    |" >> $GITHUB_STEP_SUMMARY
-          echo "| AWS      | 6         | ~$0.15    |" >> $GITHUB_STEP_SUMMARY
+          echo "| AWS      | 6         | ~\$0.15    |" >> $GITHUB_STEP_SUMMARY
           echo "| OVHcloud | 5         | ~€0.15    |" >> $GITHUB_STEP_SUMMARY
-          echo "| OCI      | 3         | ~$0.10    |" >> $GITHUB_STEP_SUMMARY
+          echo "| OCI      | 3         | ~\$0.10    |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total estimated cost: ~$0.50 / run**" >> $GITHUB_STEP_SUMMARY
+          echo "**Total estimated cost: ~\$0.50 / run**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Individual provider limits still apply (>$5 blocks)." >> $GITHUB_STEP_SUMMARY
+          echo "Individual provider limits still apply (>\$5 blocks)." >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ inputs.skip_cost_guard }}" != "true" ]; then
             echo "Cost guard passed. Proceeding..."
