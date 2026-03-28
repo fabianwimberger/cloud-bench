@@ -275,6 +275,87 @@ jobs:
               --protocol icmp --port -1 --cidr "$RUNNER_IP/32" || true
           done
 
+      - name: Update OCI Security Lists with Runner IP
+        if: ${{ github.event.inputs.provider == 'oci' }}
+        env:
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+          OCI_COMPARTMENT_ID: ${{ secrets.OCI_COMPARTMENT_ID }}
+        run: |
+          RUNNER_IP=$(curl -s --retry 3 https://ifconfig.me || curl -s --retry 3 https://api.ipify.org)
+          echo "Benchmark runner IP: $RUNNER_IP"
+          PREV_IP="${{ needs.provision.outputs.runner_ip }}"
+          echo "Provision runner IP: $PREV_IP"
+          if [ "$RUNNER_IP" = "$PREV_IP" ]; then
+            echo "Same IP, no update needed"
+            exit 0
+          fi
+
+          pip install oci
+
+          python3 - <<'PYSCRIPT'
+          import oci
+          import os
+
+          config = {
+              "tenancy": os.environ["OCI_TENANCY_OCID"],
+              "user": os.environ["OCI_USER_OCID"],
+              "fingerprint": os.environ["OCI_FINGERPRINT"],
+              "key_content": os.environ["OCI_PRIVATE_KEY"],
+              "region": "${{ needs.provision.outputs.region }}",
+          }
+          compartment_id = os.environ["OCI_COMPARTMENT_ID"]
+          run_id = "${{ env.RUN_ID }}"
+          new_ip = os.popen("curl -s --retry 3 https://ifconfig.me || curl -s --retry 3 https://api.ipify.org").read().strip()
+
+          network = oci.core.VirtualNetworkClient(config)
+
+          # Find security lists with our tags
+          all_sls = network.list_security_lists(compartment_id).data
+          sls = [sl for sl in all_sls if sl.freeform_tags.get("run_id") == run_id and sl.freeform_tags.get("project") == "cloud-bench"]
+
+          for sl in sls:
+              print(f"Updating security list: {sl.display_name}")
+              # Get existing rules
+              sl_details = network.get_security_list(sl.id).data
+
+              # Build new ingress rules - keep existing and add new IP
+              new_ingress = list(sl_details.ingress_security_rules)
+              
+              # Add SSH rule for new IP (protocol 6 = TCP, port 22)
+              ssh_rule = oci.core.models.IngressSecurityRule(
+                  protocol="6",
+                  source=new_ip + "/32",
+                  source_type="CIDR_BLOCK",
+                  stateless=False,
+                  tcp_options=oci.core.models.TcpOptions(destination_port_range=oci.core.models.PortRange(min=22, max=22)),
+              )
+              new_ingress.append(ssh_rule)
+              
+              # Add ICMP rule for new IP (protocol 1 = ICMP)
+              icmp_rule = oci.core.models.IngressSecurityRule(
+                  protocol="1",
+                  source=new_ip + "/32",
+                  source_type="CIDR_BLOCK",
+                  stateless=False,
+                  icmp_options=oci.core.models.IcmpOptions(type=8, code=-1),
+              )
+              new_ingress.append(icmp_rule)
+
+              # Update security list
+              network.update_security_list(
+                  sl.id,
+                  oci.core.models.UpdateSecurityListDetails(
+                      ingress_security_rules=new_ingress
+                  )
+              )
+              print(f"  Added {new_ip}/32 to {sl.display_name}")
+
+          print(f"Updated {len(sls)} security list(s)")
+          PYSCRIPT
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
