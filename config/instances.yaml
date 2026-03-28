@@ -228,17 +228,6 @@ providers:
       pricing:
         hourly: 0.046
         monthly: 33.12
-    - id: a1-flex-2-4
-      name: A1.Flex 2/4
-      shape: VM.Standard.A1.Flex
-      arch: ARM64
-      ocpus: 2
-      vcpu: 2
-      ram_gb: 4
-      disk_gb: 50
-      pricing:
-        hourly: 0.026
-        monthly: 18.72
     - id: a2-flex-2-4
       name: A2.Flex 2/4
       shape: VM.Standard.A2.Flex
