@@ -133,7 +133,7 @@ jobs:
       - name: Check Python dependencies
         run: |
           pip install safety
-          safety check -r scripts/requirements.txt -r tests/requirements-test.txt || {
+          safety scan --target . --output screen || {
             echo "::error::Python security vulnerabilities detected. Review and update dependencies."
             exit 1
           }
