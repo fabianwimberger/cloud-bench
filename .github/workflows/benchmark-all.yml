@@ -85,9 +85,32 @@ jobs:
       - name: Get Runner Public IP
         id: get_ip
         run: |
-          RUNNER_IP=$(curl -s --max-time 5 https://api.ipify.org || curl -s --max-time 5 https://ifconfig.me)
-          echo "ip=$RUNNER_IP" >> $GITHUB_OUTPUT
-          echo "Runner IP: $RUNNER_IP"
+          IP_SERVICES=(
+            "https://api.ipify.org"
+            "https://icanhazip.com"
+            "https://ifconfig.me"
+            "https://ipecho.net/plain"
+          )
+
+          RUNNER_IP=""
+          for service in "${IP_SERVICES[@]}"; do
+            echo "Trying $service..."
+            RUNNER_IP=$(curl -s --max-time 5 "$service" 2>/dev/null) && break
+            echo "  Failed, trying next service..."
+          done
+
+          if [ -z "$RUNNER_IP" ]; then
+            echo "::error::Failed to detect runner IP address from any service"
+            exit 1
+          fi
+
+          if ! [[ "$RUNNER_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid IP format: $RUNNER_IP"
+            exit 1
+          fi
+
+          echo "ip=${RUNNER_IP}" >> $GITHUB_OUTPUT
+          echo "Runner IP: ${RUNNER_IP}"
 
       - name: Generate SSH Key Pair
         run: |
@@ -116,7 +139,7 @@ jobs:
             -var="cloud_provider=${{ matrix.provider }}" \
             -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
             -var="default_region=${{ matrix.region }}" \
-            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}" \
             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
             -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
@@ -194,7 +217,7 @@ jobs:
             -var="cloud_provider=${{ matrix.provider }}" \
             -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
             -var="default_region=${{ matrix.region }}" \
-            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || '0000000000000000000000000000000000000000000000000000000000000000' }}" \
             -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
             -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
             -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
@@ -207,6 +230,81 @@ jobs:
             -var="oci_compartment_id=${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}" \
             -var="ssh_public_key_path=/dev/null" \
             -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" || true
+
+      - name: Verify Cleanup (${{ matrix.provider }})
+        if: always()
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ matrix.region }}
+          OVH_OPENSTACK_USERNAME: ${{ secrets.OVH_OPENSTACK_USERNAME }}
+        run: |
+          echo "Verifying cleanup..."
+          RUN_ID="${{ github.run_id }}-${{ matrix.provider }}"
+
+          if [ "${{ matrix.provider }}" = "hetzner" ]; then
+            HCLOUD_VERSION="1.61.0"
+            HCLOUD_SHA256="86da8a0bbff6d56ca39041e4594c2af3b50baf0971526a67669639a213b51936"
+            HCLOUD_URL="https://github.com/hetznercloud/cli/releases/download/v${HCLOUD_VERSION}/hcloud-linux-amd64.tar.gz"
+            curl -fsSL "$HCLOUD_URL" -o hcloud-linux-amd64.tar.gz
+            echo "${HCLOUD_SHA256}  hcloud-linux-amd64.tar.gz" | sha256sum -c -
+            if [ $? -ne 0 ]; then
+              echo "::error::SHA256 checksum verification failed for hcloud CLI"
+              rm -f hcloud-linux-amd64.tar.gz
+              exit 1
+            fi
+            tar -xzf hcloud-linux-amd64.tar.gz
+            rm -f hcloud-linux-amd64.tar.gz
+
+            SERVERS=$(./hcloud server list -o json | jq -r ".[] | select(.name | contains(\"$RUN_ID\")) | .name")
+            if [[ -n "$SERVERS" ]]; then
+              echo "::error::CRITICAL: Servers still exist after cleanup:"
+              echo "$SERVERS"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] All resources cleaned up successfully"
+            fi
+
+          elif [ "${{ matrix.provider }}" = "aws" ]; then
+            INSTANCES=$(aws ec2 describe-instances \
+              --filters "Name=tag:project,Values=cloud-bench" "Name=tag:run_id,Values=$RUN_ID" \
+              --query 'Reservations[].Instances[?State.Name!=`terminated`].InstanceId' \
+              --output text 2>/dev/null || echo "")
+            if [[ -n "$INSTANCES" && "$INSTANCES" != "None" ]]; then
+              echo "::error::CRITICAL: AWS instances still exist after cleanup:"
+              echo "$INSTANCES"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] All AWS resources cleaned up successfully"
+            fi
+
+          elif [ "${{ matrix.provider }}" = "ovhcloud" ]; then
+            cd terraform
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "openstack_compute_instance" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: OVH instances still in Terraform state after cleanup!"
+              terraform state list | grep "openstack_compute_instance"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] OVH resources cleaned up successfully"
+            fi
+
+          elif [ "${{ matrix.provider }}" = "oci" ]; then
+            cd terraform
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "oci_core_instance" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: OCI instances still in Terraform state after cleanup!"
+              terraform state list | grep "oci_core_instance"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] OCI resources cleaned up successfully"
+            fi
+          fi
 
   # Serialize access to benchmark-data branch to prevent race conditions
   persist-results:
@@ -236,11 +334,14 @@ jobs:
       - name: Merge Results to Data Branch
         run: |
           pip install pyyaml
-          
+
           TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S)
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
+          # Save script before switching branches (scripts/ won't exist on data branch)
+          cp scripts/update_manifest.py /tmp/update_manifest.py
+
           # Fetch data branch
           if git fetch origin benchmark-data:benchmark-data 2>/dev/null; then
             git checkout benchmark-data
@@ -250,37 +351,43 @@ jobs:
             mkdir -p data
             echo '{"schema_version":"3.0","runs":[],"instance_index":{}}' > data/manifest.json
           fi
-          
+
+          # Region mapping (must match matrix above)
+          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 )
+
           # Process each provider's results
           for provider in hetzner aws ovhcloud oci; do
             PROVIDER_DIR="artifacts/results-$provider"
             if [ -d "$PROVIDER_DIR" ]; then
-              RUN_DIR="data/runs/${TIMESTAMP}-${provider}"
+              REGION="${REGIONS[$provider]}"
+              RUN_DIR="data/runs/${TIMESTAMP}-${provider}-${REGION}"
               mkdir -p "$RUN_DIR/raw"
-              
+
               # Copy raw results
-              cp "$PROVIDER_DIR"/*.json "$RUN_DIR/raw/" 2>/dev/null || true
-              
+              cp "$PROVIDER_DIR"/results/"$provider"/*.json "$RUN_DIR/raw/" 2>/dev/null || true
+
               # Copy processed results if they exist
-              PROCESSED_DIR="artifacts/results-$provider/${provider}"
-              if [ -f "$PROVIDER_DIR/frontend/public/data/$provider/summary-*.json" ]; then
-                cp "$PROVIDER_DIR/frontend/public/data/$provider/summary-*.json" "$RUN_DIR/summary.json" 2>/dev/null || true
+              SUMMARY_FILE=$(ls "$PROVIDER_DIR"/frontend/public/data/"$provider"/summary-*.json 2>/dev/null | head -1)
+              DETAIL_FILE=$(ls "$PROVIDER_DIR"/frontend/public/data/"$provider"/detail-*.json 2>/dev/null | head -1)
+              if [ -n "$SUMMARY_FILE" ]; then
+                cp "$SUMMARY_FILE" "$RUN_DIR/summary.json"
               fi
-              if [ -f "$PROVIDER_DIR/frontend/public/data/$provider/detail-*.json" ]; then
-                cp "$PROVIDER_DIR/frontend/public/data/$provider/detail-*.json" "$RUN_DIR/detail.json" 2>/dev/null || true
+              if [ -n "$DETAIL_FILE" ]; then
+                cp "$DETAIL_FILE" "$RUN_DIR/detail.json"
               fi
-              
+
               # Update manifest
-              python scripts/update_manifest.py \
+              python /tmp/update_manifest.py \
                 --manifest data/manifest.json \
                 --run-dir "$RUN_DIR" \
                 --provider "$provider" \
+                --region "$REGION" \
                 --timestamp "$TIMESTAMP" || true
-              
+
               echo "Persisted $provider results"
             fi
           done
-          
+
           # Commit all changes
           git add data/
           git commit -m "benchmark: all providers ${TIMESTAMP}" || echo "No changes to commit"
