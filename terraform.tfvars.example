@@ -15,3 +15,15 @@ aws_secret_access_key = "your-aws-secret-key"
 ovh_openstack_username = "user-xxxxx"
 ovh_openstack_password = "your-password"
 ovh_cloud_project_id = "your-project-id"
+
+# Oracle Cloud (OCI)
+# See docs/setup-guide.md for how to generate API keys
+oci_tenancy_ocid = "ocid1.tenancy.oc1..xxx"
+oci_user_ocid = "ocid1.user.oc1..xxx"
+oci_fingerprint = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+oci_private_key = <<EOT
+-----BEGIN PRIVATE KEY-----
+Your API private key here (from the .pem file)
+-----END PRIVATE KEY-----
+EOT
+oci_compartment_id = "ocid1.compartment.oc1..xxx"

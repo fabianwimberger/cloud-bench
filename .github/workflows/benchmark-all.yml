@@ -1,0 +1,350 @@
+name: Benchmark All Providers
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_cost_guard:
+        description: 'Skip cost estimation (not recommended)'
+        type: boolean
+        default: false
+
+env:
+  TF_VERSION: "1.10.5"
+  ANSIBLE_VERSION: "11.4.0"
+  NODE_VERSION: "22.14.0"
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  cost-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Estimate Costs (All Providers)
+        run: |
+          echo "## Cost Estimate" >> $GITHUB_STEP_SUMMARY
+          echo "| Provider | Instances | Est. Cost |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-----------|-----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Hetzner  | 8         | ~€0.05    |" >> $GITHUB_STEP_SUMMARY
+          echo "| AWS      | 6         | ~$0.15    |" >> $GITHUB_STEP_SUMMARY
+          echo "| OVHcloud | 5         | ~€0.15    |" >> $GITHUB_STEP_SUMMARY
+          echo "| OCI      | 3         | ~$0.10    |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total estimated cost: ~$0.50 / run**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Individual provider limits still apply (>$5 blocks)." >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.skip_cost_guard }}" != "true" ]; then
+            echo "Cost guard passed. Proceeding..."
+          else
+            echo "::warning::Cost guard skipped!"
+          fi
+
+  # Matrix job: runs all 4 providers in parallel
+  benchmark-provider:
+    needs: cost-guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Separate concurrency group per provider allows parallel execution
+    concurrency:
+      group: benchmark-${{ matrix.provider }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false  # Continue with other providers if one fails
+      matrix:
+        include:
+          - provider: hetzner
+            region: fsn1
+            instances: all
+          - provider: aws
+            region: eu-central-1
+            instances: all
+          - provider: ovhcloud
+            region: DE1
+            instances: all
+          - provider: oci
+            region: eu-frankfurt-1
+            instances: all
+    outputs:
+      ${{ matrix.provider }}_result: ${{ job.status }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+
+      - name: Get Runner Public IP
+        id: get_ip
+        run: |
+          RUNNER_IP=$(curl -s --max-time 5 https://api.ipify.org || curl -s --max-time 5 https://ifconfig.me)
+          echo "ip=$RUNNER_IP" >> $GITHUB_OUTPUT
+          echo "Runner IP: $RUNNER_IP"
+
+      - name: Generate SSH Key Pair
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t ed25519 -f ~/.ssh/cloud_bench_${{ matrix.provider }} -N "" -C "cloud-bench@github-actions"
+          chmod 600 ~/.ssh/cloud_bench_${{ matrix.provider }}
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Determine Instances
+        id: instances
+        run: |
+          INSTANCES_ARG=$(./scripts/parse-instances.sh "${{ matrix.instances }}")
+          echo "arg=$INSTANCES_ARG" >> $GITHUB_OUTPUT
+
+      - name: Terraform Apply (${{ matrix.provider }})
+        working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          terraform apply -auto-approve \
+            -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
+            -var="cloud_provider=${{ matrix.provider }}" \
+            -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
+            -var="default_region=${{ matrix.region }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
+            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
+            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
+            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
+            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}" \
+            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}" \
+            -var="oci_tenancy_ocid=${{ secrets.OCI_TENANCY_OCID || 'unused' }}" \
+            -var="oci_user_ocid=${{ secrets.OCI_USER_OCID || 'unused' }}" \
+            -var="oci_fingerprint=${{ secrets.OCI_FINGERPRINT || 'unused' }}" \
+            -var="oci_private_key=${{ secrets.OCI_PRIVATE_KEY || 'unused' }}" \
+            -var="oci_compartment_id=${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}" \
+            -var="ssh_public_key_path=~/.ssh/cloud_bench_${{ matrix.provider }}.pub" \
+            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]"
+
+      - name: Generate Ansible Inventory
+        working-directory: terraform
+        run: |
+          terraform output -raw ansible_inventory > ../ansible/inventory_${{ matrix.provider }}.ini
+
+      - name: Install Ansible
+        run: pip install ansible==${{ env.ANSIBLE_VERSION }}
+
+      - name: Wait for Instances
+        run: |
+          for i in $(seq 1 15); do
+            echo "Attempt $i: Checking SSH connectivity..."
+            if ansible all -i ansible/inventory_${{ matrix.provider }}.ini -m raw -a "echo ready" \
+              --private-key ~/.ssh/cloud_bench_${{ matrix.provider }} \
+              --ssh-common-args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 2>/dev/null | grep -q "ready"; then
+              echo "All instances are ready!"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::warning::Some instances may not be ready, continuing..."
+
+      - name: Run Benchmarks (${{ matrix.provider }})
+        working-directory: ansible
+        run: |
+          export RUN_ID="${{ github.run_id }}-${{ matrix.provider }}"
+          export ANSIBLE_HOST_KEY_CHECKING=False
+          ansible-playbook -i ../inventory_${{ matrix.provider }}.ini playbooks/benchmark.yml \
+            --private-key ~/.ssh/cloud_bench_${{ matrix.provider }} \
+            --extra-vars "run_id=${{ github.run_id }}-${{ matrix.provider }}"
+
+      - name: Process Results (${{ matrix.provider }})
+        run: |
+          pip install -r scripts/requirements.txt
+          mkdir -p results/${{ matrix.provider }}
+          cp ansible/results/*.json results/${{ matrix.provider }}/ 2>/dev/null || true
+          python scripts/process_results.py \
+            --input results/${{ matrix.provider }}/ \
+            --output frontend/public/data/${{ matrix.provider }}/ \
+            --config config/instances.yaml \
+            --region "${{ matrix.region }}" \
+            --provider "${{ matrix.provider }}"
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v7
+        with:
+          name: results-${{ matrix.provider }}
+          path: |
+            frontend/public/data/${{ matrix.provider}}/
+            results/${{ matrix.provider }}/
+          retention-days: 1
+
+      - name: Cleanup (${{ matrix.provider }})
+        if: always()
+        working-directory: terraform
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          terraform destroy -auto-approve \
+            -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
+            -var="cloud_provider=${{ matrix.provider }}" \
+            -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
+            -var="default_region=${{ matrix.region }}" \
+            -var="hcloud_token=${{ secrets.HCLOUD_TOKEN || 'unused' }}" \
+            -var="aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID || 'unused' }}" \
+            -var="aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY || 'unused' }}" \
+            -var="ovh_openstack_username=${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}" \
+            -var="ovh_openstack_password=${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}" \
+            -var="ovh_cloud_project_id=${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}" \
+            -var="oci_tenancy_ocid=${{ secrets.OCI_TENANCY_OCID || 'unused' }}" \
+            -var="oci_user_ocid=${{ secrets.OCI_USER_OCID || 'unused' }}" \
+            -var="oci_fingerprint=${{ secrets.OCI_FINGERPRINT || 'unused' }}" \
+            -var="oci_private_key=${{ secrets.OCI_PRIVATE_KEY || 'unused' }}" \
+            -var="oci_compartment_id=${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}" \
+            -var="ssh_public_key_path=/dev/null" \
+            -var="allowed_ssh_ips=[]" || true
+
+  # Serialize access to benchmark-data branch to prevent race conditions
+  persist-results:
+    needs: benchmark-provider
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # This concurrency ensures only one job updates benchmark-data at a time
+    concurrency:
+      group: benchmark-data-write
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download All Results
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts/
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+
+      - name: Merge Results to Data Branch
+        run: |
+          pip install pyyaml
+          
+          TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Fetch data branch
+          if git fetch origin benchmark-data:benchmark-data 2>/dev/null; then
+            git checkout benchmark-data
+          else
+            git checkout --orphan benchmark-data
+            git rm -rf . 2>/dev/null || true
+            mkdir -p data
+            echo '{"schema_version":"3.0","runs":[],"instance_index":{}}' > data/manifest.json
+          fi
+          
+          # Process each provider's results
+          for provider in hetzner aws ovhcloud oci; do
+            PROVIDER_DIR="artifacts/results-$provider"
+            if [ -d "$PROVIDER_DIR" ]; then
+              RUN_DIR="data/runs/${TIMESTAMP}-${provider}"
+              mkdir -p "$RUN_DIR/raw"
+              
+              # Copy raw results
+              cp "$PROVIDER_DIR"/*.json "$RUN_DIR/raw/" 2>/dev/null || true
+              
+              # Copy processed results if they exist
+              PROCESSED_DIR="artifacts/results-$provider/${provider}"
+              if [ -f "$PROVIDER_DIR/frontend/public/data/$provider/summary-*.json" ]; then
+                cp "$PROVIDER_DIR/frontend/public/data/$provider/summary-*.json" "$RUN_DIR/summary.json" 2>/dev/null || true
+              fi
+              if [ -f "$PROVIDER_DIR/frontend/public/data/$provider/detail-*.json" ]; then
+                cp "$PROVIDER_DIR/frontend/public/data/$provider/detail-*.json" "$RUN_DIR/detail.json" 2>/dev/null || true
+              fi
+              
+              # Update manifest
+              python scripts/update_manifest.py \
+                --manifest data/manifest.json \
+                --run-dir "$RUN_DIR" \
+                --provider "$provider" \
+                --timestamp "$TIMESTAMP" || true
+              
+              echo "Persisted $provider results"
+            fi
+          done
+          
+          # Commit all changes
+          git add data/
+          git commit -m "benchmark: all providers ${TIMESTAMP}" || echo "No changes to commit"
+          git push origin benchmark-data
+
+  # Single deploy job after all results are persisted
+  deploy:
+    needs: persist-results
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '${{ env.PYTHON_VERSION }}'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+
+      - name: Fetch All Benchmark Data
+        run: |
+          git fetch origin benchmark-data || echo "No benchmark-data branch"
+          if git rev-parse origin/benchmark-data >/dev/null 2>&1; then
+            git checkout origin/benchmark-data -- data/
+            if [ -d data ]; then
+              cp -r data/* frontend/public/data/
+            fi
+          fi
+
+      - name: Build Combined Data
+        run: |
+          pip install -r scripts/requirements.txt
+          if [ -f frontend/public/data/manifest.json ]; then
+            python scripts/merge_summaries.py \
+              --manifest frontend/public/data/manifest.json \
+              --data-dir frontend/public/data/ \
+              --output frontend/public/data/benchmark-data.json
+            python scripts/build_history.py \
+              --data-dir frontend/public/data/ \
+              --output frontend/public/data/history.json
+          fi
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          path: frontend/dist
