@@ -236,11 +236,14 @@ jobs:
       - name: Merge Results to Data Branch
         run: |
           pip install pyyaml
-          
+
           TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S)
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
+          # Save script before switching branches (scripts/ won't exist on data branch)
+          cp scripts/update_manifest.py /tmp/update_manifest.py
+
           # Fetch data branch
           if git fetch origin benchmark-data:benchmark-data 2>/dev/null; then
             git checkout benchmark-data
@@ -250,37 +253,43 @@ jobs:
             mkdir -p data
             echo '{"schema_version":"3.0","runs":[],"instance_index":{}}' > data/manifest.json
           fi
-          
+
+          # Region mapping (must match matrix above)
+          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 )
+
           # Process each provider's results
           for provider in hetzner aws ovhcloud oci; do
             PROVIDER_DIR="artifacts/results-$provider"
             if [ -d "$PROVIDER_DIR" ]; then
-              RUN_DIR="data/runs/${TIMESTAMP}-${provider}"
+              REGION="${REGIONS[$provider]}"
+              RUN_DIR="data/runs/${TIMESTAMP}-${provider}-${REGION}"
               mkdir -p "$RUN_DIR/raw"
-              
+
               # Copy raw results
-              cp "$PROVIDER_DIR"/*.json "$RUN_DIR/raw/" 2>/dev/null || true
-              
+              cp "$PROVIDER_DIR"/results/"$provider"/*.json "$RUN_DIR/raw/" 2>/dev/null || true
+
               # Copy processed results if they exist
-              PROCESSED_DIR="artifacts/results-$provider/${provider}"
-              if [ -f "$PROVIDER_DIR/frontend/public/data/$provider/summary-*.json" ]; then
-                cp "$PROVIDER_DIR/frontend/public/data/$provider/summary-*.json" "$RUN_DIR/summary.json" 2>/dev/null || true
+              SUMMARY_FILE=$(ls "$PROVIDER_DIR"/frontend/public/data/"$provider"/summary-*.json 2>/dev/null | head -1)
+              DETAIL_FILE=$(ls "$PROVIDER_DIR"/frontend/public/data/"$provider"/detail-*.json 2>/dev/null | head -1)
+              if [ -n "$SUMMARY_FILE" ]; then
+                cp "$SUMMARY_FILE" "$RUN_DIR/summary.json"
               fi
-              if [ -f "$PROVIDER_DIR/frontend/public/data/$provider/detail-*.json" ]; then
-                cp "$PROVIDER_DIR/frontend/public/data/$provider/detail-*.json" "$RUN_DIR/detail.json" 2>/dev/null || true
+              if [ -n "$DETAIL_FILE" ]; then
+                cp "$DETAIL_FILE" "$RUN_DIR/detail.json"
               fi
-              
+
               # Update manifest
-              python scripts/update_manifest.py \
+              python /tmp/update_manifest.py \
                 --manifest data/manifest.json \
                 --run-dir "$RUN_DIR" \
                 --provider "$provider" \
+                --region "$REGION" \
                 --timestamp "$TIMESTAMP" || true
-              
+
               echo "Persisted $provider results"
             fi
           done
-          
+
           # Commit all changes
           git add data/
           git commit -m "benchmark: all providers ${TIMESTAMP}" || echo "No changes to commit"
