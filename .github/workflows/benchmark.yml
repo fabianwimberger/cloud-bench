@@ -64,6 +64,7 @@ jobs:
       ssh_key_b64: ${{ steps.export_key.outputs.key_b64 }}
       ssh_pub_key: ${{ steps.export_key.outputs.pub_key }}
       region: ${{ steps.resolve_region.outputs.region }}
+      state_key: ${{ steps.state_key.outputs.key }}
     steps:
       - uses: actions/checkout@v6
 
@@ -204,11 +205,24 @@ jobs:
         run: |
           terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
-      - name: Upload Terraform State
+      - name: Encrypt and Upload Terraform State
+        id: state_key
+        run: |
+          # Generate a random passphrase for this run (passed to cleanup via job output)
+          STATE_KEY=$(openssl rand -hex 32)
+          echo "::add-mask::$STATE_KEY"
+          echo "key=$STATE_KEY" >> $GITHUB_OUTPUT
+          openssl enc -aes-256-cbc -pbkdf2 -salt \
+            -in terraform/terraform.tfstate \
+            -out terraform/terraform.tfstate.enc \
+            -pass "pass:$STATE_KEY"
+          rm terraform/terraform.tfstate
+
+      - name: Upload Encrypted Terraform State
         uses: actions/upload-artifact@v7
         with:
           name: terraform-state
-          path: terraform/terraform.tfstate
+          path: terraform/terraform.tfstate.enc
           retention-days: 1
 
       - name: Upload Ansible Inventory
@@ -538,11 +552,19 @@ jobs:
           echo "ip=${RUNNER_IP}" >> $GITHUB_OUTPUT
           echo "Runner IP for cleanup: ${RUNNER_IP}"
 
-      - name: Download Terraform State
+      - name: Download Encrypted Terraform State
         uses: actions/download-artifact@v8
         with:
           name: terraform-state
           path: terraform/
+
+      - name: Decrypt Terraform State
+        run: |
+          openssl enc -aes-256-cbc -pbkdf2 -d \
+            -in terraform/terraform.tfstate.enc \
+            -out terraform/terraform.tfstate \
+            -pass "pass:${{ needs.provision.outputs.state_key }}"
+          rm terraform/terraform.tfstate.enc
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
