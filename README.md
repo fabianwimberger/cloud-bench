@@ -166,7 +166,7 @@ cloud-bench/
 
 ## Features
 
-- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud (19 instance types)
+- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, OCI (23 instance types)
 - **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
 - **Metric averaging** — scores based on all historical runs, not just the latest
 - **Cost analysis** — performance per dollar with EUR/USD toggle
