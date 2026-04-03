@@ -1,0 +1,240 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-04-03T14:50:15.872132",
+    "run_count": 6,
+    "currency": "USD",
+    "provider": "aws",
+    "region": "eu-central-1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1525,
+      "usd_to_eur": 0.8677,
+      "last_updated": "2026-04-02",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "instances": [
+    {
+      "id": "M7I-FLEX.LARGE",
+      "name": "M7I-FLEX.LARGE (X86)",
+      "scores": {
+        "single_core": 93.2,
+        "multi_core": 51.3,
+        "memory": 100.0,
+        "disk": 99.9,
+        "overall": 88.9
+      },
+      "metrics": {
+        "cpu_single_raw": 1062.28,
+        "cpu_multi_raw": 1098.51,
+        "mem_read_raw": 10392.94,
+        "mem_write_raw": 9426.22,
+        "mem_throughput_raw": 19819.16,
+        "disk_iops_raw": 3041.277297
+      },
+      "pricing": {
+        "hourly": 0.11471,
+        "monthly": 82.59
+      },
+      "value": 0.87,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 8,
+        "disk_gb": 20,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "C7I-FLEX.LARGE",
+      "name": "C7I-FLEX.LARGE (X86)",
+      "scores": {
+        "single_core": 100.0,
+        "multi_core": 55.2,
+        "memory": 83.8,
+        "disk": 100.0,
+        "overall": 85.4
+      },
+      "metrics": {
+        "cpu_single_raw": 1139.93,
+        "cpu_multi_raw": 1182.14,
+        "mem_read_raw": 11320.8,
+        "mem_write_raw": 5297.31,
+        "mem_throughput_raw": 16618.11,
+        "disk_iops_raw": 3041.72705
+      },
+      "pricing": {
+        "hourly": 0.09676,
+        "monthly": 69.67
+      },
+      "value": 1.11,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 20,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    },
+    {
+      "id": "T4G.MICRO",
+      "name": "T4G.MICRO (ARM64)",
+      "scores": {
+        "single_core": 93.8,
+        "multi_core": 100.0,
+        "memory": 56.8,
+        "disk": 100.0,
+        "overall": 83.6
+      },
+      "metrics": {
+        "cpu_single_raw": 1069.12,
+        "cpu_multi_raw": 2141.4,
+        "mem_read_raw": 7344.69,
+        "mem_write_raw": 3917.38,
+        "mem_throughput_raw": 11262.07,
+        "disk_iops_raw": 3043.176253
+      },
+      "pricing": {
+        "hourly": 0.0096,
+        "monthly": 6.91
+      },
+      "value": 14.02,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 1,
+        "disk_gb": 20,
+        "arch": "ARM64"
+      },
+      "provider_attributes": {
+        "arch": "ARM64",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 1024
+      }
+    },
+    {
+      "id": "T4G.SMALL",
+      "name": "T4G.SMALL (ARM64)",
+      "scores": {
+        "single_core": 93.8,
+        "multi_core": 98.3,
+        "memory": 55.4,
+        "disk": 100.0,
+        "overall": 82.8
+      },
+      "metrics": {
+        "cpu_single_raw": 1069.77,
+        "cpu_multi_raw": 2105.32,
+        "mem_read_raw": 7428.89,
+        "mem_write_raw": 3553.6,
+        "mem_throughput_raw": 10982.49,
+        "disk_iops_raw": 3042.476638
+      },
+      "pricing": {
+        "hourly": 0.0192,
+        "monthly": 13.82
+      },
+      "value": 6.95,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 2,
+        "disk_gb": 20,
+        "arch": "ARM64"
+      },
+      "provider_attributes": {
+        "arch": "ARM64",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 2048
+      }
+    },
+    {
+      "id": "T3.MICRO",
+      "name": "T3.MICRO (X86)",
+      "scores": {
+        "single_core": 36.5,
+        "multi_core": 30.7,
+        "memory": 86.5,
+        "disk": 100.0,
+        "overall": 68.7
+      },
+      "metrics": {
+        "cpu_single_raw": 416.28,
+        "cpu_multi_raw": 656.39,
+        "mem_read_raw": 10202.3,
+        "mem_write_raw": 6939.14,
+        "mem_throughput_raw": 17141.44,
+        "disk_iops_raw": 3043.026336
+      },
+      "pricing": {
+        "hourly": 0.012,
+        "monthly": 8.64
+      },
+      "value": 3.89,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 1,
+        "disk_gb": 20,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 1024
+      }
+    },
+    {
+      "id": "T3.SMALL",
+      "name": "T3.SMALL (X86)",
+      "scores": {
+        "single_core": 35.8,
+        "multi_core": 30.1,
+        "memory": 85.1,
+        "disk": 100.0,
+        "overall": 68.0
+      },
+      "metrics": {
+        "cpu_single_raw": 407.9,
+        "cpu_multi_raw": 643.7,
+        "mem_read_raw": 10016.22,
+        "mem_write_raw": 6851.84,
+        "mem_throughput_raw": 16868.059999999998,
+        "disk_iops_raw": 3042.52661
+      },
+      "pricing": {
+        "hourly": 0.024,
+        "monthly": 17.28
+      },
+      "value": 1.91,
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 2,
+        "disk_gb": 20,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 2048
+      }
+    }
+  ]
+}
