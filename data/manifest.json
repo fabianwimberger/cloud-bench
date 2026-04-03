@@ -2,6 +2,22 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-04-03T15:18:19-oci-eu-frankfurt-1",
+      "timestamp": "2026-04-03T15:18:19",
+      "provider": "oci",
+      "region": "eu-frankfurt-1",
+      "instance_count": 3,
+      "instances": [
+        "E5-FLEX-1-4",
+        "STD3-FLEX-1-4",
+        "A2-FLEX-2-4"
+      ],
+      "files": {
+        "summary": "data/runs/2026-04-03T15:18:19-oci-eu-frankfurt-1/summary.json",
+        "detail": "data/runs/2026-04-03T15:18:19-oci-eu-frankfurt-1/detail.json"
+      }
+    },
+    {
       "id": "2026-04-03T15:07:10-ovhcloud-DE1",
       "timestamp": "2026-04-03T15:07:10",
       "provider": "ovhcloud",
@@ -882,6 +898,27 @@
     }
   ],
   "instance_index": {
+    "E5-FLEX-1-4": [
+      "2026-04-03T15:18:19-oci-eu-frankfurt-1",
+      "2026-03-28T15:35:20-oci-eu-frankfurt-1",
+      "2026-03-28T15:10:22-oci-eu-frankfurt-1",
+      "2026-03-28T14:05:32-oci-eu-frankfurt-1",
+      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
+    ],
+    "STD3-FLEX-1-4": [
+      "2026-04-03T15:18:19-oci-eu-frankfurt-1",
+      "2026-03-28T15:35:20-oci-eu-frankfurt-1",
+      "2026-03-28T15:10:22-oci-eu-frankfurt-1",
+      "2026-03-28T14:05:32-oci-eu-frankfurt-1",
+      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
+    ],
+    "A2-FLEX-2-4": [
+      "2026-04-03T15:18:19-oci-eu-frankfurt-1",
+      "2026-03-28T15:35:20-oci-eu-frankfurt-1",
+      "2026-03-28T15:10:22-oci-eu-frankfurt-1",
+      "2026-03-28T14:05:32-oci-eu-frankfurt-1",
+      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
+    ],
     "C3-8": [
       "2026-04-03T15:07:10-ovhcloud-DE1",
       "2026-03-28T16:11:23-ovhcloud-DE1",
@@ -1188,24 +1225,6 @@
       "2026-03-15T12:55:25-hetzner-fsn1",
       "2026-03-15T11:36:46-hetzner-fsn1",
       "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "E5-FLEX-1-4": [
-      "2026-03-28T15:35:20-oci-eu-frankfurt-1",
-      "2026-03-28T15:10:22-oci-eu-frankfurt-1",
-      "2026-03-28T14:05:32-oci-eu-frankfurt-1",
-      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
-    ],
-    "STD3-FLEX-1-4": [
-      "2026-03-28T15:35:20-oci-eu-frankfurt-1",
-      "2026-03-28T15:10:22-oci-eu-frankfurt-1",
-      "2026-03-28T14:05:32-oci-eu-frankfurt-1",
-      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
-    ],
-    "A2-FLEX-2-4": [
-      "2026-03-28T15:35:20-oci-eu-frankfurt-1",
-      "2026-03-28T15:10:22-oci-eu-frankfurt-1",
-      "2026-03-28T14:05:32-oci-eu-frankfurt-1",
-      "2026-03-28T12:51:09-oci-eu-frankfurt-1"
     ]
   }
 }
