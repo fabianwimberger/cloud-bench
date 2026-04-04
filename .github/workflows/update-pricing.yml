@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
-        run: pip install requests pyyaml boto3
+        run: pip install requests pyyaml boto3 google-cloud-billing
 
       - name: Check pricing
         id: check
@@ -56,7 +56,7 @@ jobs:
           commit-message: 'chore: update instance pricing from cloud APIs'
           title: 'chore: Update instance pricing'
           body: |
-            Automated pricing update from Hetzner Cloud API, AWS Pricing API, OVH Catalog API, and OCI Pricing.
+            Automated pricing update from Hetzner Cloud API, AWS Pricing API, OVH Catalog API, OCI Pricing, and GCP Cloud Billing API.
 
             Changes detected in `config/instances.yaml`.
 

@@ -27,6 +27,7 @@ jobs:
           echo "| AWS      | 6         | ~\$0.15    |" >> $GITHUB_STEP_SUMMARY
           echo "| OVHcloud | 5         | ~€0.15    |" >> $GITHUB_STEP_SUMMARY
           echo "| OCI      | 3         | ~\$0.10    |" >> $GITHUB_STEP_SUMMARY
+          echo "| GCP      | 5         | ~\$0.10    |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Total estimated cost: ~\$0.50 / run**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -62,6 +63,9 @@ jobs:
             instances: all
           - provider: oci
             region: eu-frankfurt-1
+            instances: all
+          - provider: gcp
+            region: europe-west3
             instances: all
     steps:
       - uses: actions/checkout@v6
@@ -144,6 +148,8 @@ jobs:
           TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
           TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY || 'unused' }}
           TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
+          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID || 'unused' }}
+          TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS || '' }}
         run: |
           terraform apply -auto-approve \
             -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
@@ -222,6 +228,8 @@ jobs:
           TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
           TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY || 'unused' }}
           TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
+          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID || 'unused' }}
+          TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS || '' }}
         run: |
           terraform destroy -auto-approve \
             -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
@@ -304,6 +312,18 @@ jobs:
             else
               echo "[OK] OCI resources cleaned up successfully"
             fi
+
+          elif [ "${{ matrix.provider }}" = "gcp" ]; then
+            cd terraform
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "google_compute_instance" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: GCP instances still in Terraform state after cleanup!"
+              terraform state list | grep "google_compute_instance"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] GCP resources cleaned up successfully"
+            fi
           fi
 
   # Serialize access to benchmark-data branch to prevent race conditions
@@ -353,10 +373,10 @@ jobs:
           fi
 
           # Region mapping (must match matrix above)
-          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 )
+          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 [gcp]=europe-west3 )
 
           # Process each provider's results
-          for provider in hetzner aws ovhcloud oci; do
+          for provider in hetzner aws ovhcloud oci gcp; do
             PROVIDER_DIR="artifacts/results-$provider"
             if [ -d "$PROVIDER_DIR" ]; then
               REGION="${REGIONS[$provider]}"

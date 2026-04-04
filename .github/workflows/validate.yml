@@ -459,6 +459,70 @@ jobs:
           print('OCI currency check passed: USD')
           "
 
+      - name: Create Mock Results (GCP)
+        run: |
+          rm -f results/*.json
+          cat > results/e2-standard-2-mock.json << 'MOCKEOF'
+          {
+            "run_id": "test-mock-gcp",
+            "timestamp": "2026-01-01T00:00:00Z",
+            "system": {
+              "provider": "gcp",
+              "instance_type": "e2-standard-2"
+            },
+            "provider_attributes": {
+              "arch": "x86_64",
+              "os": "Ubuntu 24.04",
+              "kernel": "6.8.0",
+              "vcpu": 2,
+              "memory_mb": 8192,
+              "hostname": "test-e2-standard-2"
+            },
+            "cpu": {
+              "test": "sysbench-cpu",
+              "runs": 5,
+              "single_thread_events": 410,
+              "multi_thread_events": 820,
+              "threads": 2
+            },
+            "memory": {
+              "test": "sysbench-memory",
+              "runs": 5,
+              "read_mib_per_sec": 7800,
+              "write_mib_per_sec": 5900,
+              "total_throughput_mib": 13700
+            },
+            "disk": {
+              "test": "fio-randread",
+              "runs": 5,
+              "read_iops": 15000
+            }
+          }
+          MOCKEOF
+
+      - name: Test Result Processing (GCP)
+        run: |
+          mkdir -p frontend/public/data-gcp/
+          python3 scripts/process_results.py \
+            --input results/ \
+            --output frontend/public/data-gcp/ \
+            --config config/instances.yaml \
+            --region europe-west3 \
+            --provider gcp
+
+      - name: Verify GCP Output Files
+        run: |
+          for f in benchmark-data.json benchmark-results.csv summary.md; do
+            test -f "frontend/public/data-gcp/$f" || (echo "$f missing" && exit 1)
+          done
+          # Verify currency is USD
+          python3 -c "
+          import json
+          data = json.load(open('frontend/public/data-gcp/benchmark-data.json'))
+          assert data['metadata']['currency'] == 'USD', f'Expected USD, got {data[\"metadata\"][\"currency\"]}'
+          print('GCP currency check passed: USD')
+          "
+
       - name: Build Frontend with Real Data
         working-directory: frontend
         run: npm run build
