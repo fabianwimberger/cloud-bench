@@ -239,6 +239,58 @@ providers:
       pricing:
         hourly: 0.036
         monthly: 25.92
+  gcp:
+    currency: USD
+    default_region: europe-west3
+    regions:
+      europe-west3:
+        name: Frankfurt
+    instances:
+    - id: e2-standard-2
+      name: E2 Standard 2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.07672
+        monthly: 55.24
+    - id: n2-standard-2
+      name: N2 Standard 2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.11312
+        monthly: 81.45
+    - id: n2d-standard-2
+      name: N2D Standard 2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.09868
+        monthly: 71.05
+    - id: t2d-standard-2
+      name: T2D Standard 2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.09448
+        monthly: 68.03
+    - id: t2a-standard-2
+      name: T2A Standard 2
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.08008
+        monthly: 57.66
 exchange_rates:
   eur_to_usd: 1.1525
   usd_to_eur: 0.8677
