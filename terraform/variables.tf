@@ -20,8 +20,8 @@ variable "cloud_provider" {
   default     = "hetzner"
 
   validation {
-    condition     = can(regex("^(hetzner|aws|ovhcloud|oci)$", var.cloud_provider))
-    error_message = "Provider must be 'hetzner', 'aws', 'ovhcloud', or 'oci'."
+    condition     = can(regex("^(hetzner|aws|ovhcloud|oci|gcp)$", var.cloud_provider))
+    error_message = "Provider must be 'hetzner', 'aws', 'ovhcloud', 'oci', or 'gcp'."
   }
 }
 
@@ -155,4 +155,23 @@ variable "oci_compartment_id" {
   type        = string
   sensitive   = true
   default     = ""
+}
+
+variable "gcp_project_id" {
+  description = "Google Cloud project ID"
+  type        = string
+  default     = ""
+}
+
+variable "gcp_credentials" {
+  description = "Google Cloud service account JSON key content"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "gcp_disk_size" {
+  description = "Boot disk size in GB for GCP instances"
+  type        = number
+  default     = 20
 }

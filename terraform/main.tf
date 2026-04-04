@@ -18,6 +18,10 @@ terraform {
       source  = "oracle/oci"
       version = "~> 6.0"
     }
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 7.0"
+    }
   }
 
   backend "local" {
@@ -57,6 +61,12 @@ provider "oci" {
   region       = var.cloud_provider == "oci" ? local.effective_region : "eu-frankfurt-1"
 }
 
+provider "google" {
+  project     = var.gcp_project_id
+  region      = var.cloud_provider == "gcp" ? local.effective_region : "europe-west3"
+  credentials = var.gcp_credentials != "" ? var.gcp_credentials : null
+}
+
 locals {
   config = yamldecode(file("${path.module}/../config/instances.yaml"))
 
@@ -81,6 +91,7 @@ locals {
       aws      = "eu-central-1"
       ovhcloud = "DE1"
       oci      = "eu-frankfurt-1"
+      gcp      = "europe-west3"
     },
     var.cloud_provider,
     "fsn1"
@@ -154,6 +165,21 @@ module "oci_instances" {
   labels             = merge(local.common_labels, { instance_type = each.value.id })
 }
 
+module "gcp_instances" {
+  source   = "./modules/gcp"
+  for_each = var.cloud_provider == "gcp" ? { for inst in local.instances : inst.id => inst } : {}
+
+  instance_name   = "cloud-bench-${var.cloud_provider}-${each.value.id}-${var.run_id}"
+  machine_type    = each.value.id
+  instance_arch   = lookup(local.arch_map, each.value.arch, "x86_64")
+  region          = lookup(var.instance_regions, each.value.id, local.effective_region)
+  project_id      = var.gcp_project_id
+  ssh_public_key  = local.ssh_public_key
+  allowed_ssh_ips = var.allowed_ssh_ips
+  disk_size_gb    = var.gcp_disk_size
+  labels          = merge(local.common_labels, { instance_type = replace(each.value.id, ".", "-") })
+}
+
 locals {
   all_instances = merge(
     {
@@ -176,6 +202,12 @@ locals {
     },
     {
       for inst_id, mod in module.oci_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+    {
+      for inst_id, mod in module.gcp_instances : inst_id => {
         host = mod.server_ip
         name = mod.server_name
       }
