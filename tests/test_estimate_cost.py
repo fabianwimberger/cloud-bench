@@ -119,9 +119,13 @@ class TestEstimateCost(unittest.TestCase):
         # AWS is USD, so USD cost should be the native cost
         expected_hourly = 0.0104 + 0.0208
         expected_cost_native = expected_hourly * 0.33
-        self.assertAlmostEqual(result["cost_usd"], round(expected_cost_native, 4), places=3)
+        self.assertAlmostEqual(
+            result["cost_usd"], round(expected_cost_native, 4), places=3
+        )
         # EUR cost should be converted
-        self.assertAlmostEqual(result["cost_eur"], round(expected_cost_native * 0.92, 4), places=3)
+        self.assertAlmostEqual(
+            result["cost_eur"], round(expected_cost_native * 0.92, 4), places=3
+        )
 
     def test_estimate_unknown_provider(self):
         """Test estimating cost for unknown provider returns empty."""

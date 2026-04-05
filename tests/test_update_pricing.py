@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Tests for update_pricing.py."""
 
-
 import os
 import sys
 
@@ -184,7 +183,10 @@ class TestFetchExchangeRates(unittest.TestCase):
     def test_fetch_exchange_rates_success(self, mock_get):
         """Test successful exchange rate fetch."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"rates": {"USD": 1.087}, "date": "2024-01-01"}
+        mock_response.json.return_value = {
+            "rates": {"USD": 1.087},
+            "date": "2024-01-01",
+        }
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
 
@@ -198,6 +200,7 @@ class TestFetchExchangeRates(unittest.TestCase):
     def test_fetch_exchange_rates_failure(self, mock_get):
         """Test failed exchange rate fetch."""
         import requests
+
         mock_get.side_effect = requests.RequestException("API error")
 
         result = up.fetch_exchange_rates()

@@ -259,7 +259,9 @@ class TestMain(unittest.TestCase):
             self.assertEqual(len(manifest["runs"]), 1)
             self.assertEqual(manifest["runs"][0]["id"], "20240101-120000-hetzner-nbg1")
             self.assertEqual(manifest["runs"][0]["instance_count"], 2)
-            self.assertEqual(manifest["instance_index"]["cx11"], ["20240101-120000-hetzner-nbg1"])
+            self.assertEqual(
+                manifest["instance_index"]["cx11"], ["20240101-120000-hetzner-nbg1"]
+            )
         finally:
             sys.argv = original_argv
 
@@ -310,7 +312,9 @@ class TestMain(unittest.TestCase):
             # Should still have only one run (updated)
             self.assertEqual(len(manifest["runs"]), 1)
             self.assertEqual(manifest["runs"][0]["instance_count"], 2)
-            self.assertEqual(sorted(manifest["runs"][0]["instances"]), sorted(["cx11", "cpx11"]))
+            self.assertEqual(
+                sorted(manifest["runs"][0]["instances"]), sorted(["cx11", "cpx11"])
+            )
         finally:
             sys.argv = original_argv
 

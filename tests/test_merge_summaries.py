@@ -433,7 +433,8 @@ class TestMain(unittest.TestCase):
             self.assertEqual(len(result["summary"]["instances"]), 1)
             # Average of 1000 and 1200 = 1100
             self.assertEqual(
-                result["summary"]["instances"][0]["metrics"]["cpu_single_events"], 1100.0
+                result["summary"]["instances"][0]["metrics"]["cpu_single_events"],
+                1100.0,
             )
         finally:
             sys.argv = original_argv
