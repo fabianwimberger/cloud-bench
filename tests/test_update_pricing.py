@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Tests for update_pricing.py."""
 
-import json
+
 import os
 import sys
-import tempfile
+
 import unittest
 from unittest.mock import MagicMock, patch
 
