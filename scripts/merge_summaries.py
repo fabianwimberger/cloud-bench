@@ -106,8 +106,8 @@ def main():
         run_count_for_provider = len(provider_runs)
 
         for inst_id, inst_list in instance_runs.items():
-            # Start from the most recent run's data as the base
-            inst = json.loads(json.dumps(inst_list[-1]))
+            # Start from the first run's data as the base (runs are newest-first)
+            inst = json.loads(json.dumps(inst_list[0]))
 
             # Average raw metrics across all runs for this instance
             if len(inst_list) > 1:
