@@ -1,5 +1,5 @@
 boto3==1.42.82
 numpy==2.4.4
-pandas==3.0.1
+pandas==3.0.2
 pyyaml==6.0.3
 requests==2.33.0
