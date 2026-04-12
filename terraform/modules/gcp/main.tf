@@ -10,9 +10,7 @@ terraform {
 locals {
   image = var.instance_arch == "arm64" ? data.google_compute_image.ubuntu_arm64.self_link : data.google_compute_image.ubuntu_x86.self_link
 
-  cloud_init = templatefile("${path.module}/cloud-init.yml.tmpl", {
-    ssh_public_key = var.ssh_public_key
-  })
+  cloud_init = templatefile("${path.module}/cloud-init.yml.tmpl", {})
 
   zone = var.zone != "" ? var.zone : "${var.region}-${var.zone_suffix}"
 }

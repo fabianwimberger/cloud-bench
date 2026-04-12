@@ -285,6 +285,12 @@ jobs:
               --protocol icmp --port -1 --cidr "$RUNNER_IP/32" || true
           done
 
+      - name: Setup gcloud CLI
+        if: ${{ github.event.inputs.provider == 'gcp' }}
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: '>= 363.0.0'
+
       - name: Update GCP Firewall Rules with Runner IP
         if: ${{ github.event.inputs.provider == 'gcp' }}
         env:
