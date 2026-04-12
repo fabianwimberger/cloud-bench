@@ -424,16 +424,14 @@ def fetch_gcp_pricing(config: dict, gcp_region: str = "europe-west3") -> int:
         request = billing_v1.ListSkusRequest(parent=service_name)
 
         # Build a map of machine type -> hourly price for the target region
-        # GCP SKU descriptions contain the machine type and region info
-        # Region mapping for SKU filtering
-        region_prefix = gcp_region.split("-")[0] + "-" + gcp_region.split("-")[1]
+        # GCP SKU service_regions contains exact region names like "europe-west3"
 
         # Collect per-vCPU and per-GB rates by machine series
         series_rates: dict[str, dict[str, float]] = {}
 
         for sku in client.list_skus(request=request):
-            # Only consider on-demand compute SKUs in our region
-            if not any(region_prefix in region for region in sku.service_regions):
+            # Only consider on-demand compute SKUs in our exact target region
+            if gcp_region not in sku.service_regions:
                 continue
 
             desc = sku.description.lower()
@@ -484,7 +482,7 @@ def fetch_gcp_pricing(config: dict, gcp_region: str = "europe-west3") -> int:
                 break
 
         if not series_rates:
-            print(f"  [WARN] No GCP pricing rates found for region {gcp_region}")
+            print(f"  [ERROR] No GCP pricing rates found for region {gcp_region}")
             return 0
 
         print(
@@ -493,7 +491,7 @@ def fetch_gcp_pricing(config: dict, gcp_region: str = "europe-west3") -> int:
         )
 
     except Exception as e:
-        print(f"  [WARN] Failed to fetch GCP pricing: {e}")
+        print(f"  [ERROR] Failed to fetch GCP pricing from Cloud Billing API: {e}")
         return 0
 
     # Map machine type to series key (e.g. "n2d-standard-2" -> "n2d")
