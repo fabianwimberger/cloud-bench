@@ -28,13 +28,6 @@ jobs:
       - name: Install dependencies
         run: pip install requests pyyaml boto3 google-cloud-billing
 
-      - name: Setup GCP Credentials
-        if: ${{ secrets.GCP_CREDENTIALS != '' }}
-        run: |
-          echo "${{ secrets.GCP_CREDENTIALS }}" > /tmp/gcp-key.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json" >> $GITHUB_ENV
-          trap 'rm -f /tmp/gcp-key.json' EXIT
-
       - name: Check pricing
         id: check
         env:
@@ -42,8 +35,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
         run: |
+          # Setup GCP credentials if available
+          if [ -n "$GCP_CREDENTIALS" ]; then
+            echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+            trap 'rm -f /tmp/gcp-key.json' EXIT
+          fi
           if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
             python scripts/update_pricing.py --provider all --dry-run | tee pricing_output.txt
           else
