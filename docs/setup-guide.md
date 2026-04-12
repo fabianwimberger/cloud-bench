@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - GitHub account (for Actions-based benchmarking)
-- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud, Oracle Cloud (OCI)
+- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud, Oracle Cloud (OCI), Google Cloud Platform (GCP)
 
 ## Hetzner Setup
 
@@ -155,6 +155,56 @@ In OCI Console, go to **Billing & Cost Management > Budgets** and create a budge
 
 Go to **Actions > Run Benchmarks > Run workflow**. Select provider `oci` and region `eu-frankfurt-1`.
 
+## GCP Setup
+
+### 1. Create a dedicated GCP project
+
+In [Google Cloud Console](https://console.cloud.google.com/), create a new project (e.g., "cloud-bench"). This isolates resources and makes billing tracking easier.
+
+### 2. Enable required APIs
+
+Navigate to **APIs & Services > Library** and enable:
+- Compute Engine API
+- Cloud Billing API (for automated pricing updates)
+
+### 3. Create a service account
+
+**IAM & Admin > Service Accounts > Create Service Account**:
+- Name: `cloud-bench`
+- Description: Cloud benchmark automation
+
+Grant the following roles:
+- **Compute Admin** (for creating instances and firewall rules)
+- **Compute Viewer** (read-only access to compute resources)
+- **Billing Account Viewer** (for pricing data)
+
+### 4. Create and download a service account key
+
+**IAM & Admin > Service Accounts > cloud-bench > Keys > Add Key > Create New Key**.
+
+Choose JSON format and download the key file.
+
+### 5. Collect required identifiers
+
+| Secret | Where to find it |
+|---|---|
+| `GCP_PROJECT_ID` | Project selector dropdown — the project ID (not name) |
+| `GCP_CREDENTIALS` | The entire JSON content of the downloaded key file |
+
+### 6. Add secrets to GitHub
+
+**Repository Settings > Secrets and variables > Actions** — add:
+- `GCP_PROJECT_ID` — the project ID string
+- `GCP_CREDENTIALS` — the full JSON service account key
+
+### 7. Set a budget alert
+
+In GCP Console, go to **Billing > Budgets & alerts** and create a budget at e.g. $10.
+
+### 8. Run
+
+Go to **Actions > Run Benchmarks > Run workflow**. Select provider `gcp` and region `europe-west3`.
+
 ## Local Run (Cloud Provisioning)
 
 Run the full benchmark pipeline locally (provisions cloud instances, runs benchmarks, processes results):
@@ -182,6 +232,11 @@ export OCI_FINGERPRINT="aa:bb:cc:..."
 export OCI_PRIVATE_KEY="$(cat ~/.oci/oci_api_key.pem)"
 export OCI_COMPARTMENT_ID="ocid1.compartment.oc1..xxx"
 PROVIDER=oci ./scripts/run-local.sh
+
+# GCP
+export GCP_PROJECT_ID="your-project-id"
+export GCP_CREDENTIALS="$(cat /path/to/service-account-key.json)"
+PROVIDER=gcp ./scripts/run-local.sh
 ```
 
 The script auto-detects your IP for the firewall/security group. It provisions, benchmarks, processes results, and prompts to destroy.
@@ -213,6 +268,9 @@ terraform plan -var="run_id=test" -var="cloud_provider=ovhcloud" -var='allowed_s
 
 # OCI
 terraform plan -var="run_id=test" -var="cloud_provider=oci" -var='allowed_ssh_ips=["YOUR_IP/32"]'
+
+# GCP
+terraform plan -var="run_id=test" -var="cloud_provider=gcp" -var='allowed_ssh_ips=["YOUR_IP/32"]'
 ```
 
 ## Troubleshooting
