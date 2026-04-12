@@ -109,7 +109,8 @@ jobs:
             exit 1
           fi
           GCP_KEY_SET="${{ secrets.GCP_CREDENTIALS != '' }}"
-          if [ "${{ github.event.inputs.provider }}" = "gcp" ] && [ "$GCP_KEY_SET" != "true" ]; then
+          GCP_PROJECT_SET="${{ secrets.GCP_PROJECT_ID != '' }}"
+          if [ "${{ github.event.inputs.provider }}" = "gcp" ] && { [ "$GCP_KEY_SET" != "true" ] || [ "$GCP_PROJECT_SET" != "true" ]; }; then
             echo "::error::GCP_CREDENTIALS and GCP_PROJECT_ID secrets are required for GCP"
             exit 1
           fi
@@ -301,6 +302,8 @@ jobs:
 
           # Write credentials to temp file for gcloud auth
           echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
+          # Ensure cleanup happens even if subsequent commands fail
+          trap 'rm -f /tmp/gcp-key.json' EXIT
           gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
           gcloud config set project "$GCP_PROJECT_ID"
 
@@ -309,8 +312,20 @@ jobs:
           for rule in $RULES; do
             echo "Updating firewall rule: $rule"
             EXISTING=$(gcloud compute firewall-rules describe "$rule" --format="value(sourceRanges)")
+            NEW_IP="${RUNNER_IP}/32"
+            # Check if IP already exists to avoid duplicates
+            if echo "$EXISTING" | grep -q "${NEW_IP}"; then
+              echo "IP ${NEW_IP} already in source ranges, skipping update"
+              continue
+            fi
+            # Handle empty existing ranges
+            if [ -z "$EXISTING" ]; then
+              UPDATED_RANGES="$NEW_IP"
+            else
+              UPDATED_RANGES="${EXISTING},${NEW_IP}"
+            fi
             gcloud compute firewall-rules update "$rule" \
-              --source-ranges="${EXISTING},${RUNNER_IP}/32" || true
+              --source-ranges="$UPDATED_RANGES" || true
           done
           rm -f /tmp/gcp-key.json
 
@@ -703,10 +718,11 @@ jobs:
 
           elif [ "${{ github.event.inputs.provider }}" = "gcp" ]; then
             cd terraform
-            REMAINING=$(terraform state list 2>/dev/null | grep -c "google_compute_instance" || true)
-            if [ "$REMAINING" -gt 0 ]; then
-              echo "::error::CRITICAL: GCP instances still in Terraform state after cleanup!"
-              terraform state list | grep "google_compute_instance"
+            REMAINING_INSTANCES=$(terraform state list 2>/dev/null | grep -c "google_compute_instance" || true)
+            REMAINING_FIREWALLS=$(terraform state list 2>/dev/null | grep -c "google_compute_firewall" || true)
+            if [ "$REMAINING_INSTANCES" -gt 0 ] || [ "$REMAINING_FIREWALLS" -gt 0 ]; then
+              echo "::error::CRITICAL: GCP resources still in Terraform state after cleanup!"
+              terraform state list | grep -E "google_compute_instance|google_compute_firewall"
               echo "Manual intervention required!"
               exit 1
             else
