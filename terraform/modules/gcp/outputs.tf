@@ -12,3 +12,8 @@ output "instance_id" {
   description = "GCP instance ID"
   value       = google_compute_instance.benchmark.instance_id
 }
+
+output "zone" {
+  description = "GCP zone where the instance is deployed"
+  value       = google_compute_instance.benchmark.zone
+}

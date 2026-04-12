@@ -24,6 +24,18 @@ variable "region" {
   type        = string
 }
 
+variable "zone_suffix" {
+  description = "Zone suffix to append to region (e.g., 'a' creates zone 'europe-west3-a')"
+  type        = string
+  default     = "a"
+}
+
+variable "zone" {
+  description = "Full GCP zone (e.g. europe-west3-a). Overrides region and zone_suffix if set"
+  type        = string
+  default     = ""
+}
+
 variable "project_id" {
   description = "GCP project ID"
   type        = string
@@ -54,6 +66,11 @@ variable "disk_type" {
   description = "Boot disk type (pd-balanced, pd-ssd, pd-standard)"
   type        = string
   default     = "pd-balanced"
+
+  validation {
+    condition     = contains(["pd-balanced", "pd-ssd", "pd-standard", "pd-extreme", "pd-hyperdisk-balanced", "pd-hyperdisk-extreme"], var.disk_type)
+    error_message = "disk_type must be one of: pd-balanced, pd-ssd, pd-standard, pd-extreme, pd-hyperdisk-balanced, pd-hyperdisk-extreme"
+  }
 }
 
 variable "labels" {

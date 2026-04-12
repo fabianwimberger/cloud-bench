@@ -160,6 +160,7 @@ variable "oci_compartment_id" {
 variable "gcp_project_id" {
   description = "Google Cloud project ID"
   type        = string
+  sensitive   = true
   default     = ""
 }
 

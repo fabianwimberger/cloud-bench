@@ -2,7 +2,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 7.0"
+      version = "~> 7.1"
     }
   }
 }
@@ -14,7 +14,7 @@ locals {
     ssh_public_key = var.ssh_public_key
   })
 
-  zone = "${var.region}-a"
+  zone = var.zone != "" ? var.zone : "${var.region}-${var.zone_suffix}"
 }
 
 # --- Networking ---
