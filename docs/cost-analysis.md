@@ -30,8 +30,8 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
 2. **Billing alerts** — set in each provider's console (recommended: €10 / $10)
 3. **Auto-cleanup** — `if: always()` in CI destroys infrastructure even on failure
 4. **Orphan cleanup** — scheduled workflows terminate instances older than 2 hours
-   - Hetzner: every 6 hours (automated)
-   - AWS: every 6 hours (automated)
+   - Hetzner: manual trigger
+   - AWS: manual trigger
    - OVHcloud: manual trigger
    - OCI: manual trigger
 

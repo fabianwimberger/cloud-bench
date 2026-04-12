@@ -113,7 +113,7 @@ No code changes needed — Terraform, Ansible, and the frontend all pick up conf
 - Fresh Ed25519 SSH key generated per run, never reused
 - Firewall/security group allows SSH from runner IP only
 - Auto-cleanup via `if: always()` — infrastructure destroyed even if benchmarks fail
-- Orphan cleanup workflows as safety net (every 6 hours for AWS, manual for OVHcloud/OCI)
+- Orphan cleanup workflows as safety net (manual trigger for all providers)
 
 ## Documentation
 
