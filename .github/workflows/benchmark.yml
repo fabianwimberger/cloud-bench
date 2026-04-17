@@ -538,7 +538,7 @@ jobs:
           echo "ip=${RUNNER_IP}" >> $GITHUB_OUTPUT
           echo "Runner IP for cleanup: ${RUNNER_IP}"
 
-      - name: Download Encrypted Terraform State
+      - name: Download Terraform State
         uses: actions/download-artifact@v8
         with:
           name: terraform-state

@@ -310,7 +310,7 @@ def validate_documentation():
     readme_path = Path("README.md")
     if readme_path.exists():
         content = readme_path.read_text()
-        required_sections = ["Overview", "Usage", "Methodology"]
+        required_sections = ["Quick Start", "How It Works", "Features"]
         for section in required_sections:
             if section.lower() in content.lower():
                 print_success(f"README has {section} section")

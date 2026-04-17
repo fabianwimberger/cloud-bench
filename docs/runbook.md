@@ -4,7 +4,7 @@
 
 **Symptom**: Workflow failed, servers still running in provider console.
 
-**Auto-fix**: Orphan cleanup workflows run every 6 hours (AWS) or manual trigger (OVHcloud, OCI) and clean up anything older than 2 hours tagged `cloud-bench`.
+**Auto-fix**: Orphan cleanup workflows run on manual trigger and clean up anything older than 2 hours tagged `cloud-bench`.
 
 **Manual fix (Hetzner)**:
 ```bash
