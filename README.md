@@ -10,6 +10,18 @@ A cloud instance benchmarking suite comparing CPU, memory, and disk performance 
 
 A €20 instance can mean very different things between providers. This runs the same sysbench and fio suite on each, tracks cost per benchmark point, and publishes the results to GitHub Pages. Infrastructure is provisioned and torn down via Terraform and Ansible so runs stay reproducible.
 
+## Features
+
+- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, OCI (23 instance types)
+- **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
+- **Metric averaging** — scores based on all historical runs, not just the latest
+- **Cost analysis** — performance per dollar with EUR/USD toggle
+- **Interactive dashboard** — filtering, comparison, per-instance history charts
+- **Automated pricing** — live pricing from provider APIs + ECB exchange rates
+- **Security-first** — fresh SSH keys per run, firewall whitelisting, automatic cleanup
+- **Cost guards** — pre-run estimation blocks expensive configurations ($5 / 15 instance limit)
+- **Local benchmarking** — standalone script for users to compare their own hardware
+
 ## Live Dashboard
 
 View the latest results at **[fabianwimberger.github.io/cloud-bench](https://fabianwimberger.github.io/cloud-bench/)**
@@ -100,18 +112,6 @@ providers:
 ```
 
 No code changes needed — Terraform, Ansible, and the frontend all pick up config changes automatically. See [docs/configuration.md](docs/configuration.md) for details.
-
-## Features
-
-- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, OCI (23 instance types)
-- **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
-- **Metric averaging** — scores based on all historical runs, not just the latest
-- **Cost analysis** — performance per dollar with EUR/USD toggle
-- **Interactive dashboard** — filtering, comparison, per-instance history charts
-- **Automated pricing** — live pricing from provider APIs + ECB exchange rates
-- **Security-first** — fresh SSH keys per run, firewall whitelisting, automatic cleanup
-- **Cost guards** — pre-run estimation blocks expensive configurations ($5 / 15 instance limit)
-- **Local benchmarking** — standalone script for users to compare their own hardware
 
 ## Security
 
