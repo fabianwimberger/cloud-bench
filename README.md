@@ -16,6 +16,17 @@ View the latest results at **[fabianwimberger.github.io/cloud-bench](https://fab
 
 Scores shown are averaged across all benchmark runs for each instance type, not just the latest run.
 
+## Pipeline
+
+```mermaid
+flowchart LR
+    TF[Terraform<br/>provision] --> AN[Ansible<br/>sysbench, fio]
+    AN --> R[Collect JSON]
+    R --> TFD[Terraform<br/>destroy]
+    R --> P[Process<br/>normalize, price]
+    P --> D[GitHub Pages<br/>dashboard]
+```
+
 ## Run Benchmarks Locally
 
 Compare your own machine against the official results — no cloud credentials needed:
