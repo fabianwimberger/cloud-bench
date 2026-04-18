@@ -6,14 +6,9 @@
 
 A cloud instance benchmarking suite comparing CPU, memory, and disk performance across providers with cost analysis. 23 instance types across Hetzner Cloud, AWS EC2, OVHcloud, and Oracle Cloud (OCI).
 
-## Why This Project?
+## Background
 
-Cloud instance pricing and performance vary significantly between providers and instance types. $20/month can get you vastly different compute capabilities depending on your choice. This project provides reproducible, data-driven benchmarks to make informed infrastructure decisions based on actual performance rather than marketing specs.
-
-**Goals:**
-- Compare instance types objectively using standardized benchmarks
-- Factor in cost to determine real value (performance per dollar)
-- Provide reproducible results that can be independently verified
+A €20 instance can mean very different things between providers. This runs the same sysbench and fio suite on each, tracks cost per benchmark point, and publishes the results to GitHub Pages. Infrastructure is provisioned and torn down via Terraform and Ansible so runs stay reproducible.
 
 ## Live Dashboard
 
