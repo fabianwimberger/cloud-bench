@@ -39,9 +39,11 @@ flowchart LR
     P --> D[GitHub Pages<br/>dashboard]
 ```
 
-## Run Benchmarks Locally
+## Quick Start
 
-Compare your own machine against the official results — no cloud credentials needed:
+### Local
+
+Compare your own machine against the official results. No cloud credentials needed:
 
 ```bash
 git clone https://github.com/fabianwimberger/cloud-bench.git
@@ -49,9 +51,9 @@ cd cloud-bench
 sudo bash scripts/run-local-bench.sh
 ```
 
-Runs the exact same sysbench/fio benchmarks and outputs a JSON file + terminal summary. See [docs/local-benchmark.md](docs/local-benchmark.md) for details.
+Runs the same sysbench/fio benchmarks and outputs a JSON file plus a terminal summary. See [docs/local-benchmark.md](docs/local-benchmark.md) for details.
 
-## Quick Start (Cloud Benchmarks)
+### Cloud
 
 ```bash
 # Clone and configure
