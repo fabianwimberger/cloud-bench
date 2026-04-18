@@ -3,18 +3,24 @@
 [![CI](https://github.com/fabianwimberger/cloud-bench/actions/workflows/validate.yml/badge.svg)](https://github.com/fabianwimberger/cloud-bench/actions)
 [![codecov](https://codecov.io/gh/fabianwimberger/cloud-bench/branch/main/graph/badge.svg)](https://codecov.io/gh/fabianwimberger/cloud-bench)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Live Results](https://img.shields.io/badge/Live%20Results-View%20Dashboard-blue)](https://fabianwimberger.github.io/cloud-bench/)
 
 A cloud instance benchmarking suite comparing CPU, memory, and disk performance across providers with cost analysis. 23 instance types across Hetzner Cloud, AWS EC2, OVHcloud, and Oracle Cloud (OCI).
 
-## Why This Project?
+## Background
 
-Cloud instance pricing and performance vary significantly between providers and instance types. $20/month can get you vastly different compute capabilities depending on your choice. This project provides reproducible, data-driven benchmarks to make informed infrastructure decisions based on actual performance rather than marketing specs.
+A €20 instance can mean very different things between providers. This runs the same sysbench and fio suite on each, tracks cost per benchmark point, and publishes the results to GitHub Pages. Infrastructure is provisioned and torn down via Terraform and Ansible so runs stay reproducible.
 
-**Goals:**
-- Compare instance types objectively using standardized benchmarks
-- Factor in cost to determine real value (performance per dollar)
-- Provide reproducible results that can be independently verified
+## Features
+
+- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, OCI (23 instance types)
+- **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
+- **Metric averaging** — scores based on all historical runs, not just the latest
+- **Cost analysis** — performance per dollar with EUR/USD toggle
+- **Interactive dashboard** — filtering, comparison, per-instance history charts
+- **Automated pricing** — live pricing from provider APIs + ECB exchange rates
+- **Security-first** — fresh SSH keys per run, firewall whitelisting, automatic cleanup
+- **Cost guards** — pre-run estimation blocks expensive configurations ($5 / 15 instance limit)
+- **Local benchmarking** — standalone script for users to compare their own hardware
 
 ## Live Dashboard
 
@@ -22,9 +28,22 @@ View the latest results at **[fabianwimberger.github.io/cloud-bench](https://fab
 
 Scores shown are averaged across all benchmark runs for each instance type, not just the latest run.
 
-## Run Benchmarks Locally
+## Pipeline
 
-Compare your own machine against the official results — no cloud credentials needed:
+```mermaid
+flowchart LR
+    TF[Terraform<br/>provision] --> AN[Ansible<br/>sysbench, fio]
+    AN --> R[Collect JSON]
+    R --> TFD[Terraform<br/>destroy]
+    R --> P[Process<br/>normalize, price]
+    P --> D[GitHub Pages<br/>dashboard]
+```
+
+## Quick Start
+
+### Local
+
+Compare your own machine against the official results. No cloud credentials needed:
 
 ```bash
 git clone https://github.com/fabianwimberger/cloud-bench.git
@@ -32,9 +51,9 @@ cd cloud-bench
 sudo bash scripts/run-local-bench.sh
 ```
 
-Runs the exact same sysbench/fio benchmarks and outputs a JSON file + terminal summary. See [docs/local-benchmark.md](docs/local-benchmark.md) for details.
+Runs the same sysbench/fio benchmarks and outputs a JSON file plus a terminal summary. See [docs/local-benchmark.md](docs/local-benchmark.md) for details.
 
-## Quick Start (Cloud Benchmarks)
+### Cloud
 
 ```bash
 # Clone and configure
@@ -95,18 +114,6 @@ providers:
 ```
 
 No code changes needed — Terraform, Ansible, and the frontend all pick up config changes automatically. See [docs/configuration.md](docs/configuration.md) for details.
-
-## Features
-
-- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, OCI (23 instance types)
-- **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
-- **Metric averaging** — scores based on all historical runs, not just the latest
-- **Cost analysis** — performance per dollar with EUR/USD toggle
-- **Interactive dashboard** — filtering, comparison, per-instance history charts
-- **Automated pricing** — live pricing from provider APIs + ECB exchange rates
-- **Security-first** — fresh SSH keys per run, firewall whitelisting, automatic cleanup
-- **Cost guards** — pre-run estimation blocks expensive configurations ($5 / 15 instance limit)
-- **Local benchmarking** — standalone script for users to compare their own hardware
 
 ## Security
 
