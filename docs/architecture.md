@@ -92,7 +92,7 @@ See [data-format.md](data-format.md) for full schemas.
 - `if: always()` cleanup in CI ensures infrastructure destruction
 - Verify Cleanup step confirms resources are gone via provider APIs after destroy
 - Provider secrets passed via `TF_VAR_` environment variables, never on command line
-- Orphan cleanup workflows: every 6 hours (AWS), manual trigger (OVHcloud, OCI)
+- Orphan cleanup workflows: manual trigger (all providers)
 - Dedicated project/IAM user/OpenStack user/compartment recommended for isolation
 
 ## Workflows
