@@ -666,22 +666,16 @@ class TestUpdateConfigGCP(unittest.TestCase):
                 }
             }
         }
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".yaml", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(config, f)
             temp_path = f.name
 
         try:
-            result = up.update_config(
-                temp_path, [], dry_run=False, provider="gcp"
-            )
+            result = up.update_config(temp_path, [], dry_run=False, provider="gcp")
             mock_fetch_gcp.assert_called_once()
             # fetch_gcp_pricing returned 1, so metadata should be written
             self.assertIn("_metadata", result)
-            self.assertIn(
-                "GCP Cloud Billing API", result["_metadata"]["source"]
-            )
+            self.assertIn("GCP Cloud Billing API", result["_metadata"]["source"])
         finally:
             os.unlink(temp_path)
 
@@ -693,9 +687,7 @@ class TestMainGCP(unittest.TestCase):
     def test_main_gcp_provider(self, mock_rates, mock_server, mock_gcp):
         """Test main() accepts --provider gcp and invokes fetch_gcp_pricing."""
         config = {"providers": {"gcp": {"instances": []}}}
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".yaml", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(config, f)
             temp_path = f.name
 
