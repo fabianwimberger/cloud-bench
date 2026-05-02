@@ -239,12 +239,64 @@ providers:
       pricing:
         hourly: 0.036
         monthly: 25.92
+  gcp:
+    currency: USD
+    default_region: europe-west3
+    regions:
+      europe-west3:
+        name: Frankfurt
+    instances:
+    - id: e2-standard-2
+      name: E2 Standard 2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.08915
+        monthly: 64.19
+    - id: n2-standard-2
+      name: N2 Standard 2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.1292
+        monthly: 93.02
+    - id: n2d-standard-2
+      name: N2D Standard 2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.10885
+        monthly: 78.37
+    - id: t2d-standard-2
+      name: T2D Standard 2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.10885
+        monthly: 78.37
+    - id: c4a-standard-2
+      name: C4A Standard 2
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.10597
+        monthly: 76.3
 exchange_rates:
   eur_to_usd: 1.1702
   usd_to_eur: 0.8546
   last_updated: '2026-04-30'
   source: Frankfurter API (ECB data)
 _metadata:
-  last_pricing_update: '2026-05-01T21:54:54.753556'
+  last_pricing_update: '2026-05-02T09:39:29.757001'
   source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing
-    API
+    API / GCP Cloud Billing API

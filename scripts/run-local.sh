@@ -1,5 +1,5 @@
 #!/bin/bash
-# Local benchmark runner script (supports Hetzner, AWS, OVHcloud, and OCI)
+# Local benchmark runner script (supports Hetzner, AWS, OVHcloud, OCI, and GCP)
 set -e
 
 # Configuration
@@ -15,6 +15,7 @@ if [ -z "$REGION" ]; then
         aws)      REGION="eu-central-1" ;;
         ovhcloud) REGION="DE1" ;;
         oci)      REGION="eu-frankfurt-1" ;;
+        gcp)      REGION="europe-west3" ;;
         *)        REGION="fsn1" ;;
     esac
 fi
@@ -108,6 +109,18 @@ validate_credentials() {
                 exit 1
             fi
             ;;
+        gcp)
+            local gcp_missing=()
+            [ -z "$GCP_PROJECT_ID" ] && gcp_missing+=("GCP_PROJECT_ID")
+            [ -z "$GCP_CREDENTIALS" ] && gcp_missing+=("GCP_CREDENTIALS")
+            if [ ${#gcp_missing[@]} -ne 0 ]; then
+                echo "[ERROR] GCP credentials not set: ${gcp_missing[*]}"
+                echo "Set them with:"
+                echo "  export GCP_PROJECT_ID=your-project-id"
+                echo "  export GCP_CREDENTIALS=\$(cat /path/to/service-account-key.json)"
+                exit 1
+            fi
+            ;;
         *)
             echo "[ERROR] Unsupported provider: $PROVIDER"
             exit 1
@@ -194,6 +207,18 @@ build_tf_vars() {
                 -var="oci_fingerprint=$OCI_FINGERPRINT"
                 -var="oci_private_key=$OCI_PRIVATE_KEY"
                 -var="oci_compartment_id=$OCI_COMPARTMENT_ID"
+            )
+            ;;
+        gcp)
+            common_vars+=(
+                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
+                -var="aws_access_key_id=unused"
+                -var="aws_secret_access_key=unused"
+                -var="ovh_openstack_username=unused"
+                -var="ovh_openstack_password=unused"
+                -var="ovh_cloud_project_id=unused"
+                -var="gcp_project_id=$GCP_PROJECT_ID"
+                -var="gcp_credentials=$GCP_CREDENTIALS"
             )
             ;;
     esac

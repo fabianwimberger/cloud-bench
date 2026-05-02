@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
-        run: pip install requests pyyaml boto3
+        run: pip install requests pyyaml boto3 google-cloud-billing
 
       - name: Check pricing
         id: check
@@ -35,7 +35,15 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: us-east-1
+          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
         run: |
+          # Setup GCP credentials if available
+          if [ -n "$GCP_CREDENTIALS" ]; then
+            trap 'rm -f /tmp/gcp-key.json' EXIT
+            echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
+            chmod 600 /tmp/gcp-key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
+          fi
           if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
             python scripts/update_pricing.py --provider all --dry-run | tee pricing_output.txt
           else
@@ -56,7 +64,7 @@ jobs:
           commit-message: 'chore: update instance pricing from cloud APIs'
           title: 'chore: Update instance pricing'
           body: |
-            Automated pricing update from Hetzner Cloud API, AWS Pricing API, OVH Catalog API, and OCI Pricing.
+            Automated pricing update from Hetzner Cloud API, AWS Pricing API, OVH Catalog API, OCI Pricing, and GCP Cloud Billing API.
 
             Changes detected in `config/instances.yaml`.
 

@@ -23,6 +23,12 @@ const providerStyles = {
     label: 'OCI',
     fullName: 'Oracle Cloud (OCI)',
   },
+  gcp: {
+    background: 'rgba(66, 133, 244, 0.2)',
+    color: '#93c5fd',
+    label: 'GCP',
+    fullName: 'Google Cloud Platform',
+  },
 }
 
 function ProviderBadge({ provider }) {
