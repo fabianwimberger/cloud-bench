@@ -1,0 +1,72 @@
+name: Cleanup Azure Orphans
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: |
+            {
+              "clientId": "${{ secrets.AZURE_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
+              "subscriptionId": "${{ secrets.AZURE_SUBSCRIPTION_ID }}",
+              "tenantId": "${{ secrets.AZURE_TENANT_ID }}"
+            }
+
+      - name: Find and delete orphaned resource groups
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          if [ -z "$AZURE_SUBSCRIPTION_ID" ]; then
+            echo "Azure credentials not configured, skipping"
+            exit 0
+          fi
+
+          echo "Checking for orphaned cloud-bench resource groups..."
+
+          # Resource groups are named cloud-bench-azure-<instance>-<run_id>
+          RG_LIST=$(az group list \
+            --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --query "[?tags.project=='cloud-bench'].{name:name, created:tags.run_id, time:tags.run_id}" \
+            -o tsv)
+
+          if [ -z "$RG_LIST" ]; then
+            echo "[OK] No cloud-bench resource groups found"
+            exit 0
+          fi
+
+          echo "Found resource groups:"
+          echo "$RG_LIST"
+
+          CUTOFF=$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -u -v-2H +%Y-%m-%dT%H:%M:%S)
+          DELETED=0
+
+          while IFS=$'\t' read -r rg_name run_id _; do
+            # Get the VM creation time from the resource group
+            CREATED=$(az group show -n "$rg_name" --query "properties.provisioningStateTransitionTime" -o tsv 2>/dev/null || echo "")
+            if [ -z "$CREATED" ]; then
+              echo "Could not determine creation time for $rg_name, skipping"
+              continue
+            fi
+            if [[ "$CREATED" < "$CUTOFF" ]]; then
+              echo "Deleting orphaned resource group: $rg_name (created: $CREATED, run_id: $run_id)"
+              az group delete -n "$rg_name" --yes --no-wait
+              DELETED=$((DELETED + 1))
+            else
+              echo "Keeping recent resource group: $rg_name (created: $CREATED)"
+            fi
+          done <<< "$RG_LIST"
+
+          echo ""
+          echo "Summary: Queued deletion of $DELETED orphaned resource group(s)"
+
+          if [ $DELETED -gt 0 ]; then
+            echo "## Azure Orphan Cleanup" >> $GITHUB_STEP_SUMMARY
+            echo "Queued deletion of **$DELETED** orphaned resource group(s) older than 2 hours." >> $GITHUB_STEP_SUMMARY
+          fi

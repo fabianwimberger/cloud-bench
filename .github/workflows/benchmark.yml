@@ -14,6 +14,7 @@ on:
           - ovhcloud
           - oci
           - gcp
+          - azure
 
       instances:
         description: 'Instance IDs (comma-separated, or "all")'
@@ -79,6 +80,7 @@ jobs:
               ovhcloud) REGION="DE1" ;;
               oci)      REGION="eu-frankfurt-1" ;;
               gcp)      REGION="europe-west3" ;;
+              azure)    REGION="westeurope" ;;
             esac
           fi
           echo "region=$REGION" >> $GITHUB_OUTPUT
@@ -112,6 +114,14 @@ jobs:
           GCP_PROJECT_SET="${{ secrets.GCP_PROJECT_ID != '' }}"
           if [ "${{ github.event.inputs.provider }}" = "gcp" ] && { [ "$GCP_KEY_SET" != "true" ] || [ "$GCP_PROJECT_SET" != "true" ]; }; then
             echo "::error::GCP_CREDENTIALS and GCP_PROJECT_ID secrets are required for GCP"
+            exit 1
+          fi
+          AZURE_SUB_SET="${{ secrets.AZURE_SUBSCRIPTION_ID != '' }}"
+          AZURE_CLIENT_SET="${{ secrets.AZURE_CLIENT_ID != '' }}"
+          AZURE_SECRET_SET="${{ secrets.AZURE_CLIENT_SECRET != '' }}"
+          AZURE_TENANT_SET="${{ secrets.AZURE_TENANT_ID != '' }}"
+          if [ "${{ github.event.inputs.provider }}" = "azure" ] && { [ "$AZURE_SUB_SET" != "true" ] || [ "$AZURE_CLIENT_SET" != "true" ] || [ "$AZURE_SECRET_SET" != "true" ] || [ "$AZURE_TENANT_SET" != "true" ]; }; then
+            echo "::error::AZURE_SUBSCRIPTION_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID secrets are required for Azure"
             exit 1
           fi
           if [ -n "$INSTANCE_REGIONS" ] && [ "$INSTANCE_REGIONS" != "{}" ]; then
@@ -198,6 +208,10 @@ jobs:
           TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
           TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID || 'unused' }}
           TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS || '' }}
+          TF_VAR_azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID || '' }}
+          TF_VAR_azure_client_id: ${{ secrets.AZURE_CLIENT_ID || '' }}
+          TF_VAR_azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
+          TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
         run: |
           terraform apply -auto-approve \
             -var="run_id=${{ env.RUN_ID }}" \
@@ -284,6 +298,57 @@ jobs:
             aws ec2 authorize-security-group-ingress --group-id "$sg" \
               --protocol icmp --port -1 --cidr "$RUNNER_IP/32" || true
           done
+
+      - name: Update Azure NSG with Runner IP
+        if: ${{ github.event.inputs.provider == 'azure' }}
+        env:
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        run: |
+          RUNNER_IP=$(curl -s --retry 3 https://ifconfig.me || curl -s --retry 3 https://api.ipify.org)
+          echo "Benchmark runner IP: $RUNNER_IP"
+          PREV_IP="${{ needs.provision.outputs.runner_ip }}"
+          echo "Provision runner IP: $PREV_IP"
+          if [ "$RUNNER_IP" = "$PREV_IP" ]; then
+            echo "Same IP, no update needed"
+            exit 0
+          fi
+
+          az login --service-principal \
+            -u "$AZURE_CLIENT_ID" \
+            -p "$AZURE_CLIENT_SECRET" \
+            --tenant "$AZURE_TENANT_ID" \
+            --output none
+          az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+
+          # Find all NSGs tagged with our run_id
+          NSG_LIST=$(az network nsg list \
+            --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --query "[?tags.run_id=='${{ env.RUN_ID }}' && tags.project=='cloud-bench'].{name:name, rg:resourceGroup}" \
+            -o tsv)
+
+          if [ -z "$NSG_LIST" ]; then
+            echo "No matching NSGs found"
+            exit 0
+          fi
+
+          while IFS=$'\t' read -r nsg_name rg_name; do
+            echo "Updating NSG: $nsg_name in $rg_name"
+            EXISTING=$(az network nsg rule show \
+              --nsg-name "$nsg_name" -g "$rg_name" -n allow-ssh \
+              --query "sourceAddressPrefixes" -o tsv 2>/dev/null || echo "")
+            NEW_IP="${RUNNER_IP}/32"
+            if echo "$EXISTING" | grep -q "$NEW_IP"; then
+              echo "  IP already in NSG rule, skipping"
+              continue
+            fi
+            UPDATED="${EXISTING} ${NEW_IP}"
+            az network nsg rule update \
+              --nsg-name "$nsg_name" -g "$rg_name" -n allow-ssh \
+              --source-address-prefixes $UPDATED || true
+          done <<< "$NSG_LIST"
 
       - name: Setup gcloud CLI
         if: ${{ github.event.inputs.provider == 'gcp' }}
@@ -632,6 +697,10 @@ jobs:
           TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
           TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID || 'unused' }}
           TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS || '' }}
+          TF_VAR_azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID || '' }}
+          TF_VAR_azure_client_id: ${{ secrets.AZURE_CLIENT_ID || '' }}
+          TF_VAR_azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
+          TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
         run: |
           terraform destroy -auto-approve \
             -var="run_id=${{ env.RUN_ID }}" \
@@ -733,6 +802,18 @@ jobs:
               exit 1
             else
               echo "[OK] GCP resources cleaned up successfully"
+            fi
+
+          elif [ "${{ github.event.inputs.provider }}" = "azure" ]; then
+            cd terraform
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "azurerm_linux_virtual_machine" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: Azure VMs still in Terraform state after cleanup!"
+              terraform state list | grep "azurerm_linux_virtual_machine"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] Azure resources cleaned up successfully"
             fi
           fi
 

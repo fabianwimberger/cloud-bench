@@ -16,6 +16,7 @@ if [ -z "$REGION" ]; then
         ovhcloud) REGION="DE1" ;;
         oci)      REGION="eu-frankfurt-1" ;;
         gcp)      REGION="europe-west3" ;;
+        azure)    REGION="westeurope" ;;
         *)        REGION="fsn1" ;;
     esac
 fi
@@ -121,6 +122,22 @@ validate_credentials() {
                 exit 1
             fi
             ;;
+        azure)
+            local azure_missing=()
+            [ -z "$AZURE_SUBSCRIPTION_ID" ] && azure_missing+=("AZURE_SUBSCRIPTION_ID")
+            [ -z "$AZURE_CLIENT_ID" ] && azure_missing+=("AZURE_CLIENT_ID")
+            [ -z "$AZURE_CLIENT_SECRET" ] && azure_missing+=("AZURE_CLIENT_SECRET")
+            [ -z "$AZURE_TENANT_ID" ] && azure_missing+=("AZURE_TENANT_ID")
+            if [ ${#azure_missing[@]} -ne 0 ]; then
+                echo "[ERROR] Azure credentials not set: ${azure_missing[*]}"
+                echo "Set them with:"
+                echo "  export AZURE_SUBSCRIPTION_ID=your-subscription-id"
+                echo "  export AZURE_CLIENT_ID=your-client-id"
+                echo "  export AZURE_CLIENT_SECRET=your-client-secret"
+                echo "  export AZURE_TENANT_ID=your-tenant-id"
+                exit 1
+            fi
+            ;;
         *)
             echo "[ERROR] Unsupported provider: $PROVIDER"
             exit 1
@@ -219,6 +236,20 @@ build_tf_vars() {
                 -var="ovh_cloud_project_id=unused"
                 -var="gcp_project_id=$GCP_PROJECT_ID"
                 -var="gcp_credentials=$GCP_CREDENTIALS"
+            )
+            ;;
+        azure)
+            common_vars+=(
+                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
+                -var="aws_access_key_id=unused"
+                -var="aws_secret_access_key=unused"
+                -var="ovh_openstack_username=unused"
+                -var="ovh_openstack_password=unused"
+                -var="ovh_cloud_project_id=unused"
+                -var="azure_subscription_id=$AZURE_SUBSCRIPTION_ID"
+                -var="azure_client_id=$AZURE_CLIENT_ID"
+                -var="azure_client_secret=$AZURE_CLIENT_SECRET"
+                -var="azure_tenant_id=$AZURE_TENANT_ID"
             )
             ;;
     esac

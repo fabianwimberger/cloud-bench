@@ -548,6 +548,72 @@ def fetch_gcp_pricing(config: dict, gcp_region: str = "europe-west3") -> int:
     return updated
 
 
+def fetch_azure_pricing(config: dict, azure_region: str = "westeurope") -> int:
+    """Fetch Azure VM pricing using the Retail Prices API (public, no auth).
+    Returns count of updated instances."""
+    azure_config = config.get("providers", {}).get("azure", {})
+    instances = azure_config.get("instances", [])
+    if not instances:
+        print("  [WARN] No Azure instances in config")
+        return 0
+
+    # Azure Retail Prices API — no authentication required
+    api_url = "https://prices.azure.com/api/retail/prices"
+    updated = 0
+
+    for inst in instances:
+        inst_id = inst.get("id", "")
+        try:
+            response = requests.get(
+                api_url,
+                params={
+                    "$filter": (
+                        f"armSkuName eq '{inst_id}' "
+                        f"and armRegionName eq '{azure_region}' "
+                        f"and serviceName eq 'Virtual Machines' "
+                        f"and priceType eq 'Consumption'"
+                    )
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            items = response.json().get("Items", [])
+        except requests.RequestException as e:
+            print(f"  [WARN] Failed to fetch pricing for {inst_id}: {e}")
+            continue
+
+        # Keep only Linux on-demand (exclude Windows premium and Spot)
+        linux_items = [
+            item
+            for item in items
+            if "Windows" not in item.get("productName", "")
+            and "Spot" not in item.get("skuName", "")
+            and item.get("type") == "Consumption"
+        ]
+
+        if not linux_items:
+            print(f"  [WARN] No Linux pricing found for {inst_id} in {azure_region}")
+            continue
+
+        # Take the lowest on-demand hourly rate
+        hourly = round(min(item.get("retailPrice", 0) for item in linux_items), 5)
+        if hourly <= 0:
+            print(f"  [WARN] Zero pricing returned for {inst_id}")
+            continue
+
+        monthly = round(hourly * 720, 2)
+
+        old_pricing = inst.get("pricing", {})
+        if old_pricing.get("hourly") != hourly or old_pricing.get("monthly") != monthly:
+            inst["pricing"] = {"hourly": hourly, "monthly": monthly}
+            updated += 1
+            print(f"  [UPDATED] {inst_id}: ${monthly}/mo")
+        else:
+            print(f"  [OK] {inst_id}: ${monthly}/mo (unchanged)")
+
+    return updated
+
+
 def fetch_exchange_rates() -> dict:
     """Fetch EUR/USD rate from Frankfurter API (ECB data, free, no key)."""
     try:
@@ -576,6 +642,7 @@ def update_config(
     dry_run: bool = False,
     provider: str = "all",
     aws_region: str = "eu-central-1",
+    azure_region: str = "westeurope",
 ) -> dict:
     """Update instances.yaml with fetched pricing."""
     with open(config_path) as f:
@@ -608,6 +675,11 @@ def update_config(
         print("\nUpdating GCP pricing...")
         total_updated += fetch_gcp_pricing(config)
 
+    # Update Azure pricing
+    if provider in ("all", "azure"):
+        print("\nUpdating Azure pricing...")
+        total_updated += fetch_azure_pricing(config, azure_region)
+
     # Update exchange rates
     print("\nFetching exchange rates...")
     exchange_rates = fetch_exchange_rates()
@@ -625,7 +697,7 @@ def update_config(
     if not dry_run and total_updated > 0:
         config["_metadata"] = {
             "last_pricing_update": datetime.now().isoformat(),
-            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing API / GCP Cloud Billing API",
+            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing API / GCP Cloud Billing API / Azure Retail Prices API",
         }
         with open(config_path, "w") as f:
             yaml.dump(
@@ -652,13 +724,18 @@ def main():
         "--provider",
         "-p",
         default="all",
-        choices=["hetzner", "aws", "ovhcloud", "oci", "gcp", "all"],
+        choices=["hetzner", "aws", "ovhcloud", "oci", "gcp", "azure", "all"],
         help="Provider to update pricing for",
     )
     parser.add_argument(
         "--aws-region",
         default="eu-central-1",
         help="AWS region for pricing (default: eu-central-1)",
+    )
+    parser.add_argument(
+        "--azure-region",
+        default="westeurope",
+        help="Azure region for pricing (default: westeurope)",
     )
     parser.add_argument(
         "--dry-run", "-n", action="store_true", help="Show changes without saving"
@@ -691,6 +768,7 @@ def main():
             dry_run=args.dry_run,
             provider=args.provider,
             aws_region=args.aws_region,
+            azure_region=args.azure_region,
         )
     except yaml.YAMLError as e:
         print(f"[ERROR] YAML parsing failed: {e}")

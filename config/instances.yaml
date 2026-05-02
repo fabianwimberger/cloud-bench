@@ -291,6 +291,49 @@ providers:
       pricing:
         hourly: 0.10597
         monthly: 76.3
+  azure:
+    currency: USD
+    default_region: westeurope
+    regions:
+      westeurope:
+        name: Amsterdam
+    instances:
+    - id: Standard_B2s
+      name: B2s
+      arch: X86
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 30
+      pricing:
+        hourly: 0.0416
+        monthly: 29.95
+    - id: Standard_D2s_v5
+      name: D2s v5
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 30
+      pricing:
+        hourly: 0.096
+        monthly: 69.12
+    - id: Standard_F2s_v2
+      name: F2s v2
+      arch: X86
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 30
+      pricing:
+        hourly: 0.099
+        monthly: 71.28
+    - id: Standard_D2ps_v5
+      name: D2ps v5
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 30
+      pricing:
+        hourly: 0.077
+        monthly: 55.44
 exchange_rates:
   eur_to_usd: 1.1702
   usd_to_eur: 0.8546
