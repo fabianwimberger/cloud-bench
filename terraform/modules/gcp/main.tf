@@ -13,6 +13,10 @@ locals {
   cloud_init = templatefile("${path.module}/cloud-init.yml.tmpl", {})
 
   zone = var.zone != "" ? var.zone : "${var.region}-${var.zone_suffix}"
+
+  # 4th-gen+ families (C4, C4A, C4D, N4, N4A) require hyperdisk; older families use pd-* disks
+  needs_hyperdisk     = can(regex("^(c4|c4a|c4d|n4|n4a)-", var.machine_type))
+  effective_disk_type = local.needs_hyperdisk ? "hyperdisk-balanced" : var.disk_type
 }
 
 # --- Networking ---
@@ -51,7 +55,7 @@ resource "google_compute_instance" "benchmark" {
     initialize_params {
       image = local.image
       size  = var.disk_size_gb
-      type  = var.disk_type
+      type  = local.effective_disk_type
     }
   }
 

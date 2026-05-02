@@ -68,8 +68,8 @@ variable "disk_type" {
   default     = "pd-balanced"
 
   validation {
-    condition     = contains(["pd-balanced", "pd-ssd", "pd-standard", "pd-extreme", "pd-hyperdisk-balanced", "pd-hyperdisk-extreme"], var.disk_type)
-    error_message = "disk_type must be one of: pd-balanced, pd-ssd, pd-standard, pd-extreme, pd-hyperdisk-balanced, pd-hyperdisk-extreme"
+    condition     = contains(["pd-balanced", "pd-ssd", "pd-standard", "pd-extreme", "hyperdisk-balanced", "hyperdisk-extreme", "hyperdisk-throughput"], var.disk_type)
+    error_message = "disk_type must be one of: pd-balanced, pd-ssd, pd-standard, pd-extreme, hyperdisk-balanced, hyperdisk-extreme, hyperdisk-throughput. For C4/C4A/C4D/N4/N4A families, hyperdisk is auto-selected regardless."
   }
 }
 
