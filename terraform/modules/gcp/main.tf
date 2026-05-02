@@ -70,7 +70,7 @@ resource "google_compute_instance" "benchmark" {
 
   scheduling {
     automatic_restart   = false
-    on_host_maintenance = "TERMINATE"
+    on_host_maintenance = "MIGRATE"
     preemptible         = false
   }
 }
