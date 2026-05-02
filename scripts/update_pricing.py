@@ -423,20 +423,40 @@ def fetch_gcp_pricing(config: dict, gcp_region: str = "europe-west3") -> int:
     # Series identifiers as they appear at the start of SKU descriptions.
     # Listed longest-first so the regex prefers more specific matches (n2d before n2).
     known_series = [
-        "n2d", "n4a", "c2d", "c3d", "c4a", "c4d",
-        "n1", "n2", "n4", "e2", "t2a", "t2d",
-        "c2", "c3", "c4",
+        "n2d",
+        "n4a",
+        "c2d",
+        "c3d",
+        "c4a",
+        "c4d",
+        "n1",
+        "n2",
+        "n4",
+        "e2",
+        "t2a",
+        "t2d",
+        "c2",
+        "c3",
+        "c4",
     ]
     # Qualifiers between series and "Instance" (e.g. "C4A Arm Instance Core ...",
     # "N2D AMD Instance Core ...", "E2 Custom Instance Core ...").
     series_re = re.compile(
-        r"^(" + "|".join(known_series) + r")\s+(?:AMD|Arm|Custom)?\s*Instance\s+(Core|Ram)\s+running\s+in\s+",
+        r"^("
+        + "|".join(known_series)
+        + r")\s+(?:AMD|Arm|Custom)?\s*Instance\s+(Core|Ram)\s+running\s+in\s+",
         re.IGNORECASE,
     )
     # Variants we must skip — none of these are vanilla on-demand pricing.
     excluded_terms = (
-        "sole tenancy", "committed use", "reserved", "premium",
-        "overcommit", "dws", "extended", "memory-optimized",
+        "sole tenancy",
+        "committed use",
+        "reserved",
+        "premium",
+        "overcommit",
+        "dws",
+        "extended",
+        "memory-optimized",
     )
 
     try:
