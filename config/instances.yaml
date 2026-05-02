@@ -282,15 +282,6 @@ providers:
       pricing:
         hourly: 0.09448
         monthly: 68.03
-    - id: t2a-standard-2
-      name: T2A Standard 2
-      arch: ARM64
-      vcpu: 2
-      ram_gb: 8
-      disk_gb: 20
-      pricing:
-        hourly: 0.08008
-        monthly: 57.66
     - id: c4a-standard-2
       name: C4A Standard 2
       arch: ARM64
