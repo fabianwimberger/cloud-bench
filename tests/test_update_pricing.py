@@ -12,12 +12,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 # Ensure google.cloud.billing_v1 is mockable even when not installed
 _google = types.ModuleType("google")
 _google_cloud = types.ModuleType("google.cloud")
-_google.cloud = _google_cloud
+setattr(_google, "cloud", _google_cloud)  # type: ignore[attr-defined]
 sys.modules["google"] = _google
 sys.modules["google.cloud"] = _google_cloud
 sys.modules.setdefault("google.cloud.billing_v1", MagicMock())
 
-import update_pricing as up
+import update_pricing as up  # noqa: E402
 
 
 class TestParsePricing(unittest.TestCase):
@@ -251,8 +251,15 @@ class TestFetchGCPPricing(unittest.TestCase):
             }
         }
 
-    def _make_sku(self, description, service_regions, resource_family="Compute",
-                  usage_type="OnDemand", unit_price_units=0, unit_price_nanos=0):
+    def _make_sku(
+        self,
+        description,
+        service_regions,
+        resource_family="Compute",
+        usage_type="OnDemand",
+        unit_price_units=0,
+        unit_price_nanos=0,
+    ):
         """Helper to create a mock SKU."""
         sku = MagicMock()
         sku.description = description
@@ -331,10 +338,19 @@ class TestFetchGCPPricing(unittest.TestCase):
         # n2-standard-2: 2 * 0.06 + 8 * 0.008 = 0.184 -> monthly = 132.48
         # Both should update since old prices differ
         self.assertEqual(result, 2)
-        self.assertEqual(self.config["providers"]["gcp"]["instances"][0]["pricing"]["hourly"], 0.128)
-        self.assertEqual(self.config["providers"]["gcp"]["instances"][0]["pricing"]["monthly"], 92.16)
-        self.assertEqual(self.config["providers"]["gcp"]["instances"][1]["pricing"]["hourly"], 0.184)
-        self.assertEqual(self.config["providers"]["gcp"]["instances"][1]["pricing"]["monthly"], 132.48)
+        self.assertEqual(
+            self.config["providers"]["gcp"]["instances"][0]["pricing"]["hourly"], 0.128
+        )
+        self.assertEqual(
+            self.config["providers"]["gcp"]["instances"][0]["pricing"]["monthly"], 92.16
+        )
+        self.assertEqual(
+            self.config["providers"]["gcp"]["instances"][1]["pricing"]["hourly"], 0.184
+        )
+        self.assertEqual(
+            self.config["providers"]["gcp"]["instances"][1]["pricing"]["monthly"],
+            132.48,
+        )
 
     @patch("google.cloud.billing_v1.CloudCatalogClient")
     def test_fetch_gcp_pricing_unchanged(self, mock_client_cls):
@@ -549,13 +565,19 @@ class TestFetchGCPPricing(unittest.TestCase):
         # c4a: 2 * 0.08 + 8 * 0 = 0.16
         # e2: 2 * 0 + 4 * 0.004 = 0.016 (no cpu rate, so 0)
         self.assertAlmostEqual(
-            config["providers"]["gcp"]["instances"][0]["pricing"]["hourly"], 0.12, places=5
+            config["providers"]["gcp"]["instances"][0]["pricing"]["hourly"],
+            0.12,
+            places=5,
         )
         self.assertAlmostEqual(
-            config["providers"]["gcp"]["instances"][1]["pricing"]["hourly"], 0.16, places=5
+            config["providers"]["gcp"]["instances"][1]["pricing"]["hourly"],
+            0.16,
+            places=5,
         )
         self.assertAlmostEqual(
-            config["providers"]["gcp"]["instances"][2]["pricing"]["hourly"], 0.016, places=5
+            config["providers"]["gcp"]["instances"][2]["pricing"]["hourly"],
+            0.016,
+            places=5,
         )
 
 
