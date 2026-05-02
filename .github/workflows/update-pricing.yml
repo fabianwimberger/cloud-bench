@@ -39,9 +39,10 @@ jobs:
         run: |
           # Setup GCP credentials if available
           if [ -n "$GCP_CREDENTIALS" ]; then
-            echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
-            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
             trap 'rm -f /tmp/gcp-key.json' EXIT
+            echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
+            chmod 600 /tmp/gcp-key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp-key.json
           fi
           if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
             python scripts/update_pricing.py --provider all --dry-run | tee pricing_output.txt

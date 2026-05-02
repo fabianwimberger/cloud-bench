@@ -3,9 +3,12 @@
 
 import os
 import sys
+import tempfile
 import types
 import unittest
 from unittest.mock import MagicMock, patch
+
+import yaml
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
@@ -579,6 +582,132 @@ class TestFetchGCPPricing(unittest.TestCase):
             0.016,
             places=5,
         )
+
+    @patch("google.cloud.billing_v1.CloudCatalogClient")
+    def test_fetch_gcp_pricing_non_ondemand(self, mock_client_cls):
+        """Test that SKUs with usage_type != OnDemand are skipped."""
+        mock_client = MagicMock()
+        mock_client_cls.return_value = mock_client
+
+        skus = [
+            self._make_sku(
+                "E2 Instance Core running in Frankfurt",
+                ["europe-west3"],
+                usage_type="Preemptible",
+                unit_price_units=0,
+                unit_price_nanos=50000000,
+            ),
+        ]
+        mock_client.list_skus.return_value = skus
+
+        result = up.fetch_gcp_pricing(self.config, gcp_region="europe-west3")
+        # Preemptible SKUs are excluded, so no rates found
+        self.assertEqual(result, 0)
+
+    @patch("google.cloud.billing_v1.CloudCatalogClient")
+    def test_fetch_gcp_pricing_no_regex_match(self, mock_client_cls):
+        """Test that SKUs not matching the series regex are skipped."""
+        mock_client = MagicMock()
+        mock_client_cls.return_value = mock_client
+
+        # Description is Compute / OnDemand / right region but doesn't match regex
+        skus = [
+            self._make_sku(
+                "E2 Micro Instance running in Frankfurt",
+                ["europe-west3"],
+                unit_price_units=0,
+                unit_price_nanos=50000000,
+            ),
+        ]
+        mock_client.list_skus.return_value = skus
+
+        result = up.fetch_gcp_pricing(self.config, gcp_region="europe-west3")
+        # No regex match, so no rates found
+        self.assertEqual(result, 0)
+
+    @patch("google.cloud.billing_v1.CloudCatalogClient")
+    def test_fetch_gcp_pricing_zero_price_empty_rates(self, mock_client_cls):
+        """Test that SKUs with zero price lead to empty series_rates."""
+        mock_client = MagicMock()
+        mock_client_cls.return_value = mock_client
+
+        # Matching SKU but with zero price -> no rate added -> empty series_rates
+        skus = [
+            self._make_sku(
+                "E2 Instance Core running in Frankfurt",
+                ["europe-west3"],
+                unit_price_units=0,
+                unit_price_nanos=0,
+            ),
+        ]
+        mock_client.list_skus.return_value = skus
+
+        result = up.fetch_gcp_pricing(self.config, gcp_region="europe-west3")
+        # Zero price means no rate stored, empty series_rates -> error path
+        self.assertEqual(result, 0)
+
+
+class TestUpdateConfigGCP(unittest.TestCase):
+    @patch("update_pricing.fetch_gcp_pricing", return_value=1)
+    @patch("update_pricing.fetch_exchange_rates", return_value={})
+    def test_update_config_gcp_provider(self, mock_fetch_rates, mock_fetch_gcp):
+        """Test update_config calls fetch_gcp_pricing when provider is gcp."""
+        config = {
+            "providers": {
+                "gcp": {
+                    "instances": [
+                        {
+                            "id": "e2-medium",
+                            "vcpu": 2,
+                            "ram_gb": 4,
+                            "pricing": {"hourly": 0.05, "monthly": 36.0},
+                        }
+                    ]
+                }
+            }
+        }
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".yaml", delete=False
+        ) as f:
+            yaml.dump(config, f)
+            temp_path = f.name
+
+        try:
+            result = up.update_config(
+                temp_path, [], dry_run=False, provider="gcp"
+            )
+            mock_fetch_gcp.assert_called_once()
+            # fetch_gcp_pricing returned 1, so metadata should be written
+            self.assertIn("_metadata", result)
+            self.assertIn(
+                "GCP Cloud Billing API", result["_metadata"]["source"]
+            )
+        finally:
+            os.unlink(temp_path)
+
+
+class TestMainGCP(unittest.TestCase):
+    @patch("update_pricing.fetch_gcp_pricing", return_value=0)
+    @patch("update_pricing.fetch_server_types", return_value=[])
+    @patch("update_pricing.fetch_exchange_rates", return_value={})
+    def test_main_gcp_provider(self, mock_rates, mock_server, mock_gcp):
+        """Test main() accepts --provider gcp and invokes fetch_gcp_pricing."""
+        config = {"providers": {"gcp": {"instances": []}}}
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".yaml", delete=False
+        ) as f:
+            yaml.dump(config, f)
+            temp_path = f.name
+
+        try:
+            with patch(
+                "sys.argv",
+                ["update_pricing", "--provider", "gcp", "--config", temp_path],
+            ):
+                up.main()
+            mock_gcp.assert_called_once()
+        finally:
+            os.unlink(temp_path)
 
 
 if __name__ == "__main__":

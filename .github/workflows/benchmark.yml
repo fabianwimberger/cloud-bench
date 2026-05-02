@@ -307,9 +307,9 @@ jobs:
           fi
 
           # Write credentials to temp file for gcloud auth
-          echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
-          # Ensure cleanup happens even if subsequent commands fail
           trap 'rm -f /tmp/gcp-key.json' EXIT
+          echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
+          chmod 600 /tmp/gcp-key.json
           gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
           gcloud config set project "$GCP_PROJECT_ID"
 
