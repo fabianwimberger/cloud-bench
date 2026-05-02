@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime
@@ -399,6 +400,134 @@ def fetch_oci_pricing(config: dict, oci_region: str = "eu-frankfurt-1") -> int:
     return updated
 
 
+def fetch_gcp_pricing(config: dict, gcp_region: str = "europe-west3") -> int:
+    """Fetch GCP pricing using the Cloud Billing Catalog API.
+    Returns count of updated instances."""
+    try:
+        from google.cloud import billing_v1
+    except ImportError:
+        print(
+            "  [WARN] google-cloud-billing not installed, skipping GCP pricing update"
+        )
+        return 0
+
+    gcp_config = config.get("providers", {}).get("gcp", {})
+    instances = gcp_config.get("instances", [])
+    if not instances:
+        print("  [WARN] No GCP instances in config")
+        return 0
+
+    # Compute Engine service ID
+    service_name = "services/6F81-5844-456A"
+
+    # Series identifiers as they appear at the start of SKU descriptions.
+    # Listed longest-first so the regex prefers more specific matches (n2d before n2).
+    known_series = [
+        "n2d", "n4a", "c2d", "c3d", "c4a", "c4d",
+        "n1", "n2", "n4", "e2", "t2a", "t2d",
+        "c2", "c3", "c4",
+    ]
+    # Qualifiers between series and "Instance" (e.g. "C4A Arm Instance Core ...",
+    # "N2D AMD Instance Core ...", "E2 Custom Instance Core ...").
+    series_re = re.compile(
+        r"^(" + "|".join(known_series) + r")\s+(?:AMD|Arm|Custom)?\s*Instance\s+(Core|Ram)\s+running\s+in\s+",
+        re.IGNORECASE,
+    )
+    # Variants we must skip — none of these are vanilla on-demand pricing.
+    excluded_terms = (
+        "sole tenancy", "committed use", "reserved", "premium",
+        "overcommit", "dws", "extended", "memory-optimized",
+    )
+
+    try:
+        client = billing_v1.CloudCatalogClient()
+        request = billing_v1.ListSkusRequest(parent=service_name)
+
+        # Per-series per-vCPU and per-GB hourly rates
+        series_rates: dict[str, dict[str, float]] = {}
+
+        for sku in client.list_skus(request=request):
+            if gcp_region not in sku.service_regions:
+                continue
+            category = sku.category
+            if category.resource_family != "Compute":
+                continue
+            if category.usage_type != "OnDemand":
+                continue
+
+            desc = sku.description
+            desc_lower = desc.lower()
+            if any(term in desc_lower for term in excluded_terms):
+                continue
+
+            m = series_re.match(desc)
+            if not m:
+                continue
+
+            series_key = m.group(1).lower()
+            rate_type = "cpu_hr" if m.group(2).lower() == "core" else "gb_hr"
+
+            # Take first non-zero tiered rate
+            for tier in sku.pricing_info:
+                for rate in tier.pricing_expression.tiered_rates:
+                    price = rate.unit_price.units + rate.unit_price.nanos / 1e9
+                    if price > 0:
+                        series_rates.setdefault(series_key, {})[rate_type] = price
+                        break
+                break
+
+        if not series_rates:
+            print(f"  [ERROR] No GCP pricing rates found for region {gcp_region}")
+            return 0
+
+        print(
+            f"  [OK] Fetched rates for {len(series_rates)} machine series: "
+            f"{', '.join(sorted(series_rates.keys()))}"
+        )
+
+    except Exception as e:
+        print(f"  [ERROR] Failed to fetch GCP pricing from Cloud Billing API: {e}")
+        return 0
+
+    # Map machine type to series key (e.g. "n2d-standard-2" -> "n2d")
+    def _get_series(machine_type: str) -> str | None:
+        series = machine_type.split("-")[0]  # e2, n2, n2d, t2d, t2a
+        if series in series_rates:
+            return series
+        return None
+
+    updated = 0
+    for inst in instances:
+        inst_id = inst.get("id", "")
+        vcpu = inst.get("vcpu", 0)
+        ram_gb = inst.get("ram_gb", 0)
+
+        series = _get_series(inst_id)
+        if not series or series not in series_rates:
+            print(f"  [WARN] No pricing rates for machine type '{inst_id}'")
+            continue
+
+        rates = series_rates[series]
+        cpu_rate = rates.get("cpu_hr", 0)
+        gb_rate = rates.get("gb_hr", 0)
+
+        hourly = round(vcpu * cpu_rate + ram_gb * gb_rate, 5)
+        monthly = round(hourly * 720, 2)
+
+        old_pricing = inst.get("pricing", {})
+        if old_pricing.get("hourly") != hourly or old_pricing.get("monthly") != monthly:
+            inst["pricing"] = {"hourly": hourly, "monthly": monthly}
+            updated += 1
+            print(
+                f"  [UPDATED] {inst_id}: ${monthly}/mo "
+                f"(${cpu_rate}/vCPU-hr + ${gb_rate}/GB-hr)"
+            )
+        else:
+            print(f"  [OK] {inst_id}: ${monthly}/mo (unchanged)")
+
+    return updated
+
+
 def fetch_exchange_rates() -> dict:
     """Fetch EUR/USD rate from Frankfurter API (ECB data, free, no key)."""
     try:
@@ -454,6 +583,11 @@ def update_config(
         print("\nUpdating OCI pricing...")
         total_updated += fetch_oci_pricing(config)
 
+    # Update GCP pricing
+    if provider in ("all", "gcp"):
+        print("\nUpdating GCP pricing...")
+        total_updated += fetch_gcp_pricing(config)
+
     # Update exchange rates
     print("\nFetching exchange rates...")
     exchange_rates = fetch_exchange_rates()
@@ -471,7 +605,7 @@ def update_config(
     if not dry_run and total_updated > 0:
         config["_metadata"] = {
             "last_pricing_update": datetime.now().isoformat(),
-            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing API",
+            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing API / GCP Cloud Billing API",
         }
         with open(config_path, "w") as f:
             yaml.dump(
@@ -498,7 +632,7 @@ def main():
         "--provider",
         "-p",
         default="all",
-        choices=["hetzner", "aws", "ovhcloud", "oci", "all"],
+        choices=["hetzner", "aws", "ovhcloud", "oci", "gcp", "all"],
         help="Provider to update pricing for",
     )
     parser.add_argument(

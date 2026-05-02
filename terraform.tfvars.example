@@ -27,3 +27,15 @@ Your API private key here (from the .pem file)
 -----END PRIVATE KEY-----
 EOT
 oci_compartment_id = "ocid1.compartment.oc1..xxx"
+
+# Google Cloud (GCP)
+# Create a service account and download JSON key from:
+# https://console.cloud.google.com/iam-admin/serviceaccounts
+gcp_project_id = "your-project-id"
+gcp_credentials = <<EOT
+{
+  "type": "service_account",
+  "project_id": "your-project-id",
+  ...paste full JSON key here...
+}
+EOT

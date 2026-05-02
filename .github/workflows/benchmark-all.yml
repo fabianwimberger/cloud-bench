@@ -18,20 +18,68 @@ jobs:
   cost-guard:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+
       - name: Estimate Costs (All Providers)
         run: |
-          echo "## Cost Estimate" >> $GITHUB_STEP_SUMMARY
-          echo "| Provider | Instances | Est. Cost |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-----------|-----------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Hetzner  | 8         | ~€0.05    |" >> $GITHUB_STEP_SUMMARY
-          echo "| AWS      | 6         | ~\$0.15    |" >> $GITHUB_STEP_SUMMARY
-          echo "| OVHcloud | 5         | ~€0.15    |" >> $GITHUB_STEP_SUMMARY
-          echo "| OCI      | 3         | ~\$0.10    |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Total estimated cost: ~\$0.50 / run**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Individual provider limits still apply (>\$5 blocks)." >> $GITHUB_STEP_SUMMARY
-          
+          python3 - <<'SCRIPT'
+          import yaml
+          import os
+
+          with open('config/instances.yaml') as f:
+              config = yaml.safe_load(f)
+
+          exchange_rates = config.get('exchange_rates', {})
+          eur_to_usd = exchange_rates.get('eur_to_usd', 1.08)
+
+          def estimate_provider(provider_name, currency):
+              provider = config.get('providers', {}).get(provider_name, {})
+              instances = provider.get('instances', [])
+              if not instances:
+                  return 0, 0, currency
+
+              # Estimate for 1 hour of running all instances
+              total_hourly = sum(inst.get('pricing', {}).get('hourly', 0) for inst in instances)
+
+              # Convert to USD for consistent comparison
+              if currency == 'EUR':
+                  total_usd = total_hourly * eur_to_usd
+              else:
+                  total_usd = total_hourly
+
+              return len(instances), total_usd, currency
+
+          providers = [
+              ('hetzner', 'EUR'),
+              ('aws', 'USD'),
+              ('ovhcloud', 'EUR'),
+              ('oci', 'USD'),
+              ('gcp', 'USD'),
+          ]
+
+          summary = "## Cost Estimate\n\n"
+          summary += "| Provider | Instances | Est. Cost (1h) |\n"
+          summary += "|----------|-----------|----------------|\n"
+
+          total_usd = 0
+          for name, currency in providers:
+              count, cost_usd, curr = estimate_provider(name, currency)
+              if count > 0:
+                  if curr == 'EUR':
+                      summary += f"| {name.capitalize():8} | {count:9} | ~€{cost_usd / eur_to_usd:.2f} |\n"
+                  else:
+                      summary += f"| {name.capitalize():8} | {count:9} | ~${cost_usd:.2f} |\n"
+                  total_usd += cost_usd
+
+          summary += f"\n**Total estimated cost: ~${total_usd:.2f} / run**\n\n"
+          summary += "Individual provider limits still apply (>$5 blocks).\n"
+
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as f:
+              f.write(summary)
+
+          print(summary)
+          SCRIPT
+
           if [ "${{ inputs.skip_cost_guard }}" != "true" ]; then
             echo "Cost guard passed. Proceeding..."
           else
@@ -62,6 +110,9 @@ jobs:
             instances: all
           - provider: oci
             region: eu-frankfurt-1
+            instances: all
+          - provider: gcp
+            region: europe-west3
             instances: all
     steps:
       - uses: actions/checkout@v6
@@ -144,6 +195,8 @@ jobs:
           TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
           TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY || 'unused' }}
           TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
+          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID || 'unused' }}
+          TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS || '' }}
         run: |
           terraform apply -auto-approve \
             -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
@@ -222,6 +275,8 @@ jobs:
           TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
           TF_VAR_oci_private_key: ${{ secrets.OCI_PRIVATE_KEY || 'unused' }}
           TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
+          TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID || 'unused' }}
+          TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS || '' }}
         run: |
           terraform destroy -auto-approve \
             -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
@@ -304,6 +359,18 @@ jobs:
             else
               echo "[OK] OCI resources cleaned up successfully"
             fi
+
+          elif [ "${{ matrix.provider }}" = "gcp" ]; then
+            cd terraform
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "google_compute_instance" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: GCP instances still in Terraform state after cleanup!"
+              terraform state list | grep "google_compute_instance"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] GCP resources cleaned up successfully"
+            fi
           fi
 
   # Serialize access to benchmark-data branch to prevent race conditions
@@ -353,10 +420,10 @@ jobs:
           fi
 
           # Region mapping (must match matrix above)
-          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 )
+          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 [gcp]=europe-west3 )
 
           # Process each provider's results
-          for provider in hetzner aws ovhcloud oci; do
+          for provider in hetzner aws ovhcloud oci gcp; do
             PROVIDER_DIR="artifacts/results-$provider"
             if [ -d "$PROVIDER_DIR" ]; then
               REGION="${REGIONS[$provider]}"

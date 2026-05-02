@@ -1,0 +1,61 @@
+name: Cleanup GCP Orphans
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - uses: google-github-actions/setup-gcloud@v3
+
+      - name: Find and terminate orphaned instances
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        run: |
+          if [ -z "$GCP_PROJECT_ID" ]; then
+            echo "GCP credentials not configured, skipping"
+            exit 0
+          fi
+
+          echo "Checking for orphaned cloud-bench instances..."
+
+          INSTANCES=$(gcloud compute instances list \
+            --project="$GCP_PROJECT_ID" \
+            --filter="labels.project=cloud-bench" \
+            --format="value(name,zone,creationTimestamp,labels.run_id)")
+
+          if [ -z "$INSTANCES" ]; then
+            echo "[OK] No cloud-bench instances found"
+            exit 0
+          fi
+
+          echo "Found instances:"
+          echo "$INSTANCES"
+
+          CUTOFF=$(date -u -d '2 hours ago' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -u -v-2H +%Y-%m-%dT%H:%M:%S)
+          TERMINATED=0
+
+          while IFS=$'\t' read -r name zone created run_id; do
+            if [[ "$created" < "$CUTOFF" ]]; then
+              echo "Terminating orphaned instance: $name (zone: $zone, created: $created, run_id: $run_id)"
+              gcloud compute instances delete "$name" --zone="$zone" --project="$GCP_PROJECT_ID" --quiet
+              TERMINATED=$((TERMINATED + 1))
+            else
+              echo "Keeping recent instance: $name (created: $created)"
+            fi
+          done <<< "$INSTANCES"
+
+          echo ""
+          echo "Summary: Terminated $TERMINATED orphaned instance(s)"
+
+          if [ $TERMINATED -gt 0 ]; then
+            echo "## GCP Orphan Cleanup" >> $GITHUB_STEP_SUMMARY
+            echo "Terminated **$TERMINATED** orphaned instance(s) older than 2 hours." >> $GITHUB_STEP_SUMMARY
+          fi
