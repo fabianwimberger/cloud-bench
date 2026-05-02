@@ -138,7 +138,10 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear, cur
           <div key={inst.instance_type} style={{ background: 'var(--color-surface)', padding: '0.75rem 1rem', fontSize: '0.8125rem' }}>
             {inst.vcpu} vCPU<br />
             {inst.ram_gb} GB RAM<br />
-            {inst.disk_gb} GB Disk
+            <span title={inst.storage_included ? 'Storage included in price' : 'Storage size is configurable and not included in the displayed price'}>
+              {inst.disk_gb} GB Disk
+              {!inst.storage_included && <span style={{ color: 'var(--color-text-muted)', fontSize: '0.75em', marginLeft: '0.125rem' }}>*</span>}
+            </span>
           </div>
         ))}
 

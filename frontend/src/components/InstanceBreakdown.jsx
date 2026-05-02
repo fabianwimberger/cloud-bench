@@ -22,6 +22,12 @@ function InstanceBreakdown({ ranking, metadata, currency, onSelectHistory }) {
                 <strong style={{ fontSize: '1rem' }}>{instance.instance_type}</strong>
                 <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.125rem' }}>
                   {instance.vcpu} vCPU {'\u00B7'} {instance.ram_gb} GB {'\u00B7'} {instance.disk_gb} GB
+                  {!instance.storage_included && (
+                    <span
+                      title="Storage size is configurable and not included in the displayed price"
+                      style={{ color: 'var(--color-text-muted)', marginLeft: '0.125rem', cursor: 'help' }}
+                    >*</span>
+                  )}
                 </div>
               </div>
               <span className="arch-badge">{instance.arch}</span>

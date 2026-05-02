@@ -132,7 +132,12 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                   </td>
                   <td className="cell-numeric">{instance.vcpu}</td>
                   <td className="cell-numeric">{instance.ram_gb} <span className="metric-unit">GB</span></td>
-                  <td className="cell-numeric">{instance.disk_gb} <span className="metric-unit">GB</span></td>
+                  <td className="cell-numeric">
+                    <span title={instance.storage_included ? 'Storage included in price' : 'Storage size is configurable and not included in the displayed price'}>
+                      {instance.disk_gb} <span className="metric-unit">GB</span>
+                      {!instance.storage_included && <span style={{ color: 'var(--color-text-muted)', fontSize: '0.75em', marginLeft: '0.125rem' }}>*</span>}
+                    </span>
+                  </td>
                   <td className="cell-numeric">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end' }}>
                       <ScoreBar value={instance.single_core_score} />
@@ -176,6 +181,14 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
       <p className="table-note">
         <strong>Value</strong> = CPU Score per {currencySymbol} per Month (higher is better).
         Click checkboxes to compare up to {maxSelections} instances.
+        {ranking.some(r => !r.storage_included) && (
+          <>
+            <br />
+            <span style={{ color: 'var(--color-text-muted)' }}>
+              * Storage is configurable separately and not included in the displayed price for some providers.
+            </span>
+          </>
+        )}
       </p>
     </div>
   )
