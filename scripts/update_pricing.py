@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime
@@ -419,65 +420,59 @@ def fetch_gcp_pricing(config: dict, gcp_region: str = "europe-west3") -> int:
     # Compute Engine service ID
     service_name = "services/6F81-5844-456A"
 
+    # Series identifiers as they appear at the start of SKU descriptions.
+    # Listed longest-first so the regex prefers more specific matches (n2d before n2).
+    known_series = [
+        "n2d", "n4a", "c2d", "c3d", "c4a", "c4d",
+        "n1", "n2", "n4", "e2", "t2a", "t2d",
+        "c2", "c3", "c4",
+    ]
+    # Qualifiers between series and "Instance" (e.g. "C4A Arm Instance Core ...",
+    # "N2D AMD Instance Core ...", "E2 Custom Instance Core ...").
+    series_re = re.compile(
+        r"^(" + "|".join(known_series) + r")\s+(?:AMD|Arm|Custom)?\s*Instance\s+(Core|Ram)\s+running\s+in\s+",
+        re.IGNORECASE,
+    )
+    # Variants we must skip — none of these are vanilla on-demand pricing.
+    excluded_terms = (
+        "sole tenancy", "committed use", "reserved", "premium",
+        "overcommit", "dws", "extended", "memory-optimized",
+    )
+
     try:
         client = billing_v1.CloudCatalogClient()
         request = billing_v1.ListSkusRequest(parent=service_name)
 
-        # Build a map of machine type -> hourly price for the target region
-        # GCP SKU service_regions contains exact region names like "europe-west3"
-
-        # Collect per-vCPU and per-GB rates by machine series
+        # Per-series per-vCPU and per-GB hourly rates
         series_rates: dict[str, dict[str, float]] = {}
 
         for sku in client.list_skus(request=request):
-            # Only consider on-demand compute SKUs in our exact target region
             if gcp_region not in sku.service_regions:
                 continue
-
-            desc = sku.description.lower()
             category = sku.category
-
             if category.resource_family != "Compute":
                 continue
             if category.usage_type != "OnDemand":
                 continue
 
-            # Identify machine series from resource group
-            resource_group = category.resource_group.lower()
-
-            # Map resource groups to series keys
-            # Order matters: check longer prefixes first (n2d before n2, t2d before t2a)
-            series_key = None
-            if "n2d" in resource_group:
-                series_key = "n2d"
-            elif "n2" in resource_group:
-                series_key = "n2"
-            elif "e2" in resource_group:
-                series_key = "e2"
-            elif "t2d" in resource_group:
-                series_key = "t2d"
-            elif "t2a" in resource_group:
-                series_key = "t2a"
-            else:
+            desc = sku.description
+            desc_lower = desc.lower()
+            if any(term in desc_lower for term in excluded_terms):
                 continue
 
-            # Determine rate type (cpu or ram)
-            rate_type = None
-            if "core" in desc or "cpu" in desc or "vcpu" in desc:
-                rate_type = "cpu_hr"
-            elif "ram" in desc or "memory" in desc:
-                rate_type = "gb_hr"
-            else:
+            m = series_re.match(desc)
+            if not m:
                 continue
 
-            # Extract price from tiered rates (first tier)
+            series_key = m.group(1).lower()
+            rate_type = "cpu_hr" if m.group(2).lower() == "core" else "gb_hr"
+
+            # Take first non-zero tiered rate
             for tier in sku.pricing_info:
                 for rate in tier.pricing_expression.tiered_rates:
                     price = rate.unit_price.units + rate.unit_price.nanos / 1e9
                     if price > 0:
-                        if series_key not in series_rates:
-                            series_rates[series_key] = {}
-                        series_rates[series_key][rate_type] = price
+                        series_rates.setdefault(series_key, {})[rate_type] = price
                         break
                 break
 
