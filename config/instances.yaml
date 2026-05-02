@@ -291,6 +291,15 @@ providers:
       pricing:
         hourly: 0.08008
         monthly: 57.66
+    - id: c4a-standard-2
+      name: C4A Standard 2
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 20
+      pricing:
+        hourly: 0.0
+        monthly: 0.0
 exchange_rates:
   eur_to_usd: 1.1702
   usd_to_eur: 0.8546
