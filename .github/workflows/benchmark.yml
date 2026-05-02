@@ -285,16 +285,19 @@ jobs:
               --protocol icmp --port -1 --cidr "$RUNNER_IP/32" || true
           done
 
+      - name: Authenticate to GCP
+        if: ${{ github.event.inputs.provider == 'gcp' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
       - name: Setup gcloud CLI
         if: ${{ github.event.inputs.provider == 'gcp' }}
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          version: '>= 363.0.0'
+        uses: google-github-actions/setup-gcloud@v3
 
       - name: Update GCP Firewall Rules with Runner IP
         if: ${{ github.event.inputs.provider == 'gcp' }}
         env:
-          GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         run: |
           RUNNER_IP=$(curl -s --retry 3 https://ifconfig.me || curl -s --retry 3 https://api.ipify.org)
@@ -306,34 +309,29 @@ jobs:
             exit 0
           fi
 
-          # Write credentials to temp file for gcloud auth
-          trap 'rm -f /tmp/gcp-key.json' EXIT
-          echo "$GCP_CREDENTIALS" > /tmp/gcp-key.json
-          chmod 600 /tmp/gcp-key.json
-          gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
-          gcloud config set project "$GCP_PROJECT_ID"
-
-          # Find cloud-bench firewall rules for this run and add the new IP
-          RULES=$(gcloud compute firewall-rules list --filter="name~cloud-bench.*${{ env.RUN_ID }}" --format="value(name)")
+          RULES=$(gcloud compute firewall-rules list \
+            --project="$GCP_PROJECT_ID" \
+            --filter="name~cloud-bench.*${{ env.RUN_ID }}" \
+            --format="value(name)")
           for rule in $RULES; do
             echo "Updating firewall rule: $rule"
-            EXISTING=$(gcloud compute firewall-rules describe "$rule" --format="value(sourceRanges)")
+            EXISTING=$(gcloud compute firewall-rules describe "$rule" \
+              --project="$GCP_PROJECT_ID" \
+              --format="value(sourceRanges)")
             NEW_IP="${RUNNER_IP}/32"
-            # Check if IP already exists to avoid duplicates
             if echo "$EXISTING" | grep -q "${NEW_IP}"; then
               echo "IP ${NEW_IP} already in source ranges, skipping update"
               continue
             fi
-            # Handle empty existing ranges
             if [ -z "$EXISTING" ]; then
               UPDATED_RANGES="$NEW_IP"
             else
               UPDATED_RANGES="${EXISTING},${NEW_IP}"
             fi
             gcloud compute firewall-rules update "$rule" \
+              --project="$GCP_PROJECT_ID" \
               --source-ranges="$UPDATED_RANGES" || true
           done
-          rm -f /tmp/gcp-key.json
 
       - name: Update OCI Security Lists with Runner IP
         if: ${{ github.event.inputs.provider == 'oci' }}
