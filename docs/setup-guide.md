@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - GitHub account (for Actions-based benchmarking)
-- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud, Oracle Cloud (OCI), Google Cloud Platform (GCP)
+- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud, Oracle Cloud (OCI), Google Cloud Platform (GCP), Microsoft Azure
 
 ## Hetzner Setup
 
@@ -205,6 +205,43 @@ In GCP Console, go to **Billing > Budgets & alerts** and create a budget at e.g.
 
 Go to **Actions > Run Benchmarks > Run workflow**. Select provider `gcp` and region `europe-west3`.
 
+## Azure Setup
+
+### 1. Create a dedicated resource group (optional but recommended)
+
+In [Azure Portal](https://portal.azure.com/), a dedicated subscription or resource group makes cost tracking and cleanup straightforward. The Terraform module creates its own resource group per run, so no manual group creation is required.
+
+### 2. Create a service principal
+
+```bash
+az ad sp create-for-rbac --name cloud-bench \
+  --role Contributor \
+  --scopes /subscriptions/<YOUR_SUBSCRIPTION_ID>
+```
+
+This outputs `appId` (client ID), `password` (client secret), `tenant` (tenant ID). Note them — the password is shown only once.
+
+### 3. Collect required identifiers
+
+| Secret | Where to find it |
+|---|---|
+| `AZURE_SUBSCRIPTION_ID` | Azure Portal → Subscriptions — copy the Subscription ID |
+| `AZURE_CLIENT_ID` | Output `appId` from the `az ad sp create-for-rbac` command |
+| `AZURE_CLIENT_SECRET` | Output `password` from the `az ad sp create-for-rbac` command |
+| `AZURE_TENANT_ID` | Output `tenant` from the `az ad sp create-for-rbac` command |
+
+### 4. Add secrets to GitHub
+
+**Repository Settings > Secrets and variables > Actions** — add all four secrets above.
+
+### 5. Set a budget alert
+
+In Azure Portal, go to **Cost Management + Billing > Budgets** and create a budget at e.g. $10.
+
+### 6. Run
+
+Go to **Actions > Run Benchmarks > Run workflow**. Select provider `azure` and region `westeurope`.
+
 ## Local Run (Cloud Provisioning)
 
 Run the full benchmark pipeline locally (provisions cloud instances, runs benchmarks, processes results):
@@ -237,6 +274,13 @@ PROVIDER=oci ./scripts/run-local.sh
 export GCP_PROJECT_ID="your-project-id"
 export GCP_CREDENTIALS="$(cat /path/to/service-account-key.json)"
 PROVIDER=gcp ./scripts/run-local.sh
+
+# Azure
+export AZURE_SUBSCRIPTION_ID="your-subscription-id"
+export AZURE_CLIENT_ID="your-client-id"
+export AZURE_CLIENT_SECRET="your-client-secret"
+export AZURE_TENANT_ID="your-tenant-id"
+PROVIDER=azure ./scripts/run-local.sh
 ```
 
 The script auto-detects your IP for the firewall/security group. It provisions, benchmarks, processes results, and prompts to destroy.
@@ -271,6 +315,9 @@ terraform plan -var="run_id=test" -var="cloud_provider=oci" -var='allowed_ssh_ip
 
 # GCP
 terraform plan -var="run_id=test" -var="cloud_provider=gcp" -var='allowed_ssh_ips=["YOUR_IP/32"]'
+
+# Azure
+terraform plan -var="run_id=test" -var="cloud_provider=azure" -var='allowed_ssh_ips=["YOUR_IP/32"]'
 ```
 
 ## Troubleshooting
