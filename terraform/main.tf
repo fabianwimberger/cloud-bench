@@ -58,17 +58,17 @@ provider "openstack" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.oci_tenancy_ocid
-  user_ocid    = var.oci_user_ocid
-  fingerprint  = var.oci_fingerprint
-  private_key  = var.oci_private_key
+  tenancy_ocid = var.oci_tenancy_ocid != "" && var.oci_tenancy_ocid != "unused" ? var.oci_tenancy_ocid : "ocid1.tenancy.oc1..unused"
+  user_ocid    = var.oci_user_ocid != "" && var.oci_user_ocid != "unused" ? var.oci_user_ocid : "ocid1.user.oc1..unused"
+  fingerprint  = var.oci_fingerprint != "" && var.oci_fingerprint != "unused" ? var.oci_fingerprint : "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
+  private_key  = var.oci_private_key != "" && var.oci_private_key != "unused" ? var.oci_private_key : local._dummy_pem
   region       = var.cloud_provider == "oci" ? local.effective_region : "eu-frankfurt-1"
 }
 
 provider "google" {
-  project     = var.gcp_project_id
+  project     = var.gcp_project_id != "" && var.gcp_project_id != "unused" ? var.gcp_project_id : "dummy"
   region      = var.cloud_provider == "gcp" ? local.effective_region : "europe-west3"
-  credentials = var.gcp_credentials != "" ? var.gcp_credentials : null
+  credentials = var.gcp_credentials != "" ? var.gcp_credentials : local._dummy_gcp_credentials
 }
 
 provider "azurerm" {
