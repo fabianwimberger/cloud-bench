@@ -548,7 +548,7 @@ def fetch_gcp_pricing(config: dict, gcp_region: str = "europe-west3") -> int:
     return updated
 
 
-def fetch_azure_pricing(config: dict, azure_region: str = "westeurope") -> int:
+def fetch_azure_pricing(config: dict, azure_region: str = "germanywestcentral") -> int:
     """Fetch Azure VM pricing using the Retail Prices API (public, no auth).
     Returns count of updated instances."""
     azure_config = config.get("providers", {}).get("azure", {})
@@ -643,7 +643,7 @@ def update_config(
     dry_run: bool = False,
     provider: str = "all",
     aws_region: str = "eu-central-1",
-    azure_region: str = "westeurope",
+    azure_region: str = "germanywestcentral",
 ) -> dict:
     """Update instances.yaml with fetched pricing."""
     with open(config_path) as f:
@@ -735,8 +735,8 @@ def main():
     )
     parser.add_argument(
         "--azure-region",
-        default="westeurope",
-        help="Azure region for pricing (default: westeurope)",
+        default="germanywestcentral",
+        help="Azure region for pricing (default: germanywestcentral)",
     )
     parser.add_argument(
         "--dry-run", "-n", action="store_true", help="Show changes without saving"

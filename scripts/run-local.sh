@@ -16,7 +16,7 @@ if [ -z "$REGION" ]; then
         ovhcloud) REGION="DE1" ;;
         oci)      REGION="eu-frankfurt-1" ;;
         gcp)      REGION="europe-west3" ;;
-        azure)    REGION="westeurope" ;;
+        azure)    REGION="germanywestcentral" ;;
         *)        REGION="fsn1" ;;
     esac
 fi

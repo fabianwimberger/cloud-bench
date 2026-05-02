@@ -293,10 +293,10 @@ providers:
         monthly: 76.3
   azure:
     currency: USD
-    default_region: westeurope
+    default_region: germanywestcentral
     regions:
-      westeurope:
-        name: Amsterdam
+      germanywestcentral:
+        name: Frankfurt
     instances:
     - id: Standard_B2s
       name: B2s
@@ -305,8 +305,8 @@ providers:
       ram_gb: 4
       disk_gb: 30
       pricing:
-        hourly: 0.0416
-        monthly: 29.95
+        hourly: 0.048
+        monthly: 34.56
     - id: Standard_D2s_v5
       name: D2s v5
       arch: X86
@@ -314,17 +314,8 @@ providers:
       ram_gb: 8
       disk_gb: 30
       pricing:
-        hourly: 0.096
-        monthly: 69.12
-    - id: Standard_F2s_v2
-      name: F2s v2
-      arch: X86
-      vcpu: 2
-      ram_gb: 4
-      disk_gb: 30
-      pricing:
-        hourly: 0.099
-        monthly: 71.28
+        hourly: 0.115
+        monthly: 82.8
     - id: Standard_D2ps_v5
       name: D2ps v5
       arch: ARM64
@@ -332,14 +323,14 @@ providers:
       ram_gb: 8
       disk_gb: 30
       pricing:
-        hourly: 0.077
-        monthly: 55.44
+        hourly: 0.092
+        monthly: 66.24
 exchange_rates:
   eur_to_usd: 1.1702
   usd_to_eur: 0.8546
   last_updated: '2026-04-30'
   source: Frankfurter API (ECB data)
 _metadata:
-  last_pricing_update: '2026-05-02T09:39:29.757001'
+  last_pricing_update: '2026-05-02T23:15:37.026915'
   source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing
-    API / GCP Cloud Billing API
+    API / GCP Cloud Billing API / Azure Retail Prices API
