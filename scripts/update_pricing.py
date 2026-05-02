@@ -582,12 +582,13 @@ def fetch_azure_pricing(config: dict, azure_region: str = "westeurope") -> int:
             print(f"  [WARN] Failed to fetch pricing for {inst_id}: {e}")
             continue
 
-        # Keep only Linux on-demand (exclude Windows premium and Spot)
         linux_items = [
             item
             for item in items
             if "Windows" not in item.get("productName", "")
+            and "Cloud Services" not in item.get("productName", "")
             and "Spot" not in item.get("skuName", "")
+            and "Low Priority" not in item.get("skuName", "")
             and item.get("type") == "Consumption"
         ]
 
