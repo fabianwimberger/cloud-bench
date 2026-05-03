@@ -2,6 +2,21 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-05-03T11:28:10-azure-northeurope",
+      "timestamp": "2026-05-03T11:28:10",
+      "provider": "azure",
+      "region": "northeurope",
+      "instance_count": 2,
+      "instances": [
+        "STANDARD_D2AS_V7",
+        "STANDARD_D2PS_V6"
+      ],
+      "files": {
+        "summary": "data/runs/2026-05-03T11:28:10-azure-northeurope/summary.json",
+        "detail": "data/runs/2026-05-03T11:28:10-azure-northeurope/detail.json"
+      }
+    },
+    {
       "id": "2026-05-02T09:12:04-gcp-europe-west3",
       "timestamp": "2026-05-02T09:12:04",
       "provider": "gcp",
@@ -974,6 +989,12 @@
     }
   ],
   "instance_index": {
+    "STANDARD_D2AS_V7": [
+      "2026-05-03T11:28:10-azure-northeurope"
+    ],
+    "STANDARD_D2PS_V6": [
+      "2026-05-03T11:28:10-azure-northeurope"
+    ],
     "T2D-STANDARD-2": [
       "2026-05-02T09:12:04-gcp-europe-west3"
     ],
