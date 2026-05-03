@@ -38,6 +38,8 @@ exchange_rates:
 | AWS      | USD | eu-central-1 (Frankfurt) | 6 (t3.micro, t3.small, t4g.micro, t4g.small, c7i-flex.large, m7i-flex.large) |
 | OVHcloud | EUR | DE1 (Frankfurt) | 5 (d2-4, b3-8, c3-4, c3-8, r3-16) |
 | OCI      | USD | eu-frankfurt-1 (Frankfurt) | 3 (e5-flex-1-4, std3-flex-1-4, a2-flex-2-4) |
+| GCP      | USD | europe-west3 (Frankfurt) | 5 (e2-standard-2, n2-standard-2, n2d-standard-2, t2d-standard-2, c4a-standard-2) |
+| Azure    | USD | northeurope (Dublin) | 2 (Standard_D2as_v7, Standard_D2ps_v6) |
 
 ## Adding Instances
 
@@ -129,6 +131,8 @@ APIs used:
 - **AWS**: `api.pricing.us-east-1.amazonaws.com` (requires AWS credentials)
 - **OVHcloud**: `api.ovh.com/v1/order/catalog/public/cloud` (public, no auth)
 - **OCI**: `apex.oracle.com/pricing` (public, no auth, via APEX API)
+- **GCP**: Cloud Billing API (requires GCP credentials with `billing.resourceCosts.get`)
+- **Azure**: `prices.azure.com/api/retail/prices` (public, no auth)
 - **Exchange rates**: Frankfurter API (ECB data)
 
 ## Validation

@@ -11,6 +11,8 @@ config/instances.yaml            # Single source of truth for instances & pricin
 │  modules/aws/              │   EC2 instances, security groups, key pairs
 │  modules/ovhcloud/         │   OpenStack instances, key pairs (no security groups)
 │  modules/oci/              │   OCI instances, VCN, subnets, security lists
+│  modules/gcp/              │   GCE instances, firewall rules, service accounts
+│  modules/azure/            │   VMs, resource groups, NSGs, public IPs
 └────────────┬──────────────┘
              ▼
 ┌── Ansible ────────────────┐
@@ -87,13 +89,13 @@ See [data-format.md](data-format.md) for full schemas.
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
-- Firewall/security group allows SSH from runner IP only (Hetzner, AWS, OCI)
+- Firewall/security group/NSG allows SSH from runner IP only (Hetzner, AWS, OCI, GCP, Azure)
 - OVHcloud does not support security groups — SSH key auth only
 - `if: always()` cleanup in CI ensures infrastructure destruction
 - Verify Cleanup step confirms resources are gone via provider APIs after destroy
 - Provider secrets passed via `TF_VAR_` environment variables, never on command line
 - Orphan cleanup workflows: manual trigger (all providers)
-- Dedicated project/IAM user/OpenStack user/compartment recommended for isolation
+- Dedicated project/IAM user/OpenStack user/compartment/service principal recommended for isolation
 
 ## Workflows
 
@@ -109,3 +111,5 @@ See [data-format.md](data-format.md) for full schemas.
 | `cleanup-aws.yml` | Manual | Terminate orphaned AWS instances older than 2 hours |
 | `cleanup-ovhcloud.yml` | Manual | Terminate orphaned OVHcloud instances older than 2 hours |
 | `cleanup-oci.yml` | Manual | Terminate orphaned OCI instances older than 2 hours |
+| `cleanup-gcp.yml` | Manual | Delete orphaned GCP instances older than 2 hours |
+| `cleanup-azure.yml` | Manual | Delete orphaned Azure resource groups older than 2 hours |

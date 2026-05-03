@@ -291,12 +291,37 @@ providers:
       pricing:
         hourly: 0.10597
         monthly: 76.3
+  azure:
+    currency: USD
+    default_region: northeurope
+    regions:
+      northeurope:
+        name: Dublin
+    instances:
+    - id: Standard_D2as_v7
+      name: D2as v7
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 30
+      pricing:
+        hourly: 0.101
+        monthly: 73.73
+    - id: Standard_D2ps_v6
+      name: D2ps v6
+      arch: ARM64
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 30
+      pricing:
+        hourly: 0.0784
+        monthly: 57.23
 exchange_rates:
   eur_to_usd: 1.1702
   usd_to_eur: 0.8546
   last_updated: '2026-04-30'
   source: Frankfurter API (ECB data)
 _metadata:
-  last_pricing_update: '2026-05-02T09:39:29.757001'
+  last_pricing_update: '2026-05-02T23:15:37.026915'
   source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing
-    API / GCP Cloud Billing API
+    API / GCP Cloud Billing API / Azure Retail Prices API
