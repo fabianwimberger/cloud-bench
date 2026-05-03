@@ -47,6 +47,6 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
 |---|---------|-----|----------|-----|-----|-------|
 | Pricing | Simple, flat hourly/monthly | On-demand, region-dependent | Hourly consumption billing | Pay-as-you-go | Per-second billing | Per-minute billing |
 | Hidden fees | None | Egress, EBS IOPS (minimal for benchmarks) | None | Egress | Egress | Egress |
-| Cheapest instance | €2.99/mo (CX23) | $6.91/mo (t4g.micro) | €14.26/mo (D2-4) | Free tier eligible | $64.19/mo (e2-standard-2) | $29.95/mo (Standard_B2s) |
+| Cheapest instance | €2.99/mo (CX23) | $6.91/mo (t4g.micro) | €14.26/mo (D2-4) | Free tier eligible | $64.19/mo (e2-standard-2) | $61.17/mo (Standard_D2ps_v6) |
 | Cleanup | hcloud CLI / scheduled workflow | AWS CLI / scheduled workflow | OpenStack CLI / manual workflow | OCI CLI / manual workflow | gcloud CLI / scheduled workflow | az CLI / scheduled workflow |
 | Billing granularity | Hourly | Per-second | Hourly | Per-second | Per-second | Per-minute |

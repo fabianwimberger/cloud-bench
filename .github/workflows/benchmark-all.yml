@@ -116,7 +116,7 @@ jobs:
             region: europe-west3
             instances: all
           - provider: azure
-            region: germanywestcentral
+            region: northeurope
             instances: all
     steps:
       - uses: actions/checkout@v6
@@ -444,7 +444,7 @@ jobs:
           fi
 
           # Region mapping (must match matrix above)
-          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 [gcp]=europe-west3 [azure]=germanywestcentral )
+          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 [gcp]=europe-west3 [azure]=northeurope )
 
           # Process each provider's results
           for provider in hetzner aws ovhcloud oci gcp azure; do

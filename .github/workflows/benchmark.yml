@@ -80,7 +80,7 @@ jobs:
               ovhcloud) REGION="DE1" ;;
               oci)      REGION="eu-frankfurt-1" ;;
               gcp)      REGION="europe-west3" ;;
-              azure)    REGION="germanywestcentral" ;;
+              azure)    REGION="northeurope" ;;
             esac
           fi
           echo "region=$REGION" >> $GITHUB_OUTPUT

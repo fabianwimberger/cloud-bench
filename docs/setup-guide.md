@@ -240,7 +240,7 @@ In Azure Portal, go to **Cost Management + Billing > Budgets** and create a budg
 
 ### 6. Run
 
-Go to **Actions > Run Benchmarks > Run workflow**. Select provider `azure` and region `germanywestcentral`.
+Go to **Actions > Run Benchmarks > Run workflow**. Select provider `azure` and region `northeurope`.
 
 ## Local Run (Cloud Provisioning)
 

@@ -109,7 +109,7 @@ locals {
       ovhcloud = "DE1"
       oci      = "eu-frankfurt-1"
       gcp      = "europe-west3"
-      azure    = "germanywestcentral"
+      azure    = "northeurope"
     },
     var.cloud_provider,
     "fsn1"

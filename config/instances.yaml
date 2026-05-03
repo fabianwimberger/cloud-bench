@@ -293,38 +293,29 @@ providers:
         monthly: 76.3
   azure:
     currency: USD
-    default_region: germanywestcentral
+    default_region: northeurope
     regions:
-      germanywestcentral:
-        name: Frankfurt
+      northeurope:
+        name: Dublin
     instances:
-    - id: Standard_B2s
-      name: B2s
-      arch: X86
-      vcpu: 2
-      ram_gb: 4
-      disk_gb: 30
-      pricing:
-        hourly: 0.048
-        monthly: 34.56
-    - id: Standard_D2s_v5
-      name: D2s v5
+    - id: Standard_D2as_v7
+      name: D2as v7
       arch: X86
       vcpu: 2
       ram_gb: 8
       disk_gb: 30
       pricing:
-        hourly: 0.115
-        monthly: 82.8
-    - id: Standard_D2ps_v5
-      name: D2ps v5
+        hourly: 0.101
+        monthly: 73.73
+    - id: Standard_D2ps_v6
+      name: D2ps v6
       arch: ARM64
       vcpu: 2
       ram_gb: 8
       disk_gb: 30
       pricing:
-        hourly: 0.092
-        monthly: 66.24
+        hourly: 0.0784
+        monthly: 57.23
 exchange_rates:
   eur_to_usd: 1.1702
   usd_to_eur: 0.8546

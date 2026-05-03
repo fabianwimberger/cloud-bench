@@ -4,7 +4,7 @@ variable "instance_name" {
 }
 
 variable "instance_type" {
-  description = "Azure VM size (e.g. Standard_D2s_v5)"
+  description = "Azure VM size (e.g. Standard_D2ps_v6)"
   type        = string
 }
 

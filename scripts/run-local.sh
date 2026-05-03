@@ -16,7 +16,7 @@ if [ -z "$REGION" ]; then
         ovhcloud) REGION="DE1" ;;
         oci)      REGION="eu-frankfurt-1" ;;
         gcp)      REGION="europe-west3" ;;
-        azure)    REGION="germanywestcentral" ;;
+        azure)    REGION="northeurope" ;;
         *)        REGION="fsn1" ;;
     esac
 fi
@@ -274,7 +274,7 @@ main() {
     pip install -q -r scripts/requirements.txt 2>/dev/null || true
 
     python3 scripts/process_results.py \
-        --input results/ \
+        --input ansible/results/ \
         --output frontend/public/data/ \
         --config config/instances.yaml \
         --region "$REGION" \
