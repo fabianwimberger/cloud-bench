@@ -1,8 +1,13 @@
+import ProviderBadge from './ProviderBadge'
+
 function StatsOverview({ data, currency }) {
   const ranking = data?.ranking || []
   const metadata = data?.metadata || {}
 
   if (ranking.length === 0) return null
+
+  const providers = [...new Set(ranking.map(r => r.provider))].filter(Boolean).sort()
+  const regionCount = new Set(ranking.map(r => r.region).filter(Boolean)).size
 
   const bestValue = [...ranking].sort((a, b) => b.cpu_value_monthly - a.cpu_value_monthly)[0]
   const bestPerformance = ranking.reduce((best, current) =>
@@ -47,8 +52,14 @@ function StatsOverview({ data, currency }) {
     },
     {
       label: 'Providers',
-      value: [...new Set(ranking.map(r => r.provider))].filter(Boolean).map(p => ({ aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVH', oci: 'OCI', gcp: 'GCP' }[p] || p)).join(', ') || 'Unknown',
-      subtext: [...new Set(ranking.map(r => r.region))].filter(Boolean).join(', ')
+      value: providers.length > 0
+        ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', alignItems: 'center', minHeight: '2rem' }}>
+              {providers.map(p => <ProviderBadge key={p} provider={p} />)}
+            </div>
+          )
+        : 'Unknown',
+      subtext: regionCount === 1 ? '1 region' : `${regionCount} regions`
     },
   ]
 

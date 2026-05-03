@@ -84,8 +84,8 @@ provider "azurerm" {
   use_cli         = false
   use_msi         = false
   use_oidc        = false
-  # skip_provider_registration avoids an extra API call when not using Azure
-  skip_provider_registration = true
+  # avoids resource-provider registration calls when not using Azure
+  resource_provider_registrations = "none"
 }
 
 locals {
