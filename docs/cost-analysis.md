@@ -10,6 +10,8 @@ A benchmark run provisions all configured instances for a single provider for ~1
 | AWS      | 6         | ~$0.15      |
 | OVHcloud | 5         | ~€0.15      |
 | OCI      | 3         | ~$0.10      |
+| GCP      | 5         | ~$0.15      |
+| Azure    | 4         | ~$0.10      |
 
 Exact cost depends on which instances are configured in `config/instances.yaml`. The cost-guard workflow estimates this before each run and blocks anything over $5 or 15 instances.
 
@@ -23,6 +25,8 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
 | AWS      | $0.2792             | $198.91              |
 | OVHcloud | €0.2310             | €180.72              |
 | OCI      | $0.0684             | $48.51               |
+| GCP      | $0.5420             | $395.67              |
+| Azure    | $0.3136             | $228.93              |
 
 ## Safety Nets
 
@@ -34,13 +38,15 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
    - AWS: manual trigger
    - OVHcloud: manual trigger
    - OCI: manual trigger
+   - GCP: manual trigger
+   - Azure: manual trigger
 
 ## Provider Comparison
 
-| | Hetzner | AWS | OVHcloud | OCI |
-|---|---------|-----|----------|-----|
-| Pricing | Simple, flat hourly/monthly | On-demand, region-dependent | Hourly consumption billing | Pay-as-you-go |
-| Hidden fees | None | Egress, EBS IOPS (minimal for benchmarks) | None | Egress |
-| Cheapest instance | €2.99/mo (CX23) | $6.91/mo (t4g.micro) | €14.26/mo (D2-4) | Free tier eligible |
-| Cleanup | hcloud CLI / scheduled workflow | AWS CLI / scheduled workflow | OpenStack CLI / manual workflow | OCI CLI / manual workflow |
-| Billing granularity | Hourly | Per-second | Hourly | Per-second |
+| | Hetzner | AWS | OVHcloud | OCI | GCP | Azure |
+|---|---------|-----|----------|-----|-----|-------|
+| Pricing | Simple, flat hourly/monthly | On-demand, region-dependent | Hourly consumption billing | Pay-as-you-go | Per-second billing | Per-minute billing |
+| Hidden fees | None | Egress, EBS IOPS (minimal for benchmarks) | None | Egress | Egress | Egress |
+| Cheapest instance | €2.99/mo (CX23) | $6.91/mo (t4g.micro) | €14.26/mo (D2-4) | Free tier eligible | $64.19/mo (e2-standard-2) | $61.17/mo (Standard_D2ps_v6) |
+| Cleanup | hcloud CLI / scheduled workflow | AWS CLI / scheduled workflow | OpenStack CLI / manual workflow | OCI CLI / manual workflow | gcloud CLI / scheduled workflow | az CLI / scheduled workflow |
+| Billing granularity | Hourly | Per-second | Hourly | Per-second | Per-second | Per-minute |

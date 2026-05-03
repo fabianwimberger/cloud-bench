@@ -16,6 +16,7 @@ if [ -z "$REGION" ]; then
         ovhcloud) REGION="DE1" ;;
         oci)      REGION="eu-frankfurt-1" ;;
         gcp)      REGION="europe-west3" ;;
+        azure)    REGION="northeurope" ;;
         *)        REGION="fsn1" ;;
     esac
 fi
@@ -121,6 +122,22 @@ validate_credentials() {
                 exit 1
             fi
             ;;
+        azure)
+            local azure_missing=()
+            [ -z "$AZURE_SUBSCRIPTION_ID" ] && azure_missing+=("AZURE_SUBSCRIPTION_ID")
+            [ -z "$AZURE_CLIENT_ID" ] && azure_missing+=("AZURE_CLIENT_ID")
+            [ -z "$AZURE_CLIENT_SECRET" ] && azure_missing+=("AZURE_CLIENT_SECRET")
+            [ -z "$AZURE_TENANT_ID" ] && azure_missing+=("AZURE_TENANT_ID")
+            if [ ${#azure_missing[@]} -ne 0 ]; then
+                echo "[ERROR] Azure credentials not set: ${azure_missing[*]}"
+                echo "Set them with:"
+                echo "  export AZURE_SUBSCRIPTION_ID=your-subscription-id"
+                echo "  export AZURE_CLIENT_ID=your-client-id"
+                echo "  export AZURE_CLIENT_SECRET=your-client-secret"
+                echo "  export AZURE_TENANT_ID=your-tenant-id"
+                exit 1
+            fi
+            ;;
         *)
             echo "[ERROR] Unsupported provider: $PROVIDER"
             exit 1
@@ -152,76 +169,35 @@ validate_credentials() {
     fi
 }
 
-# Build terraform var args based on provider
+# Pass every credential var on every run — the OCI and Google provider blocks
+# validate their config at plan time even when no resources of that kind exist.
 build_tf_vars() {
     local action="$1"
+    shift
     local common_vars=(
         -var="run_id=$RUN_ID"
         -var="cloud_provider=$PROVIDER"
         -var="default_region=$REGION"
         -var="ssh_public_key_path=$SSH_PUB_KEY_PATH"
         -var="allowed_ssh_ips=[\"$ALLOWED_SSH_IPS\"]"
+        -var="hcloud_token=${HCLOUD_TOKEN:-0000000000000000000000000000000000000000000000000000000000000000}"
+        -var="aws_access_key_id=${AWS_ACCESS_KEY_ID:-unused}"
+        -var="aws_secret_access_key=${AWS_SECRET_ACCESS_KEY:-unused}"
+        -var="ovh_openstack_username=${OVH_OPENSTACK_USERNAME:-unused}"
+        -var="ovh_openstack_password=${OVH_OPENSTACK_PASSWORD:-unused}"
+        -var="ovh_cloud_project_id=${OVH_CLOUD_PROJECT_ID:-unused}"
+        -var="oci_tenancy_ocid=${OCI_TENANCY_OCID:-unused}"
+        -var="oci_user_ocid=${OCI_USER_OCID:-unused}"
+        -var="oci_fingerprint=${OCI_FINGERPRINT:-unused}"
+        -var="oci_private_key=${OCI_PRIVATE_KEY:-unused}"
+        -var="oci_compartment_id=${OCI_COMPARTMENT_ID:-unused}"
+        -var="gcp_project_id=${GCP_PROJECT_ID:-unused}"
+        -var="gcp_credentials=${GCP_CREDENTIALS:-}"
+        -var="azure_subscription_id=${AZURE_SUBSCRIPTION_ID:-}"
+        -var="azure_client_id=${AZURE_CLIENT_ID:-}"
+        -var="azure_client_secret=${AZURE_CLIENT_SECRET:-}"
+        -var="azure_tenant_id=${AZURE_TENANT_ID:-}"
     )
-
-    case "$PROVIDER" in
-        hetzner)
-            common_vars+=(
-                -var="hcloud_token=$HCLOUD_TOKEN"
-                -var="aws_access_key_id=unused"
-                -var="aws_secret_access_key=unused"
-                -var="ovh_openstack_username=unused"
-                -var="ovh_openstack_password=unused"
-                -var="ovh_cloud_project_id=unused"
-            )
-            ;;
-        aws)
-            common_vars+=(
-                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
-                -var="aws_access_key_id=$AWS_ACCESS_KEY_ID"
-                -var="aws_secret_access_key=$AWS_SECRET_ACCESS_KEY"
-                -var="ovh_openstack_username=unused"
-                -var="ovh_openstack_password=unused"
-                -var="ovh_cloud_project_id=unused"
-            )
-            ;;
-        ovhcloud)
-            common_vars+=(
-                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
-                -var="aws_access_key_id=unused"
-                -var="aws_secret_access_key=unused"
-                -var="ovh_openstack_username=$OVH_OPENSTACK_USERNAME"
-                -var="ovh_openstack_password=$OVH_OPENSTACK_PASSWORD"
-                -var="ovh_cloud_project_id=$OVH_CLOUD_PROJECT_ID"
-            )
-            ;;
-        oci)
-            common_vars+=(
-                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
-                -var="aws_access_key_id=unused"
-                -var="aws_secret_access_key=unused"
-                -var="ovh_openstack_username=unused"
-                -var="ovh_openstack_password=unused"
-                -var="ovh_cloud_project_id=unused"
-                -var="oci_tenancy_ocid=$OCI_TENANCY_OCID"
-                -var="oci_user_ocid=$OCI_USER_OCID"
-                -var="oci_fingerprint=$OCI_FINGERPRINT"
-                -var="oci_private_key=$OCI_PRIVATE_KEY"
-                -var="oci_compartment_id=$OCI_COMPARTMENT_ID"
-            )
-            ;;
-        gcp)
-            common_vars+=(
-                -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000"
-                -var="aws_access_key_id=unused"
-                -var="aws_secret_access_key=unused"
-                -var="ovh_openstack_username=unused"
-                -var="ovh_openstack_password=unused"
-                -var="ovh_cloud_project_id=unused"
-                -var="gcp_project_id=$GCP_PROJECT_ID"
-                -var="gcp_credentials=$GCP_CREDENTIALS"
-            )
-            ;;
-    esac
 
     common_vars+=("$@")
     printf '%s\n' "${common_vars[@]}"
@@ -298,7 +274,7 @@ main() {
     pip install -q -r scripts/requirements.txt 2>/dev/null || true
 
     python3 scripts/process_results.py \
-        --input results/ \
+        --input ansible/results/ \
         --output frontend/public/data/ \
         --config config/instances.yaml \
         --region "$REGION" \

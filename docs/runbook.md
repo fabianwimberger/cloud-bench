@@ -67,6 +67,32 @@ oci compute instance list --compartment-id $OCI_COMPARTMENT_ID \
 oci compute instance terminate --instance-id <INSTANCE_OCID> --force
 ```
 
+**Manual fix (GCP)**:
+```bash
+export GCP_PROJECT_ID="your-project-id"
+
+# List cloud-bench instances
+gcloud compute instances list --filter="labels.project=cloud-bench" \
+  --format="table(name,zone,status)" --project="$GCP_PROJECT_ID"
+
+# Delete all cloud-bench instances (per zone)
+gcloud compute instances delete <INSTANCE_NAME> --zone=<ZONE> \
+  --project="$GCP_PROJECT_ID" --quiet
+```
+
+**Manual fix (Azure)**:
+```bash
+az login --service-principal \
+  -u "$AZURE_CLIENT_ID" -p "$AZURE_CLIENT_SECRET" \
+  --tenant "$AZURE_TENANT_ID"
+
+# List cloud-bench resource groups
+az group list --tag project=cloud-bench --query "[].name" --output tsv
+
+# Delete a specific resource group (contains all run resources)
+az group delete --name <RESOURCE_GROUP_NAME> --yes --no-wait
+```
+
 ## SSH Connection Failures
 
 **Symptom**: "Failed to connect to the host via ssh"
@@ -132,10 +158,12 @@ If you need to stop everything immediately:
 3. **AWS**: EC2 Console (eu-central-1) → terminate all `cloud-bench` tagged instances, delete security groups and key pairs
 4. **OVHcloud**: Horizon Dashboard (DE1) → delete all `cloud-bench-*` instances and key pairs
 5. **OCI**: OCI Console → Compute → Instances → terminate all `cloud-bench-*` instances in your compartment, delete VCNs and security lists
+6. **GCP**: GCP Console → Compute Engine → VM instances → delete all `cloud-bench-*` instances, delete firewall rules tagged `cloud-bench`
+7. **Azure**: Azure Portal → Resource groups → delete all resource groups named `cloud-bench-azure-*`
 
 ## Preventing Issues
 
 - Always wait for the cleanup job to finish (green checkmark)
 - Don't run multiple benchmarks simultaneously (concurrency group prevents this in CI)
-- Set billing alerts: €10 in Hetzner, $10 in AWS, €10 in OVHcloud, $10 in OCI
+- Set billing alerts: €10 in Hetzner, $10 in AWS, €10 in OVHcloud, $10 in OCI, $10 in GCP, $10 in Azure
 - Keep pricing updated — stale prices affect value calculations

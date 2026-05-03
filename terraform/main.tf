@@ -22,6 +22,14 @@ terraform {
       source  = "hashicorp/google"
       version = "~> 7.1"
     }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+    external = {
+      source  = "hashicorp/external"
+      version = "~> 2.3"
+    }
   }
 
   backend "local" {
@@ -54,17 +62,30 @@ provider "openstack" {
 }
 
 provider "oci" {
-  tenancy_ocid = var.oci_tenancy_ocid
-  user_ocid    = var.oci_user_ocid
-  fingerprint  = var.oci_fingerprint
-  private_key  = var.oci_private_key
+  tenancy_ocid = var.oci_tenancy_ocid != "" && var.oci_tenancy_ocid != "unused" ? var.oci_tenancy_ocid : "ocid1.tenancy.oc1..unused"
+  user_ocid    = var.oci_user_ocid != "" && var.oci_user_ocid != "unused" ? var.oci_user_ocid : "ocid1.user.oc1..unused"
+  fingerprint  = var.oci_fingerprint != "" && var.oci_fingerprint != "unused" ? var.oci_fingerprint : "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
+  private_key  = var.oci_private_key != "" && var.oci_private_key != "unused" ? var.oci_private_key : local._dummy_pem
   region       = var.cloud_provider == "oci" ? local.effective_region : "eu-frankfurt-1"
 }
 
 provider "google" {
-  project     = var.gcp_project_id
+  project     = var.gcp_project_id != "" && var.gcp_project_id != "unused" ? var.gcp_project_id : "dummy"
   region      = var.cloud_provider == "gcp" ? local.effective_region : "europe-west3"
-  credentials = var.gcp_credentials != "" ? var.gcp_credentials : null
+  credentials = var.gcp_credentials != "" ? var.gcp_credentials : local._dummy_gcp_credentials
+}
+
+provider "azurerm" {
+  features {}
+  subscription_id = var.azure_subscription_id != "" ? var.azure_subscription_id : "00000000-0000-0000-0000-000000000000"
+  client_id       = var.azure_client_id != "" ? var.azure_client_id : "00000000-0000-0000-0000-000000000000"
+  client_secret   = var.azure_client_secret != "" ? var.azure_client_secret : "unused"
+  tenant_id       = var.azure_tenant_id != "" ? var.azure_tenant_id : "00000000-0000-0000-0000-000000000000"
+  use_cli         = false
+  use_msi         = false
+  use_oidc        = false
+  # skip_provider_registration avoids an extra API call when not using Azure
+  skip_provider_registration = true
 }
 
 locals {
@@ -92,6 +113,7 @@ locals {
       ovhcloud = "DE1"
       oci      = "eu-frankfurt-1"
       gcp      = "europe-west3"
+      azure    = "northeurope"
     },
     var.cloud_provider,
     "fsn1"
@@ -180,6 +202,20 @@ module "gcp_instances" {
   labels          = merge(local.common_labels, { instance_type = replace(each.value.id, ".", "-") })
 }
 
+module "azure_instances" {
+  source   = "./modules/azure"
+  for_each = var.cloud_provider == "azure" ? { for inst in local.instances : inst.id => inst } : {}
+
+  instance_name   = "cloud-bench-azure-${replace(each.value.id, "_", "-")}-${var.run_id}"
+  instance_type   = each.value.id
+  instance_arch   = lookup(local.arch_map, each.value.arch, "x86_64")
+  region          = lookup(var.instance_regions, each.value.id, local.effective_region)
+  ssh_public_key  = local.ssh_public_key
+  allowed_ssh_ips = var.allowed_ssh_ips
+  disk_size_gb    = var.azure_disk_size
+  tags            = merge(local.common_labels, { instance_type = replace(each.value.id, "_", "-") })
+}
+
 locals {
   all_instances = merge(
     {
@@ -208,6 +244,12 @@ locals {
     },
     {
       for inst_id, mod in module.gcp_instances : inst_id => {
+        host = mod.server_ip
+        name = mod.server_name
+      }
+    },
+    {
+      for inst_id, mod in module.azure_instances : inst_id => {
         host = mod.server_ip
         name = mod.server_name
       }

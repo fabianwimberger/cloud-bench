@@ -20,8 +20,8 @@ variable "cloud_provider" {
   default     = "hetzner"
 
   validation {
-    condition     = can(regex("^(hetzner|aws|ovhcloud|oci|gcp)$", var.cloud_provider))
-    error_message = "Provider must be 'hetzner', 'aws', 'ovhcloud', 'oci', or 'gcp'."
+    condition     = can(regex("^(hetzner|aws|ovhcloud|oci|gcp|azure)$", var.cloud_provider))
+    error_message = "Provider must be 'hetzner', 'aws', 'ovhcloud', 'oci', 'gcp', or 'azure'."
   }
 }
 
@@ -175,4 +175,38 @@ variable "gcp_disk_size" {
   description = "Boot disk size in GB for GCP instances"
   type        = number
   default     = 20
+}
+
+variable "azure_subscription_id" {
+  description = "Azure subscription ID"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "azure_client_id" {
+  description = "Azure service principal client ID"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "azure_client_secret" {
+  description = "Azure service principal client secret"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "azure_tenant_id" {
+  description = "Azure tenant ID"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "azure_disk_size" {
+  description = "OS disk size in GB for Azure instances"
+  type        = number
+  default     = 30
 }

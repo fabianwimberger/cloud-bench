@@ -55,6 +55,7 @@ jobs:
               ('ovhcloud', 'EUR'),
               ('oci', 'USD'),
               ('gcp', 'USD'),
+              ('azure', 'USD'),
           ]
 
           summary = "## Cost Estimate\n\n"
@@ -113,6 +114,9 @@ jobs:
             instances: all
           - provider: gcp
             region: europe-west3
+            instances: all
+          - provider: azure
+            region: northeurope
             instances: all
     steps:
       - uses: actions/checkout@v6
@@ -197,6 +201,10 @@ jobs:
           TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
           TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID || 'unused' }}
           TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS || '' }}
+          TF_VAR_azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID || '' }}
+          TF_VAR_azure_client_id: ${{ secrets.AZURE_CLIENT_ID || '' }}
+          TF_VAR_azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
+          TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
         run: |
           terraform apply -auto-approve \
             -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
@@ -277,6 +285,10 @@ jobs:
           TF_VAR_oci_compartment_id: ${{ secrets.OCI_COMPARTMENT_ID || 'unused' }}
           TF_VAR_gcp_project_id: ${{ secrets.GCP_PROJECT_ID || 'unused' }}
           TF_VAR_gcp_credentials: ${{ secrets.GCP_CREDENTIALS || '' }}
+          TF_VAR_azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID || '' }}
+          TF_VAR_azure_client_id: ${{ secrets.AZURE_CLIENT_ID || '' }}
+          TF_VAR_azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
+          TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
         run: |
           terraform destroy -auto-approve \
             -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
@@ -371,6 +383,18 @@ jobs:
             else
               echo "[OK] GCP resources cleaned up successfully"
             fi
+
+          elif [ "${{ matrix.provider }}" = "azure" ]; then
+            cd terraform
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "azurerm_linux_virtual_machine" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: Azure VMs still in Terraform state after cleanup!"
+              terraform state list | grep "azurerm_linux_virtual_machine"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] Azure resources cleaned up successfully"
+            fi
           fi
 
   # Serialize access to benchmark-data branch to prevent race conditions
@@ -420,10 +444,10 @@ jobs:
           fi
 
           # Region mapping (must match matrix above)
-          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 [gcp]=europe-west3 )
+          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 [gcp]=europe-west3 [azure]=northeurope )
 
           # Process each provider's results
-          for provider in hetzner aws ovhcloud oci gcp; do
+          for provider in hetzner aws ovhcloud oci gcp azure; do
             PROVIDER_DIR="artifacts/results-$provider"
             if [ -d "$PROVIDER_DIR" ]; then
               REGION="${REGIONS[$provider]}"

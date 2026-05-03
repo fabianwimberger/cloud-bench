@@ -702,5 +702,278 @@ class TestMainGCP(unittest.TestCase):
             os.unlink(temp_path)
 
 
+class TestFetchAzurePricing(unittest.TestCase):
+    def setUp(self):
+        self.config = {
+            "providers": {
+                "azure": {
+                    "instances": [
+                        {
+                            "id": "Standard_D2as_v7",
+                            "name": "D2as v7",
+                            "vcpu": 2,
+                            "ram_gb": 8,
+                            "pricing": {"hourly": 0.05, "monthly": 36.0},
+                        },
+                        {
+                            "id": "Standard_D2ps_v6",
+                            "name": "D2ps v6",
+                            "vcpu": 2,
+                            "ram_gb": 8,
+                            "pricing": {"hourly": 0.04, "monthly": 28.8},
+                        },
+                    ]
+                }
+            }
+        }
+
+    @staticmethod
+    def _mock_response(items):
+        resp = MagicMock()
+        resp.json.return_value = {"Items": items}
+        resp.raise_for_status.return_value = None
+        return resp
+
+    def test_fetch_azure_pricing_no_instances(self):
+        config = {"providers": {"azure": {"instances": []}}}
+        self.assertEqual(up.fetch_azure_pricing(config), 0)
+
+    def test_fetch_azure_pricing_no_azure_config(self):
+        self.assertEqual(up.fetch_azure_pricing({"providers": {}}), 0)
+
+    @patch("update_pricing.requests.get")
+    def test_fetch_azure_pricing_success(self, mock_get):
+        mock_get.side_effect = [
+            self._mock_response(
+                [
+                    {
+                        "armSkuName": "Standard_D2as_v7",
+                        "productName": "Virtual Machines DASv7 Series",
+                        "skuName": "D2as v7",
+                        "type": "Consumption",
+                        "retailPrice": 0.096,
+                    }
+                ]
+            ),
+            self._mock_response(
+                [
+                    {
+                        "armSkuName": "Standard_D2ps_v6",
+                        "productName": "Virtual Machines DPSv6 Series",
+                        "skuName": "D2ps v6",
+                        "type": "Consumption",
+                        "retailPrice": 0.0688,
+                    }
+                ]
+            ),
+        ]
+
+        result = up.fetch_azure_pricing(self.config, azure_region="northeurope")
+
+        self.assertEqual(result, 2)
+        self.assertEqual(
+            self.config["providers"]["azure"]["instances"][0]["pricing"]["hourly"],
+            0.096,
+        )
+        self.assertEqual(
+            self.config["providers"]["azure"]["instances"][0]["pricing"]["monthly"],
+            69.12,
+        )
+        self.assertEqual(
+            self.config["providers"]["azure"]["instances"][1]["pricing"]["hourly"],
+            0.0688,
+        )
+
+    @patch("update_pricing.requests.get")
+    def test_fetch_azure_pricing_unchanged(self, mock_get):
+        mock_get.return_value = self._mock_response(
+            [
+                {
+                    "armSkuName": "Standard_D2as_v7",
+                    "productName": "Virtual Machines DASv7 Series",
+                    "skuName": "D2as v7",
+                    "type": "Consumption",
+                    "retailPrice": 0.05,
+                }
+            ]
+        )
+
+        config = {
+            "providers": {
+                "azure": {
+                    "instances": [
+                        {
+                            "id": "Standard_D2as_v7",
+                            "vcpu": 2,
+                            "ram_gb": 8,
+                            "pricing": {"hourly": 0.05, "monthly": 36.0},
+                        }
+                    ]
+                }
+            }
+        }
+        self.assertEqual(up.fetch_azure_pricing(config), 0)
+
+    @patch("update_pricing.requests.get")
+    def test_fetch_azure_pricing_excluded_terms(self, mock_get):
+        mock_get.return_value = self._mock_response(
+            [
+                {
+                    "armSkuName": "Standard_D2as_v7",
+                    "productName": "Virtual Machines DASv7 Series Windows",
+                    "skuName": "D2as v7",
+                    "type": "Consumption",
+                    "retailPrice": 0.20,
+                },
+                {
+                    "armSkuName": "Standard_D2as_v7",
+                    "productName": "Virtual Machines DASv7 Series",
+                    "skuName": "D2as v7 Spot",
+                    "type": "Consumption",
+                    "retailPrice": 0.01,
+                },
+                {
+                    "armSkuName": "Standard_D2as_v7",
+                    "productName": "Virtual Machines DASv7 Series",
+                    "skuName": "D2as v7 Low Priority",
+                    "type": "Consumption",
+                    "retailPrice": 0.02,
+                },
+                {
+                    "armSkuName": "Standard_D2as_v7",
+                    "productName": "Cloud Services DASv7",
+                    "skuName": "D2as v7",
+                    "type": "Consumption",
+                    "retailPrice": 0.03,
+                },
+                {
+                    "armSkuName": "Standard_D2as_v7",
+                    "productName": "Virtual Machines DASv7 Series",
+                    "skuName": "D2as v7",
+                    "type": "Consumption",
+                    "retailPrice": 0.10,
+                },
+            ]
+        )
+
+        config = {
+            "providers": {
+                "azure": {
+                    "instances": [
+                        {
+                            "id": "Standard_D2as_v7",
+                            "vcpu": 2,
+                            "ram_gb": 8,
+                            "pricing": {"hourly": 0.0, "monthly": 0.0},
+                        }
+                    ]
+                }
+            }
+        }
+        result = up.fetch_azure_pricing(config)
+        self.assertEqual(result, 1)
+        self.assertEqual(
+            config["providers"]["azure"]["instances"][0]["pricing"]["hourly"], 0.10
+        )
+
+    @patch("update_pricing.requests.get")
+    def test_fetch_azure_pricing_api_error(self, mock_get):
+        import requests
+
+        mock_get.side_effect = requests.RequestException("API down")
+        self.assertEqual(up.fetch_azure_pricing(self.config), 0)
+
+    @patch("update_pricing.requests.get")
+    def test_fetch_azure_pricing_no_linux_items(self, mock_get):
+        mock_get.return_value = self._mock_response(
+            [
+                {
+                    "armSkuName": "Standard_D2as_v7",
+                    "productName": "Virtual Machines DASv7 Series Windows",
+                    "skuName": "D2as v7",
+                    "type": "Consumption",
+                    "retailPrice": 0.20,
+                }
+            ]
+        )
+        self.assertEqual(up.fetch_azure_pricing(self.config), 0)
+
+    @patch("update_pricing.requests.get")
+    def test_fetch_azure_pricing_zero_price(self, mock_get):
+        mock_get.return_value = self._mock_response(
+            [
+                {
+                    "armSkuName": "Standard_D2as_v7",
+                    "productName": "Virtual Machines DASv7 Series",
+                    "skuName": "D2as v7",
+                    "type": "Consumption",
+                    "retailPrice": 0,
+                }
+            ]
+        )
+        self.assertEqual(up.fetch_azure_pricing(self.config), 0)
+
+
+class TestUpdateConfigAzure(unittest.TestCase):
+    @patch("update_pricing.fetch_azure_pricing", return_value=1)
+    @patch("update_pricing.fetch_exchange_rates", return_value={})
+    def test_update_config_azure_provider(self, mock_rates, mock_fetch_azure):
+        config = {
+            "providers": {
+                "azure": {
+                    "instances": [
+                        {
+                            "id": "Standard_D2as_v7",
+                            "vcpu": 2,
+                            "ram_gb": 8,
+                            "pricing": {"hourly": 0.05, "monthly": 36.0},
+                        }
+                    ]
+                }
+            }
+        }
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            yaml.dump(config, f)
+            temp_path = f.name
+
+        try:
+            result = up.update_config(temp_path, [], dry_run=False, provider="azure")
+            mock_fetch_azure.assert_called_once()
+            self.assertIn("_metadata", result)
+            self.assertIn("Azure Retail Prices API", result["_metadata"]["source"])
+        finally:
+            os.unlink(temp_path)
+
+
+class TestMainAzure(unittest.TestCase):
+    @patch("update_pricing.fetch_azure_pricing", return_value=0)
+    @patch("update_pricing.fetch_server_types", return_value=[])
+    @patch("update_pricing.fetch_exchange_rates", return_value={})
+    def test_main_azure_provider(self, mock_rates, mock_server, mock_azure):
+        config = {"providers": {"azure": {"instances": []}}}
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            yaml.dump(config, f)
+            temp_path = f.name
+
+        try:
+            with patch(
+                "sys.argv",
+                [
+                    "update_pricing",
+                    "--provider",
+                    "azure",
+                    "--azure-region",
+                    "westeurope",
+                    "--config",
+                    temp_path,
+                ],
+            ):
+                up.main()
+            mock_azure.assert_called_once()
+            self.assertEqual(mock_azure.call_args.args[1], "westeurope")
+        finally:
+            os.unlink(temp_path)
+
+
 if __name__ == "__main__":
     unittest.main()
