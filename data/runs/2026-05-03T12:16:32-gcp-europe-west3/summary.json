@@ -1,0 +1,204 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-03T12:16:31.573272",
+    "run_count": 5,
+    "currency": "USD",
+    "provider": "gcp",
+    "region": "europe-west3",
+    "exchange_rates": {
+      "eur_to_usd": 1.1702,
+      "usd_to_eur": 0.8546,
+      "last_updated": "2026-04-30",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "T2D-STANDARD-2",
+      "C4A-STANDARD-2",
+      "N2D-STANDARD-2",
+      "N2-STANDARD-2",
+      "E2-STANDARD-2"
+    ],
+    "instances": [
+      {
+        "id": "T2D-STANDARD-2",
+        "name": "T2D-STANDARD-2 (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 99.9,
+          "overall": 100.0
+        },
+        "metrics": {
+          "cpu_single_events": 1438.45,
+          "cpu_multi_events": 2878.54,
+          "memory_mib_per_sec": 21855.67,
+          "disk_iops": 3166.008695
+        },
+        "pricing": {
+          "hourly": 0.10885,
+          "monthly": 78.37
+        },
+        "value": 1.28,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 20,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "C4A-STANDARD-2",
+        "name": "C4A-STANDARD-2 (ARM64)",
+        "scores": {
+          "single_core": 92.8,
+          "multi_core": 92.8,
+          "memory": 75.0,
+          "disk": 99.8,
+          "overall": 88.3
+        },
+        "metrics": {
+          "cpu_single_events": 1335.25,
+          "cpu_multi_events": 2669.96,
+          "memory_mib_per_sec": 16382.08,
+          "disk_iops": 3161.411224
+        },
+        "pricing": {
+          "hourly": 0.10597,
+          "monthly": 76.3
+        },
+        "value": 1.22,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 20,
+          "arch": "ARM64"
+        }
+      },
+      {
+        "id": "N2D-STANDARD-2",
+        "name": "N2D-STANDARD-2 (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 55.1,
+          "memory": 92.1,
+          "disk": 99.9,
+          "overall": 88.2
+        },
+        "metrics": {
+          "cpu_single_events": 1438.64,
+          "cpu_multi_events": 1584.69,
+          "memory_mib_per_sec": 20124.010000000002,
+          "disk_iops": 3166.458448
+        },
+        "pricing": {
+          "hourly": 0.10885,
+          "monthly": 78.37
+        },
+        "value": 0.99,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 20,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "N2-STANDARD-2",
+        "name": "N2-STANDARD-2 (X86)",
+        "scores": {
+          "single_core": 31.2,
+          "multi_core": 24.5,
+          "memory": 84.2,
+          "disk": 99.9,
+          "overall": 65.6
+        },
+        "metrics": {
+          "cpu_single_events": 449.55,
+          "cpu_multi_events": 704.8,
+          "memory_mib_per_sec": 18402.06,
+          "disk_iops": 3165.458998
+        },
+        "pricing": {
+          "hourly": 0.1292,
+          "monthly": 93.02
+        },
+        "value": 0.3,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 20,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "E2-STANDARD-2",
+        "name": "E2-STANDARD-2 (X86)",
+        "scores": {
+          "single_core": 23.5,
+          "multi_core": 17.3,
+          "memory": 59.3,
+          "disk": 100.0,
+          "overall": 53.9
+        },
+        "metrics": {
+          "cpu_single_events": 338.17,
+          "cpu_multi_events": 498.53,
+          "memory_mib_per_sec": 12958.89,
+          "disk_iops": 3169.256909
+        },
+        "pricing": {
+          "hourly": 0.08915,
+          "monthly": 64.19
+        },
+        "value": 0.32,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 20,
+          "arch": "X86"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0,
+        92.8,
+        100.0,
+        31.2,
+        23.5
+      ],
+      "multi_core": [
+        100.0,
+        92.8,
+        55.1,
+        24.5,
+        17.3
+      ],
+      "memory": [
+        100.0,
+        75.0,
+        92.1,
+        84.2,
+        59.3
+      ],
+      "disk": [
+        99.9,
+        99.8,
+        99.9,
+        99.9,
+        100.0
+      ],
+      "value": [
+        1.28,
+        1.22,
+        0.99,
+        0.3,
+        0.32
+      ]
+    }
+  }
+}
