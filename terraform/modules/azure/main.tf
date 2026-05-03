@@ -107,9 +107,14 @@ resource "azurerm_linux_virtual_machine" "benchmark" {
     azurerm_network_interface.benchmark.id,
   ]
 
-  admin_ssh_key {
-    username   = "ubuntu"
-    public_key = var.ssh_public_key
+  # Conditional so `terraform destroy` works when the cleanup job passes an
+  # empty key (Azure validates public_key as non-empty even on destroy).
+  dynamic "admin_ssh_key" {
+    for_each = trimspace(var.ssh_public_key) == "" ? [] : [1]
+    content {
+      username   = "ubuntu"
+      public_key = var.ssh_public_key
+    }
   }
 
   os_disk {
