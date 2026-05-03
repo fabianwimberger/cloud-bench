@@ -306,7 +306,7 @@ providers:
       disk_gb: 30
       pricing:
         hourly: 0.101
-        monthly: 73.73
+        monthly: 72.72
     - id: Standard_D2ps_v6
       name: D2ps v6
       arch: ARM64
@@ -315,13 +315,13 @@ providers:
       disk_gb: 30
       pricing:
         hourly: 0.0784
-        monthly: 57.23
+        monthly: 56.45
 exchange_rates:
   eur_to_usd: 1.1702
   usd_to_eur: 0.8546
   last_updated: '2026-04-30'
   source: Frankfurter API (ECB data)
 _metadata:
-  last_pricing_update: '2026-05-02T23:15:37.026915'
+  last_pricing_update: '2026-05-03T11:19:40.025710'
   source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing
     API / GCP Cloud Billing API / Azure Retail Prices API
