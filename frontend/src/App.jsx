@@ -5,7 +5,6 @@ import InstanceFilter from './components/InstanceFilter'
 import InstanceComparison from './components/InstanceComparison'
 import ComparisonTable from './components/ComparisonTable'
 import ComparisonCharts from './components/ComparisonCharts'
-import InstanceBreakdown from './components/InstanceBreakdown'
 import InstanceHistory from './components/InstanceHistory'
 import Footer from './components/Footer'
 import './App.css'
@@ -309,7 +308,6 @@ function App() {
         />
 
         <ComparisonCharts charts={filteredCharts} currency={currencyProps} />
-        <InstanceBreakdown ranking={filteredRanking} metadata={data?.metadata} currency={currencyProps} onSelectHistory={handleSelectHistory} />
         <Footer metadata={data?.metadata} />
       </div>
 

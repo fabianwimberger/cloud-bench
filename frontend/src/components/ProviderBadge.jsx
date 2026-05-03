@@ -29,10 +29,26 @@ const providerStyles = {
     label: 'GCP',
     fullName: 'Google Cloud Platform',
   },
+  azure: {
+    background: 'rgba(0, 120, 212, 0.2)',
+    color: '#60a5fa',
+    label: 'Azure',
+    fullName: 'Microsoft Azure',
+  },
+}
+
+const fallbackStyle = {
+  background: 'rgba(148, 163, 184, 0.2)',
+  color: '#94a3b8',
 }
 
 function ProviderBadge({ provider }) {
-  const style = providerStyles[provider] || providerStyles.hetzner
+  const known = providerStyles[provider]
+  const style = known || {
+    ...fallbackStyle,
+    label: provider || 'Unknown',
+    fullName: provider || 'Unknown provider',
+  }
 
   return (
     <span
