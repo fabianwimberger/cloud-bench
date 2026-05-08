@@ -2,6 +2,24 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-05-08T18:30:24-gcp-europe-west3",
+      "timestamp": "2026-05-08T18:30:24",
+      "provider": "gcp",
+      "region": "europe-west3",
+      "instance_count": 5,
+      "instances": [
+        "T2D-STANDARD-2",
+        "C4A-STANDARD-2",
+        "N2D-STANDARD-2",
+        "N2-STANDARD-2",
+        "E2-STANDARD-2"
+      ],
+      "files": {
+        "summary": "data/runs/2026-05-08T18:30:24-gcp-europe-west3/summary.json",
+        "detail": "data/runs/2026-05-08T18:30:24-gcp-europe-west3/detail.json"
+      }
+    },
+    {
       "id": "2026-05-08T18:20:19-ovhcloud-DE1",
       "timestamp": "2026-05-08T18:20:19",
       "provider": "ovhcloud",
@@ -1080,6 +1098,31 @@
     }
   ],
   "instance_index": {
+    "T2D-STANDARD-2": [
+      "2026-05-08T18:30:24-gcp-europe-west3",
+      "2026-05-03T12:16:32-gcp-europe-west3",
+      "2026-05-02T09:12:04-gcp-europe-west3"
+    ],
+    "C4A-STANDARD-2": [
+      "2026-05-08T18:30:24-gcp-europe-west3",
+      "2026-05-03T12:16:32-gcp-europe-west3",
+      "2026-05-02T09:12:04-gcp-europe-west3"
+    ],
+    "N2D-STANDARD-2": [
+      "2026-05-08T18:30:24-gcp-europe-west3",
+      "2026-05-03T12:16:32-gcp-europe-west3",
+      "2026-05-02T09:12:04-gcp-europe-west3"
+    ],
+    "N2-STANDARD-2": [
+      "2026-05-08T18:30:24-gcp-europe-west3",
+      "2026-05-03T12:16:32-gcp-europe-west3",
+      "2026-05-02T09:12:04-gcp-europe-west3"
+    ],
+    "E2-STANDARD-2": [
+      "2026-05-08T18:30:24-gcp-europe-west3",
+      "2026-05-03T12:16:32-gcp-europe-west3",
+      "2026-05-02T09:12:04-gcp-europe-west3"
+    ],
     "C3-8": [
       "2026-05-08T18:20:19-ovhcloud-DE1",
       "2026-05-01T22:20:58-ovhcloud-DE1",
@@ -1424,26 +1467,6 @@
       "2026-03-15T12:55:25-hetzner-fsn1",
       "2026-03-15T11:36:46-hetzner-fsn1",
       "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "T2D-STANDARD-2": [
-      "2026-05-03T12:16:32-gcp-europe-west3",
-      "2026-05-02T09:12:04-gcp-europe-west3"
-    ],
-    "C4A-STANDARD-2": [
-      "2026-05-03T12:16:32-gcp-europe-west3",
-      "2026-05-02T09:12:04-gcp-europe-west3"
-    ],
-    "N2D-STANDARD-2": [
-      "2026-05-03T12:16:32-gcp-europe-west3",
-      "2026-05-02T09:12:04-gcp-europe-west3"
-    ],
-    "N2-STANDARD-2": [
-      "2026-05-03T12:16:32-gcp-europe-west3",
-      "2026-05-02T09:12:04-gcp-europe-west3"
-    ],
-    "E2-STANDARD-2": [
-      "2026-05-03T12:16:32-gcp-europe-west3",
-      "2026-05-02T09:12:04-gcp-europe-west3"
     ],
     "STANDARD_D2AS_V7": [
       "2026-05-03T12:04:46-azure-northeurope",
