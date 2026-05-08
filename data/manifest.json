@@ -2,6 +2,24 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-05-08T18:20:19-ovhcloud-DE1",
+      "timestamp": "2026-05-08T18:20:19",
+      "provider": "ovhcloud",
+      "region": "DE1",
+      "instance_count": 5,
+      "instances": [
+        "C3-8",
+        "C3-4",
+        "B3-8",
+        "R3-16",
+        "D2-4"
+      ],
+      "files": {
+        "summary": "data/runs/2026-05-08T18:20:19-ovhcloud-DE1/summary.json",
+        "detail": "data/runs/2026-05-08T18:20:19-ovhcloud-DE1/detail.json"
+      }
+    },
+    {
       "id": "2026-05-08T18:09:44-aws-eu-central-1",
       "timestamp": "2026-05-08T18:09:44",
       "provider": "aws",
@@ -1062,6 +1080,75 @@
     }
   ],
   "instance_index": {
+    "C3-8": [
+      "2026-05-08T18:20:19-ovhcloud-DE1",
+      "2026-05-01T22:20:58-ovhcloud-DE1",
+      "2026-04-03T15:07:10-ovhcloud-DE1",
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1",
+      "2026-03-21T18:56:30-ovhcloud-DE1",
+      "2026-03-21T18:30:48-ovhcloud-DE1",
+      "2026-03-21T16:47:43-ovhcloud-DE1",
+      "2026-03-21T15:54:38-ovhcloud-DE1",
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "C3-4": [
+      "2026-05-08T18:20:19-ovhcloud-DE1",
+      "2026-05-01T22:20:58-ovhcloud-DE1",
+      "2026-04-03T15:07:10-ovhcloud-DE1",
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1",
+      "2026-03-21T18:56:30-ovhcloud-DE1",
+      "2026-03-21T18:30:48-ovhcloud-DE1",
+      "2026-03-21T16:47:43-ovhcloud-DE1",
+      "2026-03-21T15:54:38-ovhcloud-DE1",
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "B3-8": [
+      "2026-05-08T18:20:19-ovhcloud-DE1",
+      "2026-05-01T22:20:58-ovhcloud-DE1",
+      "2026-04-03T15:07:10-ovhcloud-DE1",
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1",
+      "2026-03-21T18:56:30-ovhcloud-DE1",
+      "2026-03-21T18:30:48-ovhcloud-DE1",
+      "2026-03-21T16:47:43-ovhcloud-DE1",
+      "2026-03-21T15:54:38-ovhcloud-DE1",
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "R3-16": [
+      "2026-05-08T18:20:19-ovhcloud-DE1",
+      "2026-05-01T22:20:58-ovhcloud-DE1",
+      "2026-04-03T15:07:10-ovhcloud-DE1",
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1",
+      "2026-03-21T18:56:30-ovhcloud-DE1",
+      "2026-03-21T18:30:48-ovhcloud-DE1",
+      "2026-03-21T16:47:43-ovhcloud-DE1",
+      "2026-03-21T15:54:38-ovhcloud-DE1",
+      "2026-03-21T15:07:10-ovhcloud-DE1",
+      "2026-03-21T14:47:31-ovhcloud-DE1"
+    ],
+    "D2-4": [
+      "2026-05-08T18:20:19-ovhcloud-DE1",
+      "2026-05-01T22:20:58-ovhcloud-DE1",
+      "2026-04-03T15:07:10-ovhcloud-DE1",
+      "2026-03-28T16:11:23-ovhcloud-DE1",
+      "2026-03-28T14:05:32-ovhcloud-DE1",
+      "2026-03-25T19:46:30-ovhcloud-DE1",
+      "2026-03-22T10:38:52-ovhcloud-DE1"
+    ],
     "C7I-FLEX.LARGE": [
       "2026-05-08T18:09:44-aws-eu-central-1",
       "2026-05-01T22:10:37-aws-eu-central-1",
@@ -1365,70 +1452,6 @@
     "STANDARD_D2PS_V6": [
       "2026-05-03T12:04:46-azure-northeurope",
       "2026-05-03T11:28:10-azure-northeurope"
-    ],
-    "C3-8": [
-      "2026-05-01T22:20:58-ovhcloud-DE1",
-      "2026-04-03T15:07:10-ovhcloud-DE1",
-      "2026-03-28T16:11:23-ovhcloud-DE1",
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1",
-      "2026-03-21T18:56:30-ovhcloud-DE1",
-      "2026-03-21T18:30:48-ovhcloud-DE1",
-      "2026-03-21T16:47:43-ovhcloud-DE1",
-      "2026-03-21T15:54:38-ovhcloud-DE1",
-      "2026-03-21T15:07:10-ovhcloud-DE1",
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "B3-8": [
-      "2026-05-01T22:20:58-ovhcloud-DE1",
-      "2026-04-03T15:07:10-ovhcloud-DE1",
-      "2026-03-28T16:11:23-ovhcloud-DE1",
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1",
-      "2026-03-21T18:56:30-ovhcloud-DE1",
-      "2026-03-21T18:30:48-ovhcloud-DE1",
-      "2026-03-21T16:47:43-ovhcloud-DE1",
-      "2026-03-21T15:54:38-ovhcloud-DE1",
-      "2026-03-21T15:07:10-ovhcloud-DE1",
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "R3-16": [
-      "2026-05-01T22:20:58-ovhcloud-DE1",
-      "2026-04-03T15:07:10-ovhcloud-DE1",
-      "2026-03-28T16:11:23-ovhcloud-DE1",
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1",
-      "2026-03-21T18:56:30-ovhcloud-DE1",
-      "2026-03-21T18:30:48-ovhcloud-DE1",
-      "2026-03-21T16:47:43-ovhcloud-DE1",
-      "2026-03-21T15:54:38-ovhcloud-DE1",
-      "2026-03-21T15:07:10-ovhcloud-DE1",
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "C3-4": [
-      "2026-05-01T22:20:58-ovhcloud-DE1",
-      "2026-04-03T15:07:10-ovhcloud-DE1",
-      "2026-03-28T16:11:23-ovhcloud-DE1",
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1",
-      "2026-03-21T18:56:30-ovhcloud-DE1",
-      "2026-03-21T18:30:48-ovhcloud-DE1",
-      "2026-03-21T16:47:43-ovhcloud-DE1",
-      "2026-03-21T15:54:38-ovhcloud-DE1",
-      "2026-03-21T15:07:10-ovhcloud-DE1",
-      "2026-03-21T14:47:31-ovhcloud-DE1"
-    ],
-    "D2-4": [
-      "2026-05-01T22:20:58-ovhcloud-DE1",
-      "2026-04-03T15:07:10-ovhcloud-DE1",
-      "2026-03-28T16:11:23-ovhcloud-DE1",
-      "2026-03-28T14:05:32-ovhcloud-DE1",
-      "2026-03-25T19:46:30-ovhcloud-DE1",
-      "2026-03-22T10:38:52-ovhcloud-DE1"
     ],
     "E5-FLEX-1-4": [
       "2026-04-03T15:18:19-oci-eu-frankfurt-1",

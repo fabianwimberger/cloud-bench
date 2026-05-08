@@ -1,0 +1,204 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-08T18:20:18.800381",
+    "run_count": 5,
+    "currency": "EUR",
+    "provider": "ovhcloud",
+    "region": "DE1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1761,
+      "usd_to_eur": 0.8503,
+      "last_updated": "2026-05-08",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "C3-8",
+      "C3-4",
+      "B3-8",
+      "R3-16",
+      "D2-4"
+    ],
+    "instances": [
+      {
+        "id": "C3-8",
+        "name": "C3-8 (X86)",
+        "scores": {
+          "single_core": 99.8,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 100.0,
+          "overall": 100.0
+        },
+        "metrics": {
+          "cpu_single_events": 1438.12,
+          "cpu_multi_events": 5746.68,
+          "memory_mib_per_sec": 23608.87,
+          "disk_iops": 41243.549402
+        },
+        "pricing": {
+          "hourly": 0.0913,
+          "monthly": 65.74
+        },
+        "value": 1.52,
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 8,
+          "disk_gb": 100,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "C3-4",
+        "name": "C3-4 (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 50.0,
+          "memory": 62.1,
+          "disk": 49.2,
+          "overall": 64.0
+        },
+        "metrics": {
+          "cpu_single_events": 1440.93,
+          "cpu_multi_events": 2874.52,
+          "memory_mib_per_sec": 14660.029999999999,
+          "disk_iops": 20308.645801
+        },
+        "pricing": {
+          "hourly": 0.0457,
+          "monthly": 32.9
+        },
+        "value": 2.28,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 50,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "B3-8",
+        "name": "B3-8 (X86)",
+        "scores": {
+          "single_core": 99.3,
+          "multi_core": 49.7,
+          "memory": 60.1,
+          "disk": 49.2,
+          "overall": 63.1
+        },
+        "metrics": {
+          "cpu_single_events": 1431.15,
+          "cpu_multi_events": 2854.51,
+          "memory_mib_per_sec": 14195.32,
+          "disk_iops": 20305.499613
+        },
+        "pricing": {
+          "hourly": 0.0512,
+          "monthly": 36.86
+        },
+        "value": 2.02,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 50,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "R3-16",
+        "name": "R3-16 (X86)",
+        "scores": {
+          "single_core": 99.1,
+          "multi_core": 49.7,
+          "memory": 14.4,
+          "disk": 49.2,
+          "overall": 47.1
+        },
+        "metrics": {
+          "cpu_single_events": 1428.37,
+          "cpu_multi_events": 2854.45,
+          "memory_mib_per_sec": 3408.7299999999996,
+          "disk_iops": 20305.499613
+        },
+        "pricing": {
+          "hourly": 0.0663,
+          "monthly": 47.74
+        },
+        "value": 1.56,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 16,
+          "disk_gb": 50,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "D2-4",
+        "name": "D2-4 (X86)",
+        "scores": {
+          "single_core": 25.4,
+          "multi_core": 12.6,
+          "memory": 63.8,
+          "disk": 29.4,
+          "overall": 37.3
+        },
+        "metrics": {
+          "cpu_single_events": 365.78,
+          "cpu_multi_events": 724.23,
+          "memory_mib_per_sec": 15064.900000000001,
+          "disk_iops": 12109.386548
+        },
+        "pricing": {
+          "hourly": 0.0206,
+          "monthly": 14.83
+        },
+        "value": 1.28,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 50,
+          "arch": "X86"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        99.8,
+        100.0,
+        99.3,
+        99.1,
+        25.4
+      ],
+      "multi_core": [
+        100.0,
+        50.0,
+        49.7,
+        49.7,
+        12.6
+      ],
+      "memory": [
+        100.0,
+        62.1,
+        60.1,
+        14.4,
+        63.8
+      ],
+      "disk": [
+        100.0,
+        49.2,
+        49.2,
+        49.2,
+        29.4
+      ],
+      "value": [
+        1.52,
+        2.28,
+        2.02,
+        1.56,
+        1.28
+      ]
+    }
+  }
+}
