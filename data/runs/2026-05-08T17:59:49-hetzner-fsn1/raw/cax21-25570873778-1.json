@@ -1,0 +1,44 @@
+{
+  "run_id": "25570873778-1",
+  "hostname": "cloud-bench-hetzner-cax21-25570873778-1",
+  "timestamp": "2026-05-08T17:59:20Z",
+  "benchmark_runs": 5,
+  "aggregation": "median",
+  "system": {
+    "schema_version": "2.0",
+    "provider": "hetzner",
+    "instance_type": "cax21",
+    "timestamp": "2026-05-08T17:55:53Z",
+    "provider_attributes": {
+      "arch": "aarch64",
+      "os": "Ubuntu 24.04",
+      "kernel": "6.8.0-107-generic",
+      "vcpu": 4,
+      "memory_mb": 7729,
+      "hostname": "cloud-bench-hetzner-cax21-25570873778-1"
+    },
+    "benchmark_config": {
+      "runs": 5,
+      "aggregation": "median"
+    }
+  },
+  "cpu": {
+    "test": "sysbench-cpu",
+    "runs": 5,
+    "single_thread_events": 1272.32,
+    "multi_thread_events": 5104.02,
+    "threads": 4
+  },
+  "memory": {
+    "test": "sysbench-memory",
+    "runs": 5,
+    "read_mib_per_sec": 12875.46,
+    "write_mib_per_sec": 5849.65,
+    "total_throughput_mib": 18725.11
+  },
+  "disk": {
+    "test": "fio-randread",
+    "runs": 5,
+    "read_iops": 54704.507513
+  }
+}
