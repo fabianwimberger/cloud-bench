@@ -1,0 +1,102 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-08T18:45:10.185508",
+    "run_count": 2,
+    "currency": "USD",
+    "provider": "azure",
+    "region": "northeurope",
+    "exchange_rates": {
+      "eur_to_usd": 1.1761,
+      "usd_to_eur": 0.8503,
+      "last_updated": "2026-05-08",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "STANDARD_D2AS_V7",
+      "STANDARD_D2PS_V6"
+    ],
+    "instances": [
+      {
+        "id": "STANDARD_D2AS_V7",
+        "name": "STANDARD_D2AS_V7 (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 72.9,
+          "memory": 100.0,
+          "disk": 100.0,
+          "overall": 94.6
+        },
+        "metrics": {
+          "cpu_single_events": 2077.1,
+          "cpu_multi_events": 2184.01,
+          "memory_mib_per_sec": 28976.93,
+          "disk_iops": 9417.445035
+        },
+        "pricing": {
+          "hourly": 0.101,
+          "monthly": 72.72
+        },
+        "value": 1.19,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 30,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "STANDARD_D2PS_V6",
+        "name": "STANDARD_D2PS_V6 (ARM64)",
+        "scores": {
+          "single_core": 72.2,
+          "multi_core": 100.0,
+          "memory": 58.3,
+          "disk": 100.0,
+          "overall": 79.8
+        },
+        "metrics": {
+          "cpu_single_events": 1499.5,
+          "cpu_multi_events": 2996.84,
+          "memory_mib_per_sec": 16889.329999999998,
+          "disk_iops": 9418.798505
+        },
+        "pricing": {
+          "hourly": 0.0784,
+          "monthly": 56.45
+        },
+        "value": 1.53,
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 30,
+          "arch": "ARM64"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0,
+        72.2
+      ],
+      "multi_core": [
+        72.9,
+        100.0
+      ],
+      "memory": [
+        100.0,
+        58.3
+      ],
+      "disk": [
+        100.0,
+        100.0
+      ],
+      "value": [
+        1.19,
+        1.53
+      ]
+    }
+  }
+}
