@@ -212,9 +212,7 @@ def rescale_scores(instances: list[dict]) -> list[dict]:
         no_disk_keys = ["single_core", "multi_core", "memory"]
         no_disk_scores = [scores.get(k, 0) for k in no_disk_keys]
         scores["overall_no_disk"] = (
-            round(sum(no_disk_scores) / len(no_disk_scores), 1)
-            if no_disk_scores
-            else 0
+            round(sum(no_disk_scores) / len(no_disk_scores), 1) if no_disk_scores else 0
         )
 
         # Recalculate value score (overall / monthly price)
