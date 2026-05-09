@@ -632,7 +632,7 @@ def fetch_exchange_rates() -> dict:
             "last_updated": data["date"],
             "source": "Frankfurter API (ECB data)",
         }
-    except requests.RequestException as e:
+    except (requests.RequestException, KeyError) as e:
         print(f"  [WARN] Failed to fetch exchange rates: {e}")
         return {}
 

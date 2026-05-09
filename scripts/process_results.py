@@ -228,6 +228,9 @@ def calculate_scores(df: pd.DataFrame) -> pd.DataFrame:
     df["overall_score"] = (
         df["cpu_score"] * 0.40 + df["memory_score"] * 0.35 + df["disk_score"] * 0.25
     ).round(1)
+    df["overall_score_no_disk"] = (
+        df["cpu_score"] * (0.40 / 0.75) + df["memory_score"] * (0.35 / 0.75)
+    ).round(1)
 
     # Guard against division by zero for pricing
     zero_price_mask = (df["price_hourly"] == 0) | (df["price_monthly"] == 0)
@@ -255,6 +258,10 @@ def calculate_scores(df: pd.DataFrame) -> pd.DataFrame:
         df.loc[valid_price_mask, "cpu_score"]
         / df.loc[valid_price_mask, "price_monthly"]
     ).round(2)
+    df.loc[valid_price_mask, "value_monthly_no_disk"] = (
+        df.loc[valid_price_mask, "overall_score_no_disk"]
+        / df.loc[valid_price_mask, "price_monthly"]
+    ).round(2)
 
     return df
 
@@ -275,7 +282,10 @@ def create_instance_summary(row: pd.Series) -> dict:
             "memory": row["memory_score"],
             "disk": row["disk_score"],
             "overall": row["overall_score"],
+            "overall_no_disk": row.get("overall_score_no_disk", row["overall_score"]),
         },
+        "value": row["cpu_value_monthly"],
+        "value_no_disk": row.get("value_monthly_no_disk", row["cpu_value_monthly"]),
         "metrics": {
             "cpu_single_events": metrics.get("cpu_single_raw", 0),
             "cpu_multi_events": metrics.get("cpu_multi_raw", 0),
@@ -286,7 +296,6 @@ def create_instance_summary(row: pd.Series) -> dict:
             "hourly": row["price_hourly"],
             "monthly": row["price_monthly"],
         },
-        "value": row["cpu_value_monthly"],
         "specs": {
             "vcpu": row["vcpu"],
             "ram_gb": row["ram_gb"],

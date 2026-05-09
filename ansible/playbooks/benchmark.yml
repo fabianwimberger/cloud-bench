@@ -91,7 +91,7 @@
     - block:
         - name: Run CPU single-thread benchmark {{ num_runs }} times
           shell: |
-            set -e
+            set -eo pipefail
             for i in $(seq 1 {{ num_runs }}); do
               timeout 300 sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} --threads=1 run \
                 | grep "events per second" | awk '{print $4}'
@@ -123,7 +123,7 @@
 
         - name: Run CPU multi-thread benchmark {{ num_runs }} times
           shell: |
-            set -e
+            set -eo pipefail
             for i in $(seq 1 {{ num_runs }}); do
               sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} --threads={{ ansible_processor_vcpus }} run \
                 | grep "events per second" | awk '{print $4}'
@@ -151,7 +151,7 @@
 
         - name: Run RAM read benchmark {{ num_runs }} times
           shell: |
-            set -e
+            set -eo pipefail
             for i in $(seq 1 {{ num_runs }}); do
               sysbench memory --memory-oper=read --memory-total-size={{ sysbench_memory_size }} --threads={{ ansible_processor_vcpus }} run \
                 | grep "transferred" | sed -n 's/.*(\([0-9.]*\) MiB\/sec.*/\1/p' | head -1
@@ -173,7 +173,7 @@
 
         - name: Run RAM write benchmark {{ num_runs }} times
           shell: |
-            set -e
+            set -eo pipefail
             for i in $(seq 1 {{ num_runs }}); do
               sysbench memory --memory-oper=write --memory-total-size={{ sysbench_memory_size }} --threads={{ ansible_processor_vcpus }} run \
                 | grep "transferred" | sed -n 's/.*(\([0-9.]*\) MiB\/sec.*/\1/p' | head -1
@@ -201,7 +201,7 @@
 
         - name: Run Disk I/O benchmark {{ num_runs }} times
           shell: |
-            set -e
+            set -eo pipefail
             for i in $(seq 1 {{ num_runs }}); do
               timeout 120 fio --name=randread --ioengine=libaio --iodepth={{ fio_iodepth }} \
                   --rw=randread --bs={{ fio_block_size }} --direct=1 --size={{ fio_size }} \
