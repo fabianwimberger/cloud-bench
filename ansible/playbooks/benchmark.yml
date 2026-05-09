@@ -96,6 +96,8 @@
               timeout 300 sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} --threads=1 run \
                 | grep "events per second" | awk '{print $4}'
             done > "{{ results_dir }}/cpu-single-raw.txt"
+          args:
+            executable: /bin/bash
           changed_when: true
           register: cpu_single_run
           retries: 2
@@ -128,6 +130,8 @@
               sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} --threads={{ ansible_processor_vcpus }} run \
                 | grep "events per second" | awk '{print $4}'
             done > "{{ results_dir }}/cpu-multi-raw.txt"
+          args:
+            executable: /bin/bash
           changed_when: true
 
         - name: Calculate CPU multi-thread median
@@ -156,6 +160,8 @@
               sysbench memory --memory-oper=read --memory-total-size={{ sysbench_memory_size }} --threads={{ ansible_processor_vcpus }} run \
                 | grep "transferred" | sed -n 's/.*(\([0-9.]*\) MiB\/sec.*/\1/p' | head -1
             done > "{{ results_dir }}/mem-read-raw.txt"
+          args:
+            executable: /bin/bash
           changed_when: true
 
         - name: Calculate RAM read median
@@ -178,6 +184,8 @@
               sysbench memory --memory-oper=write --memory-total-size={{ sysbench_memory_size }} --threads={{ ansible_processor_vcpus }} run \
                 | grep "transferred" | sed -n 's/.*(\([0-9.]*\) MiB\/sec.*/\1/p' | head -1
             done > "{{ results_dir }}/mem-write-raw.txt"
+          args:
+            executable: /bin/bash
           changed_when: true
 
         - name: Calculate RAM write median
@@ -209,6 +217,8 @@
                   --group_reporting --output-format=json \
                   | jq '.jobs[0].read.iops'
             done > "{{ results_dir }}/disk-iops-raw.txt"
+          args:
+            executable: /bin/bash
           changed_when: true
           register: disk_iops_raw
           retries: 2

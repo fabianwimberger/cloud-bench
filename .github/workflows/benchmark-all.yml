@@ -296,7 +296,7 @@ jobs:
             -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
             -var="default_region=${{ matrix.region }}" \
             -var="ssh_public_key_path=/dev/null" \
-            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" || true
+            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]"
 
       - name: Verify Cleanup (${{ matrix.provider }})
         if: always()

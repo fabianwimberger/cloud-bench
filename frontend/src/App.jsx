@@ -162,6 +162,14 @@ function App() {
     return filterData(data?.ranking, filters)
   }, [data?.ranking, filters])
 
+  const effectiveRanking = useMemo(() => {
+    return (filteredRanking || []).map(r => ({
+      ...r,
+      effectiveValue: filters.includeDisk ? r.cpu_value_monthly : (r.value_no_disk || r.cpu_value_monthly),
+      effectiveOverall: filters.includeDisk ? (r.overall_score || 0) : (r.overall_no_disk || 0),
+    }))
+  }, [filteredRanking, filters.includeDisk])
+
   const filteredCharts = useMemo(() => {
     if (!effectiveRanking.length) return null
 
@@ -180,14 +188,6 @@ function App() {
       value: buildChart(r => r.effectiveValue ?? r.cpu_value_monthly),
     }
   }, [effectiveRanking])
-
-  const effectiveRanking = useMemo(() => {
-    return (filteredRanking || []).map(r => ({
-      ...r,
-      effectiveValue: filters.includeDisk ? r.cpu_value_monthly : (r.value_no_disk || r.cpu_value_monthly),
-      effectiveOverall: filters.includeDisk ? (r.overall_score || 0) : (r.overall_no_disk || 0),
-    }))
-  }, [filteredRanking, filters.includeDisk])
 
   const toggleInstanceSelection = (instanceType) => {
     setSelectedForComparison(prev => {
