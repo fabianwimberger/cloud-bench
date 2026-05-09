@@ -1,8 +1,11 @@
+import MultiSelect from './MultiSelect'
+
 function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyToggle }) {
   if (!ranking || ranking.length === 0) return null
 
   const arches = [...new Set(ranking.map(r => r.arch))].filter(Boolean).sort()
   const providers = [...new Set(ranking.map(r => r.provider))].filter(Boolean).sort()
+  const displayProviderNames = { aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVH', oci: 'OCI', gcp: 'GCP', azure: 'Azure' }
 
   const maxPrice = Math.ceil(Math.max(...ranking.map(r => r.price_monthly)) * 1.2)
 
@@ -15,60 +18,48 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
 
   const clearFilters = () => {
     onFilterChange({
-      arch: '',
-      provider: '',
+      arch: [],
+      provider: [],
       vcpu: '',
       ram: '',
       disk: '',
       min_monthly_price: 0,
       max_monthly_price: maxPrice,
-      search: ''
+      search: '',
+      includeDisk: false
     })
   }
 
   const hasActiveFilters =
-    filters.arch ||
-    filters.provider ||
+    filters.arch?.length > 0 ||
+    filters.provider?.length > 0 ||
     filters.vcpu ||
     filters.ram ||
     filters.disk ||
     filters.search ||
     filters.min_monthly_price > 0 ||
-    filters.max_monthly_price < maxPrice
+    filters.max_monthly_price < maxPrice ||
+    filters.includeDisk
 
   const minPct = (filters.min_monthly_price / maxPrice) * 100
   const maxPct = (filters.max_monthly_price / maxPrice) * 100
 
   return (
     <div className="filter-bar">
-      <div className="filter-group">
-        <label>Architecture</label>
-        <select
-          className="filter-select"
-          value={filters.arch}
-          onChange={(e) => handleChange('arch', e.target.value)}
-        >
-          <option value="">All</option>
-          {arches.map(arch => (
-            <option key={arch} value={arch}>{arch}</option>
-          ))}
-        </select>
-      </div>
+      <MultiSelect
+        label="Architecture"
+        options={arches}
+        value={filters.arch}
+        onChange={(v) => handleChange('arch', v)}
+      />
 
       {providers.length > 1 && (
-        <div className="filter-group">
-          <label>Provider</label>
-          <select
-            className="filter-select"
-            value={filters.provider || ''}
-            onChange={(e) => handleChange('provider', e.target.value)}
-          >
-            <option value="">All</option>
-            {providers.map(p => (
-              <option key={p} value={p}>{{ aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVH', oci: 'OCI', gcp: 'GCP' }[p] || p}</option>
-            ))}
-          </select>
-        </div>
+        <MultiSelect
+          label="Provider"
+          options={providers}
+          value={filters.provider}
+          onChange={(v) => handleChange('provider', v)}
+        />
       )}
 
       <div className="filter-group">
@@ -142,6 +133,27 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
             }}
           />
         </div>
+      </div>
+
+      <div className="filter-group">
+        <label>Include Disk</label>
+        <button
+          onClick={() => handleChange('includeDisk', !filters.includeDisk)}
+          style={{
+            padding: '0.25rem 0.5rem',
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-sm)',
+            cursor: 'pointer',
+            background: filters.includeDisk ? 'var(--color-primary)' : 'var(--color-surface-light)',
+            color: filters.includeDisk ? '#fff' : 'var(--color-text-secondary)',
+            minWidth: '48px',
+            textAlign: 'center',
+          }}
+        >
+          {filters.includeDisk ? 'ON' : 'OFF'}
+        </button>
       </div>
 
       <div className="filter-group filter-group-grow">

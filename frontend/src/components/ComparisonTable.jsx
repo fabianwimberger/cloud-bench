@@ -2,8 +2,8 @@ import { useState } from 'react'
 import ScoreBar from './ScoreBar'
 import ProviderBadge from './ProviderBadge'
 
-function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections, currency, onSelectHistory }) {
-  const [sortKey, setSortKey] = useState('cpu_value_monthly')
+function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSelection, maxSelections, currency, onSelectHistory, includeDisk }) {
+  const [sortKey, setSortKey] = useState('effectiveValue')
   const [sortDir, setSortDir] = useState('desc')
 
   if (!ranking || ranking.length === 0) {
@@ -89,7 +89,7 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
               <th className="cell-numeric sortable" onClick={() => handleSort('metrics.disk_iops')}>Disk IOPS{indicator('metrics.disk_iops')}</th>
               <th className="cell-numeric sortable" onClick={() => handleSort('price_hourly')}>Hourly{indicator('price_hourly')}</th>
               <th className="cell-numeric sortable" onClick={() => handleSort('price_monthly')}>Monthly{indicator('price_monthly')}</th>
-              <th className="cell-numeric sortable" onClick={() => handleSort('cpu_value_monthly')}>Value{indicator('cpu_value_monthly')}</th>
+              <th className="cell-numeric sortable" onClick={() => handleSort('effectiveValue')}>Value{indicator('effectiveValue')}</th>
             </tr>
           </thead>
           <tbody>
@@ -169,7 +169,7 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                     {formatCurrency(instance.price_monthly)}
                   </td>
                   <td className="cell-numeric" style={{ color: 'var(--color-primary-light)', fontWeight: 500 }}>
-                    {instance.cpu_value_monthly.toFixed(1)}
+                    {(instance.effectiveValue ?? instance.cpu_value_monthly).toFixed(1)}
                   </td>
                 </tr>
               )
@@ -179,8 +179,8 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
       </div>
 
       <p className="table-note">
-        <strong>Value</strong> = CPU Score per {currencySymbol} per Month (higher is better).
-        Click checkboxes to compare up to {maxSelections} instances.
+        <strong>Value</strong> = {includeDisk ? 'Overall Score' : 'CPU + Memory Score'} per {currencySymbol} per Month (higher is better).
+        Click checkboxes to compare up to {maxSelections} instances. Toggle "Include Disk" in filters to switch.
         {ranking.some(r => !r.storage_included) && (
           <>
             <br />
