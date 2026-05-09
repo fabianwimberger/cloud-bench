@@ -280,6 +280,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ needs.provision.outputs.region }}
         run: |
           RUNNER_IP=$(curl -s --retry 3 https://ifconfig.me || curl -s --retry 3 https://api.ipify.org)
+          export RUNNER_IP
           echo "Benchmark runner IP: $RUNNER_IP"
           PREV_IP="${{ needs.provision.outputs.runner_ip }}"
           echo "Provision runner IP: $PREV_IP"
@@ -431,7 +432,7 @@ jobs:
           }
           compartment_id = os.environ["OCI_COMPARTMENT_ID"]
           run_id = "${{ env.RUN_ID }}"
-          new_ip = os.popen("curl -s --retry 3 https://ifconfig.me || curl -s --retry 3 https://api.ipify.org").read().strip()
+          new_ip = os.environ["RUNNER_IP"]
 
           network = oci.core.VirtualNetworkClient(config)
 
@@ -889,9 +890,11 @@ jobs:
       - name: Post Results Summary
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v9
+        env:
+          BENCHMARK_SUMMARY: ${{ needs.process.outputs.summary }}
         with:
           script: |
-            const summary = `${{ needs.process.outputs.summary }}`;
+            const summary = process.env.BENCHMARK_SUMMARY || "";
 
             await github.rest.issues.createComment({
               issue_number: context.issue.number,

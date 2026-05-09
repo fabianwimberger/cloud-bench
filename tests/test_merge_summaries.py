@@ -140,6 +140,39 @@ class TestRescaleScores(unittest.TestCase):
         self.assertEqual(cx11["scores"]["memory"], 50.0)
         self.assertEqual(cx11["scores"]["disk"], 50.0)
 
+    def test_rescale_uses_provider_score_weighting(self):
+        instances = [
+            {
+                "id": "cpu-heavy",
+                "metrics": {
+                    "cpu_single_events": 1000,
+                    "cpu_multi_events": 1000,
+                    "memory_mib_per_sec": 500,
+                    "disk_iops": 500,
+                },
+                "scores": {},
+                "pricing": {"monthly": 10},
+                "value": 0,
+            },
+            {
+                "id": "balanced-max",
+                "metrics": {
+                    "cpu_single_events": 1000,
+                    "cpu_multi_events": 1000,
+                    "memory_mib_per_sec": 1000,
+                    "disk_iops": 1000,
+                },
+                "scores": {},
+                "pricing": {"monthly": 10},
+                "value": 0,
+            },
+        ]
+
+        result = ms.rescale_scores(instances)
+        cpu_heavy = next(i for i in result if i["id"] == "cpu-heavy")
+
+        self.assertEqual(cpu_heavy["scores"]["overall"], 70.0)
+
     def test_rescale_empty_list(self):
         """Test rescaling an empty list."""
         result = ms.rescale_scores([])

@@ -200,12 +200,11 @@ def rescale_scores(instances: list[dict]) -> list[dict]:
             if max_values[mk] > 0:
                 scores[sk] = round(val / max_values[mk] * 100, 1)
 
-        # Recalculate overall as average of component scores
-        component_scores = [scores.get(k, 0) for k in score_keys]
-        scores["overall"] = (
-            round(sum(component_scores) / len(component_scores), 1)
-            if component_scores
-            else 0
+        scores["overall"] = round(
+            ((scores.get("single_core", 0) + scores.get("multi_core", 0)) / 2) * 0.40
+            + scores.get("memory", 0) * 0.35
+            + scores.get("disk", 0) * 0.25,
+            1,
         )
 
         # overall_no_disk: average of CPU + memory (excludes disk)
