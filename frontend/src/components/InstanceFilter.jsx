@@ -5,7 +5,6 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
 
   const arches = [...new Set(ranking.map(r => r.arch))].filter(Boolean).sort()
   const providers = [...new Set(ranking.map(r => r.provider))].filter(Boolean).sort()
-  const displayProviderNames = { aws: 'AWS', hetzner: 'Hetzner', ovhcloud: 'OVH', oci: 'OCI', gcp: 'GCP', azure: 'Azure' }
 
   const maxPrice = Math.ceil(Math.max(...ranking.map(r => r.price_monthly)) * 1.2)
 
