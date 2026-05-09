@@ -65,6 +65,8 @@ function transformData(data) {
       disk_score: inst.scores?.disk || 0,
       overall_score: inst.scores?.overall || 0,
       cpu_value_monthly: inst.value || 0,
+      overall_no_disk: inst.scores?.overall_no_disk || 0,
+      value_no_disk: (inst.value_no_disk ?? inst.value) || 0,
       provider: inst.provider || data.metadata?.provider || '',
       region: inst.region || data.metadata?.region || '',
       storage_included: ['hetzner', 'ovhcloud'].includes(inst.provider || data.metadata?.provider || ''),
@@ -82,8 +84,8 @@ function filterData(ranking, filters) {
   if (!ranking) return []
 
   return ranking.filter(inst => {
-    if (filters.arch && inst.arch !== filters.arch) return false
-    if (filters.provider && inst.provider !== filters.provider) return false
+    if (filters.arch?.length > 0 && !filters.arch.includes(inst.arch)) return false
+    if (filters.provider?.length > 0 && !filters.provider.includes(inst.provider)) return false
     if (!parseExprFilter(filters.vcpu, inst.vcpu)) return false
     if (!parseExprFilter(filters.ram, inst.ram_gb)) return false
     if (!parseExprFilter(filters.disk, inst.disk_gb)) return false
@@ -111,14 +113,15 @@ function App() {
   }, [])
 
   const [filters, setFilters] = useState({
-    arch: '',
-    provider: '',
+    arch: [],
+    provider: [],
     vcpu: '',
     ram: '',
     disk: '',
     min_monthly_price: 0,
     max_monthly_price: 100,
-    search: ''
+    search: '',
+    includeDisk: false
   })
 
   const [selectedForComparison, setSelectedForComparison] = useState([])
@@ -160,9 +163,9 @@ function App() {
   }, [data?.ranking, filters])
 
   const filteredCharts = useMemo(() => {
-    if (!filteredRanking.length) return null
+    if (!effectiveRanking.length) return null
 
-    const sorted = [...filteredRanking]
+    const sorted = [...effectiveRanking]
     const buildChart = (scoreFn) => {
       const pairs = sorted.map(r => [r.instance_type, scoreFn(r)])
       pairs.sort((a, b) => b[1] - a[1])
@@ -174,9 +177,17 @@ function App() {
       multi_core: buildChart(r => r.multi_core_score),
       memory: buildChart(r => r.memory_score),
       disk: buildChart(r => r.disk_score),
-      value: buildChart(r => r.cpu_value_monthly),
+      value: buildChart(r => r.effectiveValue ?? r.cpu_value_monthly),
     }
-  }, [filteredRanking])
+  }, [effectiveRanking])
+
+  const effectiveRanking = useMemo(() => {
+    return (filteredRanking || []).map(r => ({
+      ...r,
+      effectiveValue: filters.includeDisk ? r.cpu_value_monthly : (r.value_no_disk || r.cpu_value_monthly),
+      effectiveOverall: filters.includeDisk ? (r.overall_score || 0) : (r.overall_no_disk || 0),
+    }))
+  }, [filteredRanking, filters.includeDisk])
 
   const toggleInstanceSelection = (instanceType) => {
     setSelectedForComparison(prev => {
@@ -289,7 +300,7 @@ function App() {
 
         {selectedForComparison.length > 0 && (
           <InstanceComparison
-            ranking={data?.ranking}
+            ranking={effectiveRanking}
             metadata={data?.metadata}
             selectedInstances={selectedForComparison}
             onClear={setSelectedForComparison}
@@ -298,18 +309,20 @@ function App() {
         )}
 
         <ComparisonTable
-          ranking={filteredRanking}
+          ranking={effectiveRanking}
           metadata={data?.metadata}
           selectedForComparison={selectedForComparison}
           onToggleSelection={toggleInstanceSelection}
           maxSelections={3}
           currency={currencyProps}
           onSelectHistory={handleSelectHistory}
+          includeDisk={filters.includeDisk}
         />
 
         <ComparisonCharts charts={filteredCharts} currency={currencyProps} />
-        <Footer metadata={data?.metadata} />
       </div>
+
+      <Footer metadata={data?.metadata} />
 
       {selectedHistoryInstance && (
         <InstanceHistory

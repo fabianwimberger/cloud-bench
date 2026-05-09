@@ -587,11 +587,10 @@ a:hover {
 /* Footer */
 .footer {
   text-align: center;
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 2rem;
   color: var(--color-text-muted);
   font-size: 0.75rem;
   border-top: 1px solid var(--color-border);
-  margin-top: 2rem;
 }
 
 .footer a {

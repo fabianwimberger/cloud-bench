@@ -275,8 +275,8 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear, cur
           Overall
         </div>
         {selected.map(inst => {
-          const value = inst.overall_score
-          const best = getBest('overall_score')
+          const value = inst.effectiveOverall ?? inst.overall_score
+          const best = getBest('effectiveOverall')
           const isBest = value === best && value > 0
           return (
             <div key={inst.instance_type} style={{
@@ -297,8 +297,8 @@ function InstanceComparison({ ranking, metadata, selectedInstances, onClear, cur
           Value
         </div>
         {selected.map(inst => {
-          const value = inst.cpu_value_monthly
-          const best = getBest('cpu_value_monthly')
+          const value = inst.effectiveValue ?? inst.cpu_value_monthly
+          const best = getBest('effectiveValue')
           const isBest = value === best && value > 0
           return (
             <div key={inst.instance_type} style={{
