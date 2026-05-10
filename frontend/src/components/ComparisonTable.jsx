@@ -180,7 +180,7 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
 
       <p className="table-note">
         <strong>Value</strong> = {includeDisk ? 'Overall Score' : 'CPU + Memory Score'} per {currencySymbol} per Month (higher is better).
-        Click checkboxes to compare up to {maxSelections} instances. Toggle "Include Disk" in filters to switch.
+        Click checkboxes to compare up to {maxSelections} instances. Change "Value formula" in filters to include disk benchmarks.
         {ranking.some(r => !r.storage_included) && (
           <>
             <br />
