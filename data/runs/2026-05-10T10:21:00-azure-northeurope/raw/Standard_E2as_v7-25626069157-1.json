@@ -1,0 +1,44 @@
+{
+  "run_id": "25626069157-1",
+  "hostname": "cloud-bench-azure-Standard-E2as-v7-25626069157-1",
+  "timestamp": "2026-05-10T10:20:28Z",
+  "benchmark_runs": 5,
+  "aggregation": "median",
+  "system": {
+    "schema_version": "2.0",
+    "provider": "azure",
+    "instance_type": "Standard_E2as_v7",
+    "timestamp": "2026-05-10T10:16:41Z",
+    "provider_attributes": {
+      "arch": "x86_64",
+      "os": "Ubuntu 24.04",
+      "kernel": "6.17.0-1013-azure",
+      "vcpu": 2,
+      "memory_mb": 15990,
+      "hostname": "cloud-bench-azure-Standard-E2as-v7-25626069157-1"
+    },
+    "benchmark_config": {
+      "runs": 5,
+      "aggregation": "median"
+    }
+  },
+  "cpu": {
+    "test": "sysbench-cpu",
+    "runs": 5,
+    "single_thread_events": 2107.54,
+    "multi_thread_events": 2221.15,
+    "threads": 2
+  },
+  "memory": {
+    "test": "sysbench-memory",
+    "runs": 5,
+    "read_mib_per_sec": 15509.58,
+    "write_mib_per_sec": 13228.16,
+    "total_throughput_mib": 28737.739999999998
+  },
+  "disk": {
+    "test": "fio-randread",
+    "runs": 5,
+    "read_iops": 9379.033989
+  }
+}

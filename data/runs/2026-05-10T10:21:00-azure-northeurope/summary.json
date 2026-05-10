@@ -1,0 +1,106 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-10T10:21:00.375771",
+    "run_count": 2,
+    "currency": "USD",
+    "provider": "azure",
+    "region": "northeurope",
+    "exchange_rates": {
+      "eur_to_usd": 1.1761,
+      "usd_to_eur": 0.8503,
+      "last_updated": "2026-05-08",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "STANDARD_E2AS_V7",
+      "STANDARD_B2S_V2"
+    ],
+    "instances": [
+      {
+        "id": "STANDARD_E2AS_V7",
+        "name": "STANDARD_E2AS_V7 (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 99.7,
+          "overall": 99.9,
+          "overall_no_disk": 100.0
+        },
+        "value": 1.04,
+        "value_no_disk": 1.04,
+        "metrics": {
+          "cpu_single_events": 2107.54,
+          "cpu_multi_events": 2221.15,
+          "memory_mib_per_sec": 28737.739999999998,
+          "disk_iops": 9379.033989
+        },
+        "pricing": {
+          "hourly": 0.133,
+          "monthly": 95.76
+        },
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 16,
+          "disk_gb": 30,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "STANDARD_B2S_V2",
+        "name": "STANDARD_B2S_V2 (X86)",
+        "scores": {
+          "single_core": 54.5,
+          "multi_core": 53.7,
+          "memory": 69.1,
+          "disk": 100.0,
+          "overall": 70.8,
+          "overall_no_disk": 61.1
+        },
+        "value": 0.82,
+        "value_no_disk": 0.93,
+        "metrics": {
+          "cpu_single_events": 1147.56,
+          "cpu_multi_events": 1193.51,
+          "memory_mib_per_sec": 19865.559999999998,
+          "disk_iops": 9411.35923
+        },
+        "pricing": {
+          "hourly": 0.0912,
+          "monthly": 65.66
+        },
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 30,
+          "arch": "X86"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0,
+        54.5
+      ],
+      "multi_core": [
+        100.0,
+        53.7
+      ],
+      "memory": [
+        100.0,
+        69.1
+      ],
+      "disk": [
+        99.7,
+        100.0
+      ],
+      "value": [
+        1.04,
+        0.82
+      ]
+    }
+  }
+}
