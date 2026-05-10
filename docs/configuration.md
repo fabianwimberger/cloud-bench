@@ -39,7 +39,7 @@ exchange_rates:
 | OVHcloud | EUR | DE1 (Frankfurt) | 5 (d2-4, b3-8, c3-4, c3-8, r3-16) |
 | OCI      | USD | eu-frankfurt-1 (Frankfurt) | 3 (e5-flex-1-4, std3-flex-1-4, a2-flex-2-4) |
 | GCP      | USD | europe-west3 (Frankfurt) | 5 (e2-standard-2, n2-standard-2, n2d-standard-2, t2d-standard-2, c4a-standard-2) |
-| Azure    | USD | northeurope (Dublin) | 2 (Standard_D2as_v7, Standard_D2ps_v6) |
+| Azure    | USD | northeurope (Dublin) | 7 (Standard_B2ls_v2, Standard_B2s_v2, Standard_D2as_v7, Standard_D4as_v7, Standard_E2as_v7, Standard_D2ps_v6, Standard_D4ps_v6) |
 
 ## Adding Instances
 

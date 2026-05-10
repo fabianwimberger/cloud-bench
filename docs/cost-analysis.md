@@ -11,7 +11,7 @@ A benchmark run provisions all configured instances for a single provider for ~1
 | OVHcloud | 5         | ~€0.15      |
 | OCI      | 3         | ~$0.10      |
 | GCP      | 5         | ~$0.15      |
-| Azure    | 4         | ~$0.10      |
+| Azure    | 7         | ~$0.15      |
 
 Exact cost depends on which instances are configured in `config/instances.yaml`. The cost-guard workflow estimates this before each run and blocks anything over $5 or 15 instances.
 
@@ -26,7 +26,7 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
 | OVHcloud | €0.2310             | €180.72              |
 | OCI      | $0.0684             | $48.51               |
 | GCP      | $0.5420             | $395.67              |
-| Azure    | $0.3136             | $228.93              |
+| Azure    | $0.8572             | $617.18              |
 
 ## Safety Nets
 

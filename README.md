@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/fabianwimberger/cloud-bench/branch/main/graph/badge.svg)](https://codecov.io/gh/fabianwimberger/cloud-bench)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A cloud instance benchmarking suite comparing CPU, memory, and disk performance across providers with cost analysis. 31 instance types across Hetzner Cloud, AWS EC2, OVHcloud, Oracle Cloud (OCI), Google Cloud Platform (GCP), and Microsoft Azure.
+A cloud instance benchmarking suite comparing CPU, memory, and disk performance across providers with cost analysis. 36 instance types across Hetzner Cloud, AWS EC2, OVHcloud, Oracle Cloud (OCI), Google Cloud Platform (GCP), and Microsoft Azure.
 
 ## Background
 
@@ -12,7 +12,7 @@ A €20 instance can mean very different things between providers. This runs the
 
 ## Features
 
-- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, OCI, GCP, Azure (31 instance types)
+- **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, OCI, GCP, Azure (36 instance types)
 - **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
 - **Metric averaging** — scores based on all historical runs, not just the latest
 - **Cost analysis** — performance per dollar with EUR/USD toggle
