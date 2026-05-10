@@ -1,0 +1,70 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-10T12:16:46.397234",
+    "run_count": 1,
+    "currency": "USD",
+    "provider": "azure",
+    "region": "northeurope",
+    "exchange_rates": {
+      "eur_to_usd": 1.1761,
+      "usd_to_eur": 0.8503,
+      "last_updated": "2026-05-08",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "STANDARD_D4AS_V7"
+    ],
+    "instances": [
+      {
+        "id": "STANDARD_D4AS_V7",
+        "name": "STANDARD_D4AS_V7 (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 100.0,
+          "overall": 100.0,
+          "overall_no_disk": 100.0
+        },
+        "value": 0.69,
+        "value_no_disk": 0.69,
+        "metrics": {
+          "cpu_single_events": 2095.33,
+          "cpu_multi_events": 4404.27,
+          "memory_mib_per_sec": 59043.619999999995,
+          "disk_iops": 18673.885169
+        },
+        "pricing": {
+          "hourly": 0.202,
+          "monthly": 145.44
+        },
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 16,
+          "disk_gb": 30,
+          "arch": "X86"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0
+      ],
+      "multi_core": [
+        100.0
+      ],
+      "memory": [
+        100.0
+      ],
+      "disk": [
+        100.0
+      ],
+      "value": [
+        0.69
+      ]
+    }
+  }
+}
