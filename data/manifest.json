@@ -2,6 +2,21 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-05-10T11:45:21-azure-northeurope",
+      "timestamp": "2026-05-10T11:45:21",
+      "provider": "azure",
+      "region": "northeurope",
+      "instance_count": 2,
+      "instances": [
+        "STANDARD_D2AS_V7",
+        "STANDARD_B2LS_V2"
+      ],
+      "files": {
+        "summary": "data/runs/2026-05-10T11:45:21-azure-northeurope/summary.json",
+        "detail": "data/runs/2026-05-10T11:45:21-azure-northeurope/detail.json"
+      }
+    },
+    {
       "id": "2026-05-10T11:36:11-gcp-europe-west3",
       "timestamp": "2026-05-10T11:36:11",
       "provider": "gcp",
@@ -1254,6 +1269,18 @@
     }
   ],
   "instance_index": {
+    "STANDARD_D2AS_V7": [
+      "2026-05-10T11:45:21-azure-northeurope",
+      "2026-05-10T10:10:20-azure-northeurope",
+      "2026-05-09T19:13:21-azure-northeurope",
+      "2026-05-08T18:45:11-azure-northeurope",
+      "2026-05-03T12:04:46-azure-northeurope",
+      "2026-05-03T11:28:10-azure-northeurope"
+    ],
+    "STANDARD_B2LS_V2": [
+      "2026-05-10T11:45:21-azure-northeurope",
+      "2026-05-10T10:10:20-azure-northeurope"
+    ],
     "T2D-STANDARD-2": [
       "2026-05-10T11:36:11-gcp-europe-west3",
       "2026-05-10T10:31:48-gcp-europe-west3",
@@ -1381,16 +1408,6 @@
     ],
     "STANDARD_B2S_V2": [
       "2026-05-10T10:21:00-azure-northeurope"
-    ],
-    "STANDARD_D2AS_V7": [
-      "2026-05-10T10:10:20-azure-northeurope",
-      "2026-05-09T19:13:21-azure-northeurope",
-      "2026-05-08T18:45:11-azure-northeurope",
-      "2026-05-03T12:04:46-azure-northeurope",
-      "2026-05-03T11:28:10-azure-northeurope"
-    ],
-    "STANDARD_B2LS_V2": [
-      "2026-05-10T10:10:20-azure-northeurope"
     ],
     "C7I-FLEX.LARGE": [
       "2026-05-08T18:09:44-aws-eu-central-1",

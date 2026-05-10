@@ -1,0 +1,96 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-10T11:45:21.312154",
+    "run_count": 2,
+    "currency": "USD",
+    "provider": "azure",
+    "region": "northeurope",
+    "exchange_rates": {
+      "eur_to_usd": 1.1761,
+      "usd_to_eur": 0.8503,
+      "last_updated": "2026-05-08",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "instances": [
+    {
+      "id": "STANDARD_D2AS_V7",
+      "name": "STANDARD_D2AS_V7 (X86)",
+      "scores": {
+        "single_core": 100.0,
+        "multi_core": 100.0,
+        "memory": 100.0,
+        "disk": 100.0,
+        "overall": 100.0,
+        "overall_no_disk": 100.0
+      },
+      "value": 1.38,
+      "value_no_disk": 1.38,
+      "metrics": {
+        "cpu_single_raw": 2013.74,
+        "cpu_multi_raw": 2116.57,
+        "mem_read_raw": 15248.06,
+        "mem_write_raw": 12752.1,
+        "mem_throughput_raw": 28000.16,
+        "disk_iops_raw": 9382.390838
+      },
+      "pricing": {
+        "hourly": 0.101,
+        "monthly": 72.72
+      },
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 8,
+        "disk_gb": 30,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "STANDARD_B2LS_V2",
+      "name": "STANDARD_B2LS_V2 (X86)",
+      "scores": {
+        "single_core": 57.0,
+        "multi_core": 56.4,
+        "memory": 70.8,
+        "disk": 100.0,
+        "overall": 72.5,
+        "overall_no_disk": 63.3
+      },
+      "value": 1.73,
+      "value_no_disk": 1.93,
+      "metrics": {
+        "cpu_single_raw": 1147.69,
+        "cpu_multi_raw": 1193.37,
+        "mem_read_raw": 11447.5,
+        "mem_write_raw": 8371.74,
+        "mem_throughput_raw": 19819.239999999998,
+        "disk_iops_raw": 9379.033989
+      },
+      "pricing": {
+        "hourly": 0.0456,
+        "monthly": 32.83
+      },
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 30,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    }
+  ]
+}
