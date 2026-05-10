@@ -1,6 +1,6 @@
 import MultiSelect from './MultiSelect'
 
-function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyToggle }) {
+function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyToggle, resultCount }) {
   if (!ranking || ranking.length === 0) return null
 
   const arches = [...new Set(ranking.map(r => r.arch))].filter(Boolean).sort()
@@ -45,136 +45,144 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
 
   return (
     <div className="filter-bar">
-      <MultiSelect
-        label="Architecture"
-        options={arches}
-        value={filters.arch}
-        onChange={(v) => handleChange('arch', v)}
-      />
+      <div className="filter-bar-header">
+        <div>
+          <h2 className="filter-title">Filters</h2>
+          <p className="filter-summary">
+            Showing {resultCount ?? ranking.length} of {ranking.length} instances
+          </p>
+        </div>
 
-      {providers.length > 1 && (
-        <MultiSelect
-          label="Provider"
-          options={providers}
-          value={filters.provider}
-          onChange={(v) => handleChange('provider', v)}
-        />
-      )}
-
-      <div className="filter-group">
-        <label>vCPU</label>
-        <input
-          type="text"
-          className="filter-input filter-input-narrow"
-          placeholder=">2"
-          value={filters.vcpu}
-          onChange={(e) => handleChange('vcpu', e.target.value)}
-        />
-      </div>
-
-      <div className="filter-group">
-        <label>Memory (GB)</label>
-        <input
-          type="text"
-          className="filter-input filter-input-narrow"
-          placeholder="<32"
-          value={filters.ram}
-          onChange={(e) => handleChange('ram', e.target.value)}
-        />
-      </div>
-
-      <div className="filter-group">
-        <label>Disk (GB)</label>
-        <input
-          type="text"
-          className="filter-input filter-input-narrow"
-          placeholder=">50"
-          value={filters.disk}
-          onChange={(e) => handleChange('disk', e.target.value)}
-        />
-      </div>
-
-      <div className="filter-group">
-        <label>Price: {currencySymbol}{filters.min_monthly_price} {'\u2013'} {currencySymbol}{filters.max_monthly_price}</label>
-        <div className="range-slider">
-          <div
-            className="range-slider-track"
-            style={{
-              background: `linear-gradient(to right,
-                var(--color-surface-light) ${minPct}%,
-                var(--color-primary) ${minPct}%,
-                var(--color-primary) ${maxPct}%,
-                var(--color-surface-light) ${maxPct}%)`
-            }}
-          />
-          <input
-            type="range"
-            className="range-slider-input"
-            min={0}
-            max={maxPrice}
-            step={1}
-            value={filters.min_monthly_price}
-            onChange={(e) => {
-              const val = parseInt(e.target.value)
-              if (val <= filters.max_monthly_price) handleChange('min_monthly_price', val)
-            }}
-          />
-          <input
-            type="range"
-            className="range-slider-input"
-            min={0}
-            max={maxPrice}
-            step={1}
-            value={filters.max_monthly_price}
-            onChange={(e) => {
-              const val = parseInt(e.target.value)
-              if (val >= filters.min_monthly_price) handleChange('max_monthly_price', val)
-            }}
-          />
+        <div className="filter-actions">
+          {hasActiveFilters && (
+            <button onClick={clearFilters} className="btn btn-ghost btn-small">
+              Clear filters
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="filter-group">
-        <label>Include Disk</label>
-        <button
-          onClick={() => handleChange('includeDisk', !filters.includeDisk)}
-          style={{
-            padding: '0.25rem 0.5rem',
-            fontSize: '0.75rem',
-            fontWeight: 500,
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-sm)',
-            cursor: 'pointer',
-            background: filters.includeDisk ? 'var(--color-primary)' : 'var(--color-surface-light)',
-            color: filters.includeDisk ? '#fff' : 'var(--color-text-secondary)',
-            minWidth: '48px',
-            textAlign: 'center',
-          }}
-        >
-          {filters.includeDisk ? 'ON' : 'OFF'}
-        </button>
-      </div>
+      <div className="filter-primary">
+        <div className="filter-group filter-group-search">
+          <label>Search</label>
+          <input
+            type="text"
+            className="filter-input"
+            placeholder="Instance type..."
+            value={filters.search}
+            onChange={(e) => handleChange('search', e.target.value)}
+          />
+        </div>
 
-      <div className="filter-group filter-group-grow">
-        <label>Search</label>
-        <input
-          type="text"
-          className="filter-input"
-          placeholder="Instance type..."
-          value={filters.search}
-          onChange={(e) => handleChange('search', e.target.value)}
-          style={{ width: '100%' }}
+        <MultiSelect
+          label="Architecture"
+          options={arches}
+          value={filters.arch}
+          onChange={(v) => handleChange('arch', v)}
         />
+
+        {providers.length > 1 && (
+          <MultiSelect
+            label="Provider"
+            options={providers}
+            value={filters.provider}
+            onChange={(v) => handleChange('provider', v)}
+          />
+        )}
+
+        {currencyToggle}
       </div>
 
-      {currencyToggle}
+      <div className="filter-advanced">
+        <div className="filter-group">
+          <label>vCPU</label>
+          <input
+            type="text"
+            className="filter-input filter-input-narrow"
+            placeholder=">2"
+            value={filters.vcpu}
+            onChange={(e) => handleChange('vcpu', e.target.value)}
+          />
+        </div>
 
-      <div className="filter-actions">
-        {hasActiveFilters && (
-          <button onClick={clearFilters} className="btn btn-ghost btn-small">
-            Clear
+        <div className="filter-group">
+          <label>Memory</label>
+          <input
+            type="text"
+            className="filter-input filter-input-narrow"
+            placeholder="<32"
+            value={filters.ram}
+            onChange={(e) => handleChange('ram', e.target.value)}
+          />
+        </div>
+
+        <div className="filter-group">
+          <label>Disk</label>
+          <input
+            type="text"
+            className="filter-input filter-input-narrow"
+            placeholder=">50"
+            value={filters.disk}
+            onChange={(e) => handleChange('disk', e.target.value)}
+          />
+        </div>
+
+        <div className="filter-group filter-group-price">
+          <label>Monthly price</label>
+          <div className="price-filter">
+            <span>{currencySymbol}{filters.min_monthly_price}</span>
+            <div className="range-slider">
+              <div
+                className="range-slider-track"
+                style={{
+                  background: `linear-gradient(to right,
+                    var(--color-surface-light) ${minPct}%,
+                    var(--color-primary) ${minPct}%,
+                    var(--color-primary) ${maxPct}%,
+                    var(--color-surface-light) ${maxPct}%)`
+                }}
+              />
+              <input
+                type="range"
+                className="range-slider-input"
+                min={0}
+                max={maxPrice}
+                step={1}
+                value={filters.min_monthly_price}
+                aria-label="Minimum monthly price"
+                onChange={(e) => {
+                  const val = parseInt(e.target.value)
+                  if (val <= filters.max_monthly_price) handleChange('min_monthly_price', val)
+                }}
+              />
+              <input
+                type="range"
+                className="range-slider-input"
+                min={0}
+                max={maxPrice}
+                step={1}
+                value={filters.max_monthly_price}
+                aria-label="Maximum monthly price"
+                onChange={(e) => {
+                  const val = parseInt(e.target.value)
+                  if (val >= filters.min_monthly_price) handleChange('max_monthly_price', val)
+                }}
+              />
+            </div>
+            <span>{currencySymbol}{filters.max_monthly_price}</span>
+          </div>
+        </div>
+
+        <div className="filter-group filter-group-toggle">
+          <label>Value formula</label>
+          <button
+            onClick={() => handleChange('includeDisk', !filters.includeDisk)}
+            className={`filter-toggle ${filters.includeDisk ? 'active' : ''}`}
+            aria-pressed={filters.includeDisk}
+          >
+            {filters.includeDisk ? 'CPU + memory + disk' : 'CPU + memory'}
           </button>
-        )}
+        </div>
       </div>
     </div>
   )

@@ -272,15 +272,17 @@ function App() {
           filters={filters}
           onFilterChange={setFilters}
           currency={currencyProps}
+          resultCount={effectiveRanking.length}
           currencyToggle={data?.metadata?.exchange_rates && (
-            <div className="filter-group">
+            <div className="filter-group filter-group-currency">
               <label>Currency</label>
-              <div style={{ display: 'flex', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+              <div style={{ display: 'flex', width: '100%', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
                 {['EUR', 'USD'].map(cur => (
                   <button
                     key={cur}
                     onClick={() => setDisplayCurrency(cur)}
                     style={{
+                      flex: 1,
                       padding: '0.375rem 0.75rem',
                       border: 'none',
                       background: displayCurrency === cur ? 'var(--color-primary)' : 'var(--color-surface)',
