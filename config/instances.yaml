@@ -298,6 +298,24 @@ providers:
       northeurope:
         name: Dublin
     instances:
+    - id: Standard_B2ls_v2
+      name: B2ls v2
+      arch: X86
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 30
+      pricing:
+        hourly: 0.0456
+        monthly: 32.83
+    - id: Standard_B2s_v2
+      name: B2s v2
+      arch: X86
+      vcpu: 2
+      ram_gb: 8
+      disk_gb: 30
+      pricing:
+        hourly: 0.0912
+        monthly: 65.66
     - id: Standard_D2as_v7
       name: D2as v7
       arch: X86
@@ -307,6 +325,24 @@ providers:
       pricing:
         hourly: 0.101
         monthly: 72.72
+    - id: Standard_D4as_v7
+      name: D4as v7
+      arch: X86
+      vcpu: 4
+      ram_gb: 16
+      disk_gb: 30
+      pricing:
+        hourly: 0.202
+        monthly: 145.44
+    - id: Standard_E2as_v7
+      name: E2as v7
+      arch: X86
+      vcpu: 2
+      ram_gb: 16
+      disk_gb: 30
+      pricing:
+        hourly: 0.133
+        monthly: 95.76
     - id: Standard_D2ps_v6
       name: D2ps v6
       arch: ARM64
@@ -316,6 +352,15 @@ providers:
       pricing:
         hourly: 0.0784
         monthly: 56.45
+    - id: Standard_D4ps_v6
+      name: D4ps v6
+      arch: ARM64
+      vcpu: 4
+      ram_gb: 16
+      disk_gb: 30
+      pricing:
+        hourly: 0.157
+        monthly: 113.04
 exchange_rates:
   eur_to_usd: 1.1761
   usd_to_eur: 0.8503
