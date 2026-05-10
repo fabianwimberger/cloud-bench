@@ -212,16 +212,35 @@ jobs:
           TF_VAR_azure_client_id: ${{ secrets.AZURE_CLIENT_ID || '' }}
           TF_VAR_azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
           TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
+          ENABLED_INSTANCES: ${{ steps.instances.outputs.arg }}
+          INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
+          CLOUD_PROVIDER: ${{ github.event.inputs.provider }}
+          DEFAULT_REGION: ${{ steps.resolve_region.outputs.region }}
+          RUNNER_IP: ${{ steps.get_ip.outputs.ip }}
+          OS_IMAGE: ${{ vars.OS_IMAGE || 'ubuntu-24.04' }}
         run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          enabled_instances = json.loads(os.environ["ENABLED_INSTANCES"])
+          instance_regions = json.loads(os.environ["INSTANCE_REGIONS"])
+          tfvars = {
+              "run_id": os.environ["RUN_ID"],
+              "cloud_provider": os.environ["CLOUD_PROVIDER"],
+              "enabled_instances": enabled_instances,
+              "default_region": os.environ["DEFAULT_REGION"],
+              "instance_regions": instance_regions,
+              "ssh_public_key_path": os.path.expanduser("~/.ssh/cloud_bench.pub"),
+              "allowed_ssh_ips": [f"{os.environ['RUNNER_IP']}/32"],
+              "os_image": os.environ["OS_IMAGE"],
+          }
+          Path("runtime.auto.tfvars.json").write_text(json.dumps(tfvars))
+          PY
+
           terraform apply -auto-approve \
-            -var="run_id=${{ env.RUN_ID }}" \
-            -var="cloud_provider=${{ github.event.inputs.provider }}" \
-            -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
-            -var="default_region=${{ steps.resolve_region.outputs.region }}" \
-            -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
-            -var="ssh_public_key_path=~/.ssh/cloud_bench.pub" \
-            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
-            -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
+            -var-file=runtime.auto.tfvars.json
 
       - name: Generate Ansible Inventory
         working-directory: terraform
@@ -229,11 +248,13 @@ jobs:
           terraform output -raw ansible_inventory > ../ansible/inventory.ini
 
       - name: Upload Terraform State
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: terraform-state
           path: terraform/terraform.tfstate
           retention-days: 1
+          if-no-files-found: ignore
 
       - name: Upload Ansible Inventory
         uses: actions/upload-artifact@v7
@@ -663,6 +684,7 @@ jobs:
           echo "Runner IP for cleanup: ${RUNNER_IP}"
 
       - name: Download Terraform State
+        continue-on-error: true
         uses: actions/download-artifact@v8
         with:
           name: terraform-state
@@ -675,10 +697,12 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform Init
+        if: ${{ hashFiles('terraform/terraform.tfstate') != '' }}
         working-directory: terraform
         run: terraform init
 
       - name: Terraform Destroy
+        if: ${{ hashFiles('terraform/terraform.tfstate') != '' }}
         working-directory: terraform
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -700,16 +724,35 @@ jobs:
           TF_VAR_azure_client_id: ${{ secrets.AZURE_CLIENT_ID || '' }}
           TF_VAR_azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
           TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
+          ENABLED_INSTANCES: ${{ needs.provision.outputs.instances_arg }}
+          INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
+          CLOUD_PROVIDER: ${{ github.event.inputs.provider }}
+          DEFAULT_REGION: ${{ needs.provision.outputs.region }}
+          RUNNER_IP: ${{ steps.get_ip.outputs.ip }}
+          OS_IMAGE: ${{ vars.OS_IMAGE || 'ubuntu-24.04' }}
         run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          enabled_instances = json.loads(os.environ["ENABLED_INSTANCES"])
+          instance_regions = json.loads(os.environ["INSTANCE_REGIONS"])
+          tfvars = {
+              "run_id": os.environ["RUN_ID"],
+              "cloud_provider": os.environ["CLOUD_PROVIDER"],
+              "enabled_instances": enabled_instances,
+              "default_region": os.environ["DEFAULT_REGION"],
+              "instance_regions": instance_regions,
+              "ssh_public_key_path": "/dev/null",
+              "allowed_ssh_ips": [f"{os.environ['RUNNER_IP']}/32"],
+              "os_image": os.environ["OS_IMAGE"],
+          }
+          Path("runtime.auto.tfvars.json").write_text(json.dumps(tfvars))
+          PY
+
           terraform destroy -auto-approve \
-            -var="run_id=${{ env.RUN_ID }}" \
-            -var="cloud_provider=${{ github.event.inputs.provider }}" \
-            -var="enabled_instances=${{ needs.provision.outputs.instances_arg }}" \
-            -var="default_region=${{ needs.provision.outputs.region }}" \
-            -var="instance_regions=${{ github.event.inputs.instance_regions }}" \
-            -var="ssh_public_key_path=/dev/null" \
-            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]" \
-            -var="os_image=${{ vars.OS_IMAGE || 'ubuntu-24.04' }}"
+            -var-file=runtime.auto.tfvars.json
 
       - name: Verify Cleanup
         if: always()
@@ -719,6 +762,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ needs.provision.outputs.region }}
           OVH_OPENSTACK_USERNAME: ${{ secrets.OVH_OPENSTACK_USERNAME }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           echo "Verifying cleanup..."
 
@@ -813,6 +860,25 @@ jobs:
               exit 1
             else
               echo "[OK] Azure resources cleaned up successfully"
+            fi
+
+            if [ -n "$AZURE_SUBSCRIPTION_ID" ]; then
+              az login \
+                --service-principal \
+                --username "$AZURE_CLIENT_ID" \
+                --password "$AZURE_CLIENT_SECRET" \
+                --tenant "$AZURE_TENANT_ID" >/dev/null
+              az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+
+              RG_LIST=$(az group list \
+                --query "[?tags.project=='cloud-bench' && tags.run_id=='${{ env.RUN_ID }}'].name" \
+                -o tsv)
+              if [ -n "$RG_LIST" ]; then
+                echo "Deleting Azure resource groups left for run ${{ env.RUN_ID }}"
+                while IFS= read -r rg_name; do
+                  az group delete -n "$rg_name" --yes --no-wait
+                done <<< "$RG_LIST"
+              fi
             fi
           fi
 
