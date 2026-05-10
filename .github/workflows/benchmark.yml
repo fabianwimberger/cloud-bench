@@ -190,6 +190,61 @@ jobs:
           fi
           echo "arg=$INSTANCES_ARG" >> $GITHUB_OUTPUT
 
+      - name: Check Azure Core Quota
+        if: ${{ github.event.inputs.provider == 'azure' }}
+        env:
+          ENABLED_INSTANCES: ${{ steps.instances.outputs.arg }}
+          AZURE_MAX_REGIONAL_CORES: ${{ vars.AZURE_MAX_REGIONAL_CORES || '4' }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+
+          selected = json.loads(os.environ["ENABLED_INSTANCES"])
+          max_cores = int(os.environ["AZURE_MAX_REGIONAL_CORES"])
+
+          instances = []
+          current = None
+          in_azure = False
+          for line in open("config/instances.yaml"):
+              if line.startswith("  azure:"):
+                  in_azure = True
+                  continue
+              if in_azure and line.startswith("  ") and not line.startswith("    "):
+                  break
+              if not in_azure:
+                  continue
+              stripped = line.strip()
+              if stripped.startswith("- id: "):
+                  current = {"id": stripped.removeprefix("- id: ").strip()}
+                  instances.append(current)
+              elif current is not None and stripped.startswith("vcpu: "):
+                  current["vcpu"] = int(stripped.removeprefix("vcpu: ").strip())
+
+          if selected is not None:
+              selected_set = {instance.lower() for instance in selected}
+              instances = [
+                  instance
+                  for instance in instances
+                  if instance["id"].lower() in selected_set
+              ]
+
+          total_cores = sum(int(instance.get("vcpu", 0)) for instance in instances)
+          if total_cores > max_cores:
+              names = ", ".join(instance["id"] for instance in instances)
+              print(
+                  "::error::Selected Azure instances need "
+                  f"{total_cores} regional cores in North Europe, "
+                  f"but AZURE_MAX_REGIONAL_CORES is {max_cores}. "
+                  "Run fewer instances or increase the Azure quota/repo variable."
+              )
+              print(f"Selected instances: {names}")
+              sys.exit(1)
+
+          print(f"Azure core quota check passed: {total_cores}/{max_cores} cores")
+          PY
+
       - name: Terraform Apply
         working-directory: terraform
         env:
@@ -703,6 +758,7 @@ jobs:
 
       - name: Terraform Destroy
         if: ${{ hashFiles('terraform/terraform.tfstate') != '' }}
+        continue-on-error: true
         working-directory: terraform
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -751,8 +807,18 @@ jobs:
           Path("runtime.auto.tfvars.json").write_text(json.dumps(tfvars))
           PY
 
-          terraform destroy -auto-approve \
-            -var-file=runtime.auto.tfvars.json
+          for attempt in 1 2 3; do
+            if terraform destroy -auto-approve -var-file=runtime.auto.tfvars.json; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "Terraform destroy failed, retrying after Azure resource release delay..."
+              sleep 180
+            fi
+          done
+
+          exit 1
 
       - name: Verify Cleanup
         if: always()
