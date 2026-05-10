@@ -25,44 +25,25 @@ export default function MultiSelect({ label, options, value = [], onChange }) {
       : `${value.length} selected`
 
   return (
-    <div className="filter-group" ref={ref} style={{ position: 'relative' }}>
+    <div className="filter-group filter-group-select" ref={ref}>
       <label>{label}</label>
       <button
-        className="filter-select"
+        className="filter-select filter-select-button"
         onClick={() => setOpen(!open)}
-        style={{ cursor: 'pointer', minWidth: '110px', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+        type="button"
+        aria-expanded={open}
       >
-        <span style={{ flex: 1 }}>{labelText}</span>
-        <span style={{ fontSize: '0.625rem', color: 'var(--color-text-muted)' }}>{open ? '\u25B2' : '\u25BC'}</span>
+        <span>{labelText}</span>
+        <span className="filter-select-caret">{open ? '\u25B2' : '\u25BC'}</span>
       </button>
       {open && (
-        <div style={{
-          position: 'absolute',
-          top: '100%',
-          left: 0,
-          marginTop: '2px',
-          background: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-sm)',
-          minWidth: '140px',
-          zIndex: 100,
-          boxShadow: 'var(--shadow-md)'
-        }}>
+        <div className="filter-select-menu">
           {options.map(opt => (
-            <label key={opt} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.375rem',
-              padding: '0.375rem 0.5rem',
-              cursor: 'pointer',
-              fontSize: '0.8125rem',
-              color: 'var(--color-text)',
-            }}>
+            <label key={opt} className="filter-select-option">
               <input
                 type="checkbox"
                 checked={value.includes(opt)}
                 onChange={() => toggle(opt)}
-                style={{ accentColor: 'var(--color-primary)' }}
               />
               {opt}
             </label>
