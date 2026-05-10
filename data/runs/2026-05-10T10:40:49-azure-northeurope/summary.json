@@ -1,0 +1,70 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-10T10:40:48.235441",
+    "run_count": 1,
+    "currency": "USD",
+    "provider": "azure",
+    "region": "northeurope",
+    "exchange_rates": {
+      "eur_to_usd": 1.1761,
+      "usd_to_eur": 0.8503,
+      "last_updated": "2026-05-08",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "STANDARD_D2PS_V6"
+    ],
+    "instances": [
+      {
+        "id": "STANDARD_D2PS_V6",
+        "name": "STANDARD_D2PS_V6 (ARM64)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 100.0,
+          "overall": 100.0,
+          "overall_no_disk": 100.0
+        },
+        "value": 1.77,
+        "value_no_disk": 1.77,
+        "metrics": {
+          "cpu_single_events": 1498.9,
+          "cpu_multi_events": 2997.07,
+          "memory_mib_per_sec": 16537.62,
+          "disk_iops": 9414.739262
+        },
+        "pricing": {
+          "hourly": 0.0784,
+          "monthly": 56.45
+        },
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 8,
+          "disk_gb": 30,
+          "arch": "ARM64"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0
+      ],
+      "multi_core": [
+        100.0
+      ],
+      "memory": [
+        100.0
+      ],
+      "disk": [
+        100.0
+      ],
+      "value": [
+        1.77
+      ]
+    }
+  }
+}
