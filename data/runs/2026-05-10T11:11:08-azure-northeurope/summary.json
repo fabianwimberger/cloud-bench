@@ -1,0 +1,70 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-10T11:11:07.928748",
+    "run_count": 1,
+    "currency": "USD",
+    "provider": "azure",
+    "region": "northeurope",
+    "exchange_rates": {
+      "eur_to_usd": 1.1761,
+      "usd_to_eur": 0.8503,
+      "last_updated": "2026-05-08",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "STANDARD_D4PS_V6"
+    ],
+    "instances": [
+      {
+        "id": "STANDARD_D4PS_V6",
+        "name": "STANDARD_D4PS_V6 (ARM64)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 100.0,
+          "overall": 100.0,
+          "overall_no_disk": 100.0
+        },
+        "value": 0.88,
+        "value_no_disk": 0.88,
+        "metrics": {
+          "cpu_single_events": 1499.41,
+          "cpu_multi_events": 5995.55,
+          "memory_mib_per_sec": 26150.34,
+          "disk_iops": 20422.561546
+        },
+        "pricing": {
+          "hourly": 0.157,
+          "monthly": 113.04
+        },
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 16,
+          "disk_gb": 30,
+          "arch": "ARM64"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0
+      ],
+      "multi_core": [
+        100.0
+      ],
+      "memory": [
+        100.0
+      ],
+      "disk": [
+        100.0
+      ],
+      "value": [
+        0.88
+      ]
+    }
+  }
+}

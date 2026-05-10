@@ -2,6 +2,20 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-05-10T11:11:08-azure-northeurope",
+      "timestamp": "2026-05-10T11:11:08",
+      "provider": "azure",
+      "region": "northeurope",
+      "instance_count": 1,
+      "instances": [
+        "STANDARD_D4PS_V6"
+      ],
+      "files": {
+        "summary": "data/runs/2026-05-10T11:11:08-azure-northeurope/summary.json",
+        "detail": "data/runs/2026-05-10T11:11:08-azure-northeurope/detail.json"
+      }
+    },
+    {
       "id": "2026-05-10T10:58:40-azure-northeurope",
       "timestamp": "2026-05-10T10:58:40",
       "provider": "azure",
@@ -1204,6 +1218,9 @@
     }
   ],
   "instance_index": {
+    "STANDARD_D4PS_V6": [
+      "2026-05-10T11:11:08-azure-northeurope"
+    ],
     "STANDARD_D4AS_V7": [
       "2026-05-10T10:58:40-azure-northeurope"
     ],
