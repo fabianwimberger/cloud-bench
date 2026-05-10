@@ -46,6 +46,22 @@ class TestWorkflows(unittest.TestCase):
         self.assertIn("continue-on-error: true", workflow)
         self.assertIn("hashFiles('terraform/terraform.tfstate')", workflow)
 
+    def test_benchmark_workflow_checks_azure_core_quota_before_apply(self):
+        workflow = pathlib.Path(".github/workflows/benchmark.yml").read_text()
+
+        self.assertIn("Check Azure Core Quota", workflow)
+        self.assertIn("AZURE_MAX_REGIONAL_CORES", workflow)
+        self.assertLess(
+            workflow.index("Check Azure Core Quota"),
+            workflow.index("Terraform Apply"),
+        )
+
+    def test_benchmark_cleanup_retries_destroy(self):
+        workflow = pathlib.Path(".github/workflows/benchmark.yml").read_text()
+
+        self.assertIn("for attempt in 1 2 3", workflow)
+        self.assertIn("sleep 180", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

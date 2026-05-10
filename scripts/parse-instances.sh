@@ -4,7 +4,7 @@
 
 set -e
 
-INSTANCES_INPUT="$1"
+INSTANCES_INPUT="$(echo "$1" | sed 's/[[:space:]]*,[[:space:]]*/,/g; s/^[[:space:]]*//; s/[[:space:]]*$//')"
 
 if [ -z "$INSTANCES_INPUT" ]; then
     echo "Error: No instances specified" >&2
