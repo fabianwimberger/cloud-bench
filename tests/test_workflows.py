@@ -28,6 +28,24 @@ class TestWorkflows(unittest.TestCase):
             workflow,
         )
 
+    def test_benchmark_workflows_pass_instance_selection_via_var_file(self):
+        for workflow_path in (
+            ".github/workflows/benchmark.yml",
+            ".github/workflows/benchmark-all.yml",
+        ):
+            workflow = pathlib.Path(workflow_path).read_text()
+
+            self.assertNotIn('-var="enabled_instances=', workflow)
+            self.assertIn("runtime.auto.tfvars.json", workflow)
+            self.assertIn("-var-file=runtime.auto.tfvars.json", workflow)
+
+    def test_benchmark_cleanup_handles_missing_state_artifact(self):
+        workflow = pathlib.Path(".github/workflows/benchmark.yml").read_text()
+
+        self.assertIn("if-no-files-found: ignore", workflow)
+        self.assertIn("continue-on-error: true", workflow)
+        self.assertIn("hashFiles('terraform/terraform.tfstate')", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

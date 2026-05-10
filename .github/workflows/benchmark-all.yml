@@ -205,14 +205,31 @@ jobs:
           TF_VAR_azure_client_id: ${{ secrets.AZURE_CLIENT_ID || '' }}
           TF_VAR_azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
           TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
+          ENABLED_INSTANCES: ${{ steps.instances.outputs.arg }}
+          CLOUD_PROVIDER: ${{ matrix.provider }}
+          DEFAULT_REGION: ${{ matrix.region }}
+          RUNNER_IP: ${{ steps.get_ip.outputs.ip }}
         run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          tfvars = {
+              "run_id": f"{os.environ['GITHUB_RUN_ID']}-{os.environ['CLOUD_PROVIDER']}",
+              "cloud_provider": os.environ["CLOUD_PROVIDER"],
+              "enabled_instances": json.loads(os.environ["ENABLED_INSTANCES"]),
+              "default_region": os.environ["DEFAULT_REGION"],
+              "ssh_public_key_path": os.path.expanduser(
+                  f"~/.ssh/cloud_bench_{os.environ['CLOUD_PROVIDER']}.pub"
+              ),
+              "allowed_ssh_ips": [f"{os.environ['RUNNER_IP']}/32"],
+          }
+          Path("runtime.auto.tfvars.json").write_text(json.dumps(tfvars))
+          PY
+
           terraform apply -auto-approve \
-            -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
-            -var="cloud_provider=${{ matrix.provider }}" \
-            -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
-            -var="default_region=${{ matrix.region }}" \
-            -var="ssh_public_key_path=~/.ssh/cloud_bench_${{ matrix.provider }}.pub" \
-            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]"
+            -var-file=runtime.auto.tfvars.json
 
       - name: Generate Ansible Inventory
         working-directory: terraform
@@ -289,14 +306,29 @@ jobs:
           TF_VAR_azure_client_id: ${{ secrets.AZURE_CLIENT_ID || '' }}
           TF_VAR_azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET || '' }}
           TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
+          ENABLED_INSTANCES: ${{ steps.instances.outputs.arg }}
+          CLOUD_PROVIDER: ${{ matrix.provider }}
+          DEFAULT_REGION: ${{ matrix.region }}
+          RUNNER_IP: ${{ steps.get_ip.outputs.ip }}
         run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          tfvars = {
+              "run_id": f"{os.environ['GITHUB_RUN_ID']}-{os.environ['CLOUD_PROVIDER']}",
+              "cloud_provider": os.environ["CLOUD_PROVIDER"],
+              "enabled_instances": json.loads(os.environ["ENABLED_INSTANCES"]),
+              "default_region": os.environ["DEFAULT_REGION"],
+              "ssh_public_key_path": "/dev/null",
+              "allowed_ssh_ips": [f"{os.environ['RUNNER_IP']}/32"],
+          }
+          Path("runtime.auto.tfvars.json").write_text(json.dumps(tfvars))
+          PY
+
           terraform destroy -auto-approve \
-            -var="run_id=${{ github.run_id }}-${{ matrix.provider }}" \
-            -var="cloud_provider=${{ matrix.provider }}" \
-            -var="enabled_instances=${{ steps.instances.outputs.arg }}" \
-            -var="default_region=${{ matrix.region }}" \
-            -var="ssh_public_key_path=/dev/null" \
-            -var="allowed_ssh_ips=[\"${{ steps.get_ip.outputs.ip }}/32\"]"
+            -var-file=runtime.auto.tfvars.json
 
       - name: Verify Cleanup (${{ matrix.provider }})
         if: always()
@@ -306,6 +338,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ matrix.region }}
           OVH_OPENSTACK_USERNAME: ${{ secrets.OVH_OPENSTACK_USERNAME }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           echo "Verifying cleanup..."
           RUN_ID="${{ github.run_id }}-${{ matrix.provider }}"
@@ -394,6 +430,25 @@ jobs:
               exit 1
             else
               echo "[OK] Azure resources cleaned up successfully"
+            fi
+
+            if [ -n "$AZURE_SUBSCRIPTION_ID" ]; then
+              az login \
+                --service-principal \
+                --username "$AZURE_CLIENT_ID" \
+                --password "$AZURE_CLIENT_SECRET" \
+                --tenant "$AZURE_TENANT_ID" >/dev/null
+              az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+
+              RG_LIST=$(az group list \
+                --query "[?tags.project=='cloud-bench' && tags.run_id=='$RUN_ID'].name" \
+                -o tsv)
+              if [ -n "$RG_LIST" ]; then
+                echo "Deleting Azure resource groups left for run $RUN_ID"
+                while IFS= read -r rg_name; do
+                  az group delete -n "$rg_name" --yes --no-wait
+                done <<< "$RG_LIST"
+              fi
             fi
           fi
 
