@@ -2,6 +2,20 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-05-10T12:26:59-azure-northeurope",
+      "timestamp": "2026-05-10T12:26:59",
+      "provider": "azure",
+      "region": "northeurope",
+      "instance_count": 1,
+      "instances": [
+        "STANDARD_D4PS_V6"
+      ],
+      "files": {
+        "summary": "data/runs/2026-05-10T12:26:59-azure-northeurope/summary.json",
+        "detail": "data/runs/2026-05-10T12:26:59-azure-northeurope/detail.json"
+      }
+    },
+    {
       "id": "2026-05-10T12:16:47-azure-northeurope",
       "timestamp": "2026-05-10T12:16:47",
       "provider": "azure",
@@ -1312,6 +1326,10 @@
     }
   ],
   "instance_index": {
+    "STANDARD_D4PS_V6": [
+      "2026-05-10T12:26:59-azure-northeurope",
+      "2026-05-10T11:11:08-azure-northeurope"
+    ],
     "STANDARD_D4AS_V7": [
       "2026-05-10T12:16:47-azure-northeurope",
       "2026-05-10T10:58:40-azure-northeurope"
@@ -1452,9 +1470,6 @@
       "2026-03-28T14:05:32-ovhcloud-DE1",
       "2026-03-25T19:46:30-ovhcloud-DE1",
       "2026-03-22T10:38:52-ovhcloud-DE1"
-    ],
-    "STANDARD_D4PS_V6": [
-      "2026-05-10T11:11:08-azure-northeurope"
     ],
     "C7I-FLEX.LARGE": [
       "2026-05-08T18:09:44-aws-eu-central-1",
