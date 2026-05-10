@@ -1,0 +1,57 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-05-10T12:06:52.512414",
+    "run_count": 1,
+    "currency": "USD",
+    "provider": "azure",
+    "region": "northeurope",
+    "exchange_rates": {
+      "eur_to_usd": 1.1761,
+      "usd_to_eur": 0.8503,
+      "last_updated": "2026-05-08",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "instances": [
+    {
+      "id": "STANDARD_D2PS_V6",
+      "name": "STANDARD_D2PS_V6 (ARM64)",
+      "scores": {
+        "single_core": 100.0,
+        "multi_core": 100.0,
+        "memory": 100.0,
+        "disk": 100.0,
+        "overall": 100.0,
+        "overall_no_disk": 100.0
+      },
+      "value": 1.77,
+      "value_no_disk": 1.77,
+      "metrics": {
+        "cpu_single_raw": 1499.66,
+        "cpu_multi_raw": 2997.0,
+        "mem_read_raw": 10435.03,
+        "mem_write_raw": 6435.42,
+        "mem_throughput_raw": 16870.45,
+        "disk_iops_raw": 9412.035042
+      },
+      "pricing": {
+        "hourly": 0.0784,
+        "monthly": 56.45
+      },
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 8,
+        "disk_gb": 30,
+        "arch": "ARM64"
+      },
+      "provider_attributes": {
+        "arch": "ARM64",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 8192
+      }
+    }
+  ]
+}
