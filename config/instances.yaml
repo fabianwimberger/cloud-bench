@@ -362,11 +362,11 @@ providers:
         hourly: 0.157
         monthly: 113.04
 exchange_rates:
-  eur_to_usd: 1.1761
-  usd_to_eur: 0.8503
-  last_updated: '2026-05-08'
+  eur_to_usd: 1.1644
+  usd_to_eur: 0.8588
+  last_updated: '2026-05-29'
   source: Frankfurter API (ECB data)
 _metadata:
-  last_pricing_update: '2026-05-08T17:51:44.367774'
+  last_pricing_update: '2026-05-30T19:02:08.767628'
   source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing
     API / GCP Cloud Billing API / Azure Retail Prices API
