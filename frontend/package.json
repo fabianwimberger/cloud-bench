@@ -12,12 +12,12 @@
   },
   "dependencies": {
     "chart.js": "4.5.1",
-    "react": "19.2.6",
+    "react": "19.2.7",
     "react-chartjs-2": "5.3.1",
     "react-dom": "19.2.6"
   },
   "devDependencies": {
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.16",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
     "vite": "8.0.14"
