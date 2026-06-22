@@ -67,7 +67,7 @@ jobs:
       ssh_pub_key: ${{ steps.export_key.outputs.pub_key }}
       region: ${{ steps.resolve_region.outputs.region }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Resolve Region
         id: resolve_region
@@ -330,7 +330,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download Ansible Inventory
         uses: actions/download-artifact@v8
@@ -607,7 +607,7 @@ jobs:
     outputs:
       summary: ${{ steps.summary.outputs.content }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download Results
         uses: actions/download-artifact@v8
@@ -710,7 +710,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Get Runner Public IP
         id: get_ip
@@ -961,7 +961,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python
         uses: actions/setup-python@v6
