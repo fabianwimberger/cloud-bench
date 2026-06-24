@@ -18,7 +18,7 @@ jobs:
   cost-guard:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Estimate Costs (All Providers)
         run: |
@@ -119,7 +119,7 @@ jobs:
             region: northeurope
             instances: all
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
@@ -465,7 +465,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Download All Results
         uses: actions/download-artifact@v8
@@ -553,7 +553,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup Python
         uses: actions/setup-python@v6
