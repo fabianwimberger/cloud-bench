@@ -196,6 +196,9 @@ function InstanceHistory({ instanceType, historyEntry, historyError, onClose, cu
 
   const displayCurrency = currency?.displayCurrency || 'EUR'
   const fp = currency?.formatPrice || (v => `${displayCurrency === 'EUR' ? '\u20AC' : '$'}${v.toFixed(2)}`)
+  // Each history run carries its own native currency (missing on runs
+  // recorded before this field existed, which were already stored as USD).
+  const fpRun = (amount, runCurrency) => fp(amount, runCurrency || 'USD')
 
   return (
     <div className="history-overlay" onClick={onClose}>
@@ -273,7 +276,7 @@ function InstanceHistory({ instanceType, historyEntry, historyError, onClose, cu
                     </div>
                   </td>
                   <td className="price-cell cell-numeric">
-                    {run.pricing?.monthly != null ? fp(run.pricing.monthly) : '—'}
+                    {run.pricing?.monthly != null ? fpRun(run.pricing.monthly, run.currency) : '—'}
                   </td>
                 </tr>
               ))}

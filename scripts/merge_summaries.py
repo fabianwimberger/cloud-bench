@@ -101,7 +101,6 @@ def main():
             exchange_rates = latest_meta["exchange_rates"]
 
         currency = latest_meta.get("currency", "USD")
-        eur_to_usd = latest_meta.get("exchange_rates", {}).get("eur_to_usd", 1.0)
 
         run_count_for_provider = len(provider_runs)
 
@@ -122,15 +121,12 @@ def main():
                         metrics[mk] = round(sum(values) / len(values), 1)
                 print(f"  [AVG] {inst_id}: averaged {len(inst_list)} runs")
 
-            # Tag each instance with its provider for the frontend
+            # Tag each instance with its provider and native pricing currency.
+            # Pricing stays in its native currency; conversion happens only
+            # when the frontend displays it, using the current exchange rate.
             inst["provider"] = provider
             inst["region"] = provider_runs[-1].get("region", "")
-
-            # Normalize all prices to USD
-            if currency == "EUR":
-                pricing = inst.get("pricing", {})
-                pricing["hourly"] = round(pricing.get("hourly", 0) * eur_to_usd, 4)
-                pricing["monthly"] = round(pricing.get("monthly", 0) * eur_to_usd, 2)
+            inst["currency"] = currency
 
             all_instances.append(inst)
             all_labels.append(inst["id"])
@@ -140,14 +136,13 @@ def main():
         )
 
     # Re-score across all instances so scores are comparable
-    all_instances = rescale_scores(all_instances)
+    all_instances = rescale_scores(all_instances, exchange_rates)
 
     merged = {
         "schema_version": "2.0",
         "metadata": {
             "generated_at": datetime.now().isoformat(),
             "run_count": len(all_instances),
-            "currency": "USD",
             "providers": providers_seen,
             "exchange_rates": exchange_rates,
         },
@@ -166,10 +161,14 @@ def main():
     )
 
 
-def rescale_scores(instances: list[dict]) -> list[dict]:
+def rescale_scores(
+    instances: list[dict], exchange_rates: dict | None = None
+) -> list[dict]:
     """Rescale scores across all instances so they are comparable."""
     if not instances:
         return instances
+
+    eur_to_usd = (exchange_rates or {}).get("eur_to_usd", 1.0)
 
     metrics_keys = [
         "cpu_single_events",
@@ -214,8 +213,12 @@ def rescale_scores(instances: list[dict]) -> list[dict]:
             round(sum(no_disk_scores) / len(no_disk_scores), 1) if no_disk_scores else 0
         )
 
-        # Recalculate value score (overall / monthly price)
+        # Recalculate value score (overall / monthly price). Normalize to USD
+        # first so instances priced in different native currencies remain
+        # comparable; the stored native pricing itself is left untouched.
         monthly = inst.get("pricing", {}).get("monthly", 0)
+        if inst.get("currency") == "EUR":
+            monthly = monthly * eur_to_usd
         if monthly > 0:
             inst["value"] = round(scores["overall"] / monthly, 1)
             inst["value_no_disk"] = round(scores["overall_no_disk"] / monthly, 1)

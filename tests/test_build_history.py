@@ -86,7 +86,7 @@ class TestExtractInstanceData(unittest.TestCase):
         }
         run_meta = {"timestamp": "2024-01-01T00:00:00Z", "region": "nbg1"}
 
-        result = bh.extract_instance_data(detail, run_meta, 1.0)
+        result = bh.extract_instance_data(detail, run_meta)
 
         self.assertIn("cx11", result)
         self.assertEqual(result["cx11"]["timestamp"], "2024-01-01T00:00:00Z")
@@ -104,7 +104,7 @@ class TestExtractInstanceData(unittest.TestCase):
         }
         run_meta = {"timestamp": "2024-01-01T00:00:00Z", "region": "nbg1"}
 
-        result = bh.extract_instance_data(detail, run_meta, 1.0)
+        result = bh.extract_instance_data(detail, run_meta)
 
         self.assertEqual(len(result), 2)
         self.assertIn("cx11", result)
@@ -120,7 +120,7 @@ class TestExtractInstanceData(unittest.TestCase):
         }
         run_meta = {"timestamp": "2024-01-01T00:00:00Z", "region": "nbg1"}
 
-        result = bh.extract_instance_data(detail, run_meta, 1.0)
+        result = bh.extract_instance_data(detail, run_meta)
 
         self.assertEqual(len(result), 1)
         self.assertIn("cx11", result)
@@ -143,7 +143,7 @@ class TestExtractInstanceData(unittest.TestCase):
         }
         run_meta = {"timestamp": "2024-01-01T00:00:00Z"}
 
-        result = bh.extract_instance_data(detail, run_meta, 1.0)
+        result = bh.extract_instance_data(detail, run_meta)
 
         # Legacy names should be mapped to new names
         self.assertEqual(result["cx11"]["metrics"]["cpu_single_raw"], 1000)
@@ -156,12 +156,12 @@ class TestExtractInstanceData(unittest.TestCase):
         detail = {"instances": []}
         run_meta = {"timestamp": "2024-01-01T00:00:00Z"}
 
-        result = bh.extract_instance_data(detail, run_meta, 1.0)
+        result = bh.extract_instance_data(detail, run_meta)
 
         self.assertEqual(len(result), 0)
 
-    def test_extract_converts_eur_to_usd(self):
-        """Test that EUR pricing is converted to USD."""
+    def test_extract_keeps_eur_pricing_native(self):
+        """Test that EUR pricing is kept in its native currency."""
         detail = {
             "metadata": {"currency": "EUR"},
             "instances": [
@@ -174,10 +174,11 @@ class TestExtractInstanceData(unittest.TestCase):
         }
         run_meta = {"timestamp": "2024-01-01T00:00:00Z", "region": "fsn1"}
 
-        result = bh.extract_instance_data(detail, run_meta, 1.15)
+        result = bh.extract_instance_data(detail, run_meta)
 
-        self.assertAlmostEqual(result["cax11"]["pricing"]["monthly"], 5.16, places=2)
-        self.assertAlmostEqual(result["cax11"]["pricing"]["hourly"], 0.0083, places=4)
+        self.assertEqual(result["cax11"]["pricing"]["monthly"], 4.49)
+        self.assertEqual(result["cax11"]["pricing"]["hourly"], 0.0072)
+        self.assertEqual(result["cax11"]["currency"], "EUR")
 
     def test_extract_usd_pricing_unchanged(self):
         """Test that USD pricing is not converted."""
@@ -193,10 +194,11 @@ class TestExtractInstanceData(unittest.TestCase):
         }
         run_meta = {"timestamp": "2024-01-01T00:00:00Z"}
 
-        result = bh.extract_instance_data(detail, run_meta, 1.15)
+        result = bh.extract_instance_data(detail, run_meta)
 
         self.assertEqual(result["t3.micro"]["pricing"]["monthly"], 7.59)
         self.assertEqual(result["t3.micro"]["pricing"]["hourly"], 0.0104)
+        self.assertEqual(result["t3.micro"]["currency"], "USD")
 
 
 class TestBuildHistory(unittest.TestCase):
