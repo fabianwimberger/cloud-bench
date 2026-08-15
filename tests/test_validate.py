@@ -23,6 +23,58 @@ class TestRunCommand(unittest.TestCase):
         self.assertEqual(stderr, "boom")
 
 
+class TestValidateTerraform(unittest.TestCase):
+    def setUp(self):
+        self.original_cwd = os.getcwd()
+        self.tmpdir = tempfile.mkdtemp()
+        os.chdir(self.tmpdir)
+
+    def tearDown(self):
+        os.chdir(self.original_cwd)
+
+    def make_provider_dir(self, name):
+        provider_dir = Path("terraform") / "providers" / name
+        provider_dir.mkdir(parents=True)
+        for filename in ("main.tf", "variables.tf", "outputs.tf"):
+            (provider_dir / filename).write_text("")
+        return provider_dir
+
+    def test_missing_terraform_dir_fails(self):
+        self.assertFalse(validate.validate_terraform())
+
+    def test_no_provider_root_modules_fails(self):
+        (Path("terraform") / "providers").mkdir(parents=True)
+
+        with mock.patch("validate.run_command", return_value=(True, "", "")):
+            self.assertFalse(validate.validate_terraform())
+
+    def test_missing_required_file_fails(self):
+        provider_dir = self.make_provider_dir("hetzner")
+        (provider_dir / "outputs.tf").unlink()
+
+        with mock.patch("validate.run_command", return_value=(True, "", "")):
+            self.assertFalse(validate.validate_terraform())
+
+    def test_valid_provider_dirs_pass(self):
+        self.make_provider_dir("hetzner")
+        self.make_provider_dir("aws")
+
+        with mock.patch("validate.run_command", return_value=(True, "", "")):
+            self.assertTrue(validate.validate_terraform())
+
+    def test_init_failure_for_one_provider_fails_overall(self):
+        self.make_provider_dir("hetzner")
+        self.make_provider_dir("aws")
+
+        def fake_run_command(cmd, cwd=None):
+            if cmd[:2] == ["terraform", "init"] and str(cwd).endswith("aws"):
+                return False, "", "init failed"
+            return True, "", ""
+
+        with mock.patch("validate.run_command", side_effect=fake_run_command):
+            self.assertFalse(validate.validate_terraform())
+
+
 class TestValidateFrontend(unittest.TestCase):
     def setUp(self):
         self.original_cwd = os.getcwd()
