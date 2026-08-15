@@ -82,7 +82,7 @@ def validate_terraform():
 
     all_valid = True
 
-    # Check terraform fmt
+    # Check terraform fmt across the whole tree (root modules + shared modules)
     success, stdout, stderr = run_command(
         ["terraform", "fmt", "-check", "-recursive"], cwd=terraform_dir
     )
@@ -93,31 +93,42 @@ def validate_terraform():
         print("Run 'terraform fmt -recursive' to fix")
         all_valid = False
 
-    # Check terraform init (without backend for validation)
-    success, stdout, stderr = run_command(
-        ["terraform", "init", "-backend=false"], cwd=terraform_dir
-    )
-    if success:
-        print_success("Terraform init successful")
-    else:
-        print_error(f"Terraform init failed: {stderr}")
-        all_valid = False
+    # Each cloud provider is its own isolated root module so that one
+    # provider's broken credentials can never block another provider's runs.
+    providers_dir = terraform_dir / "providers"
+    provider_dirs = sorted(p for p in providers_dir.iterdir() if p.is_dir())
+    if not provider_dirs:
+        print_error("No provider root modules found under terraform/providers")
+        return False
 
-    # Check terraform validate
-    success, stdout, stderr = run_command(["terraform", "validate"], cwd=terraform_dir)
-    if success:
-        print_success("Terraform configuration is valid")
-    else:
-        print_error(f"Terraform validation failed: {stderr}")
-        all_valid = False
-
-    # Check for required files
     required_files = ["main.tf", "variables.tf", "outputs.tf"]
-    for file in required_files:
-        if (terraform_dir / file).exists():
-            print_success(f"Required file exists: {file}")
+    for provider_dir in provider_dirs:
+        name = provider_dir.name
+
+        for file in required_files:
+            if (provider_dir / file).exists():
+                print_success(f"Required file exists: {name}/{file}")
+            else:
+                print_error(f"Missing required file: {name}/{file}")
+                all_valid = False
+
+        success, stdout, stderr = run_command(
+            ["terraform", "init", "-backend=false"], cwd=provider_dir
+        )
+        if success:
+            print_success(f"Terraform init successful: {name}")
         else:
-            print_error(f"Missing required file: {file}")
+            print_error(f"Terraform init failed ({name}): {stderr}")
+            all_valid = False
+            continue
+
+        success, stdout, stderr = run_command(
+            ["terraform", "validate"], cwd=provider_dir
+        )
+        if success:
+            print_success(f"Terraform configuration is valid: {name}")
+        else:
+            print_error(f"Terraform validation failed ({name}): {stderr}")
             all_valid = False
 
     return all_valid
