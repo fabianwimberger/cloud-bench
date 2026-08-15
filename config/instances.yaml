@@ -21,8 +21,8 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly: 0.0064
-        monthly: 3.99
+        hourly: 0.0088
+        monthly: 5.49
     - id: cx33
       name: CX33
       arch: X86
@@ -30,8 +30,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly: 0.0104
-        monthly: 6.49
+        hourly: 0.0136
+        monthly: 8.49
     - id: cax11
       name: CAX11
       arch: ARM64
@@ -39,8 +39,8 @@ providers:
       ram_gb: 4
       disk_gb: 40
       pricing:
-        hourly: 0.0072
-        monthly: 4.49
+        hourly: 0.0096
+        monthly: 5.99
     - id: cax21
       name: CAX21
       arch: ARM64
@@ -48,8 +48,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly: 0.0128
-        monthly: 7.99
+        hourly: 0.0168
+        monthly: 10.49
     - id: cpx22
       name: CPX22
       arch: X86
@@ -57,8 +57,8 @@ providers:
       ram_gb: 4
       disk_gb: 80
       pricing:
-        hourly: 0.0128
-        monthly: 7.99
+        hourly: 0.0312
+        monthly: 19.49
     - id: cpx32
       name: CPX32
       arch: X86
@@ -66,8 +66,8 @@ providers:
       ram_gb: 8
       disk_gb: 160
       pricing:
-        hourly: 0.0224
-        monthly: 13.99
+        hourly: 0.0569
+        monthly: 35.49
     - id: ccx13
       name: CCX13
       arch: X86
@@ -75,8 +75,8 @@ providers:
       ram_gb: 8
       disk_gb: 80
       pricing:
-        hourly: 0.0272
-        monthly: 16.99
+        hourly: 0.0697
+        monthly: 43.49
     - id: ccx23
       name: CCX23
       arch: X86
@@ -84,8 +84,8 @@ providers:
       ram_gb: 16
       disk_gb: 160
       pricing:
-        hourly: 0.0545
-        monthly: 33.99
+        hourly: 0.1402
+        monthly: 87.49
   ovhcloud:
     currency: EUR
     default_region: DE1
@@ -362,11 +362,11 @@ providers:
         hourly: 0.157
         monthly: 113.04
 exchange_rates:
-  eur_to_usd: 1.1644
-  usd_to_eur: 0.8588
-  last_updated: '2026-05-29'
+  eur_to_usd: 1.1567
+  usd_to_eur: 0.8645
+  last_updated: '2026-08-14'
   source: Frankfurter API (ECB data)
 _metadata:
-  last_pricing_update: '2026-05-30T19:02:08.767628'
+  last_pricing_update: '2026-08-15T17:38:29.453804'
   source: Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing
     API / GCP Cloud Billing API / Azure Retail Prices API
