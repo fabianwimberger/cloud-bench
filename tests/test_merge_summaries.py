@@ -472,8 +472,8 @@ class TestMain(unittest.TestCase):
         finally:
             sys.argv = original_argv
 
-    def test_main_eur_to_usd_conversion(self):
-        """Test that EUR prices are converted to USD."""
+    def test_main_preserves_native_currency(self):
+        """Test that pricing stays in its native currency, tagged per instance."""
         self.create_manifest(
             [
                 {
@@ -526,12 +526,41 @@ class TestMain(unittest.TestCase):
             with open(self.output_path) as f:
                 result = json.load(f)
 
-            # Prices should be converted to USD
-            pricing = result["summary"]["instances"][0]["pricing"]
-            self.assertAlmostEqual(pricing["monthly"], 3.79, places=1)  # 3.49 * 1.087
-            self.assertEqual(result["metadata"]["currency"], "USD")
+            # Pricing stays untouched in its native currency
+            instance = result["summary"]["instances"][0]
+            self.assertEqual(instance["pricing"]["monthly"], 3.49)
+            self.assertEqual(instance["pricing"]["hourly"], 0.0048)
+            self.assertEqual(instance["currency"], "EUR")
+            self.assertNotIn("currency", result["metadata"])
         finally:
             sys.argv = original_argv
+
+    def test_value_normalizes_eur_for_ranking(self):
+        """EUR-priced instances should be normalized to USD before ranking,
+        so the stored value score stays comparable to USD-priced instances,
+        while the instance's own native pricing is left untouched."""
+        instances = [
+            {
+                "id": "cx11",
+                "metrics": {
+                    "cpu_single_events": 1000,
+                    "cpu_multi_events": 2000,
+                    "memory_mib_per_sec": 8000,
+                    "disk_iops": 10000,
+                },
+                "scores": {"overall": 50},
+                "pricing": {"monthly": 10},
+                "currency": "EUR",
+                "value": 0,
+            }
+        ]
+
+        result = ms.rescale_scores(instances, {"eur_to_usd": 1.1})
+
+        # Value = overall_score / (monthly_price * eur_to_usd) = 100 / 11
+        self.assertAlmostEqual(result[0]["value"], round(100 / 11, 1))
+        # Native pricing is untouched
+        self.assertEqual(result[0]["pricing"]["monthly"], 10)
 
 
 if __name__ == "__main__":
