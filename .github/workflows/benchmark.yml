@@ -177,7 +177,7 @@ jobs:
           echo "SSH_PRIVATE_KEY_FILE=~/.ssh/cloud_bench" >> $GITHUB_ENV
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: terraform/providers/${{ github.event.inputs.provider }}
         run: terraform init
 
       - name: Determine Instances
@@ -246,7 +246,7 @@ jobs:
           PY
 
       - name: Terraform Apply
-        working-directory: terraform
+        working-directory: terraform/providers/${{ github.event.inputs.provider }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -269,7 +269,6 @@ jobs:
           TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
           ENABLED_INSTANCES: ${{ steps.instances.outputs.arg }}
           INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
-          CLOUD_PROVIDER: ${{ github.event.inputs.provider }}
           DEFAULT_REGION: ${{ steps.resolve_region.outputs.region }}
           RUNNER_IP: ${{ steps.get_ip.outputs.ip }}
           OS_IMAGE: ${{ vars.OS_IMAGE || 'ubuntu-24.04' }}
@@ -283,7 +282,6 @@ jobs:
           instance_regions = json.loads(os.environ["INSTANCE_REGIONS"])
           tfvars = {
               "run_id": os.environ["RUN_ID"],
-              "cloud_provider": os.environ["CLOUD_PROVIDER"],
               "enabled_instances": enabled_instances,
               "default_region": os.environ["DEFAULT_REGION"],
               "instance_regions": instance_regions,
@@ -298,16 +296,16 @@ jobs:
             -var-file=runtime.auto.tfvars.json
 
       - name: Generate Ansible Inventory
-        working-directory: terraform
+        working-directory: terraform/providers/${{ github.event.inputs.provider }}
         run: |
-          terraform output -raw ansible_inventory > ../ansible/inventory.ini
+          terraform output -raw ansible_inventory > ../../../ansible/inventory.ini
 
       - name: Upload Terraform State
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: terraform-state
-          path: terraform/terraform.tfstate
+          path: terraform/providers/${{ github.event.inputs.provider }}/terraform.tfstate
           retention-days: 1
           if-no-files-found: ignore
 
@@ -743,7 +741,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: terraform-state
-          path: terraform/
+          path: terraform/providers/${{ github.event.inputs.provider }}/
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
@@ -752,14 +750,14 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform Init
-        if: ${{ hashFiles('terraform/terraform.tfstate') != '' }}
-        working-directory: terraform
+        if: ${{ hashFiles(format('terraform/providers/{0}/terraform.tfstate', github.event.inputs.provider)) != '' }}
+        working-directory: terraform/providers/${{ github.event.inputs.provider }}
         run: terraform init
 
       - name: Terraform Destroy
-        if: ${{ hashFiles('terraform/terraform.tfstate') != '' }}
+        if: ${{ hashFiles(format('terraform/providers/{0}/terraform.tfstate', github.event.inputs.provider)) != '' }}
         continue-on-error: true
-        working-directory: terraform
+        working-directory: terraform/providers/${{ github.event.inputs.provider }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -782,7 +780,6 @@ jobs:
           TF_VAR_azure_tenant_id: ${{ secrets.AZURE_TENANT_ID || '' }}
           ENABLED_INSTANCES: ${{ needs.provision.outputs.instances_arg }}
           INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
-          CLOUD_PROVIDER: ${{ github.event.inputs.provider }}
           DEFAULT_REGION: ${{ needs.provision.outputs.region }}
           RUNNER_IP: ${{ steps.get_ip.outputs.ip }}
           OS_IMAGE: ${{ vars.OS_IMAGE || 'ubuntu-24.04' }}
@@ -796,7 +793,6 @@ jobs:
           instance_regions = json.loads(os.environ["INSTANCE_REGIONS"])
           tfvars = {
               "run_id": os.environ["RUN_ID"],
-              "cloud_provider": os.environ["CLOUD_PROVIDER"],
               "enabled_instances": enabled_instances,
               "default_region": os.environ["DEFAULT_REGION"],
               "instance_regions": instance_regions,
@@ -879,7 +875,7 @@ jobs:
 
           elif [ "${{ github.event.inputs.provider }}" = "ovhcloud" ]; then
             # Verify OVH instances are cleaned up by checking Terraform state
-            cd terraform
+            cd terraform/providers/ovhcloud
             REMAINING=$(terraform state list 2>/dev/null | grep -c "openstack_compute_instance" || true)
             if [ "$REMAINING" -gt 0 ]; then
               echo "::error::CRITICAL: OVH instances still in Terraform state after cleanup!"
@@ -892,7 +888,7 @@ jobs:
 
           elif [ "${{ github.event.inputs.provider }}" = "oci" ]; then
             # Verify OCI instances are cleaned up by checking Terraform state
-            cd terraform
+            cd terraform/providers/oci
             REMAINING=$(terraform state list 2>/dev/null | grep -c "oci_core_instance" || true)
             if [ "$REMAINING" -gt 0 ]; then
               echo "::error::CRITICAL: OCI instances still in Terraform state after cleanup!"
@@ -904,7 +900,7 @@ jobs:
             fi
 
           elif [ "${{ github.event.inputs.provider }}" = "gcp" ]; then
-            cd terraform
+            cd terraform/providers/gcp
             REMAINING_INSTANCES=$(terraform state list 2>/dev/null | grep -c "google_compute_instance" || true)
             REMAINING_FIREWALLS=$(terraform state list 2>/dev/null | grep -c "google_compute_firewall" || true)
             if [ "$REMAINING_INSTANCES" -gt 0 ] || [ "$REMAINING_FIREWALLS" -gt 0 ]; then
@@ -917,7 +913,7 @@ jobs:
             fi
 
           elif [ "${{ github.event.inputs.provider }}" = "azure" ]; then
-            cd terraform
+            cd terraform/providers/azure
             REMAINING=$(terraform state list 2>/dev/null | grep -c "azurerm_linux_virtual_machine" || true)
             if [ "$REMAINING" -gt 0 ]; then
               echo "::error::CRITICAL: Azure VMs still in Terraform state after cleanup!"
