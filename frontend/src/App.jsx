@@ -23,6 +23,17 @@ const DataAPI = {
   }
 }
 
+function convertCurrency(amount, fromCurrency, toCurrency, exchangeRates) {
+  if (!fromCurrency || fromCurrency === toCurrency || !exchangeRates) return amount
+  if (fromCurrency === 'EUR' && toCurrency === 'USD') {
+    return amount * (exchangeRates.eur_to_usd || 1)
+  }
+  if (fromCurrency === 'USD' && toCurrency === 'EUR') {
+    return amount * (exchangeRates.usd_to_eur || 1)
+  }
+  return amount
+}
+
 function parseExprFilter(expr, value) {
   if (!expr || expr.trim() === '') return true
   const match = expr.trim().match(/^([<>]=?|=)?\s*(\d+\.?\d*)$/)
@@ -57,6 +68,7 @@ function transformData(data) {
       vcpu: inst.specs?.vcpu || 0,
       ram_gb: inst.specs?.ram_gb || 0,
       disk_gb: inst.specs?.disk_gb || 0,
+      currency: inst.currency || 'USD',
       price_hourly: inst.pricing?.hourly || 0,
       price_monthly: inst.pricing?.monthly || 0,
       single_core_score: inst.scores?.single_core || 0,
@@ -140,12 +152,13 @@ function App() {
       const transformed = transformData(summary)
       setData(transformed)
 
-      setDisplayCurrency(transformed.metadata?.currency || 'USD')
-
+      const maxPriceUsd = Math.max(...transformed.ranking.map(r =>
+        convertCurrency(r.price_monthly, r.currency, 'USD', transformed.metadata?.exchange_rates)
+      ))
       setFilters(prev => ({
         ...prev,
         min_monthly_price: 0,
-        max_monthly_price: Math.ceil(Math.max(...transformed.ranking.map(r => r.price_monthly)) * 1.2)
+        max_monthly_price: Math.ceil(maxPriceUsd * 1.2)
       }))
 
       setError(null)
@@ -158,9 +171,19 @@ function App() {
     }
   }
 
+  const exchangeRates = data?.metadata?.exchange_rates
+
+  const pricedRanking = useMemo(() => {
+    return (data?.ranking || []).map(r => ({
+      ...r,
+      price_hourly: convertCurrency(r.price_hourly, r.currency, displayCurrency, exchangeRates),
+      price_monthly: convertCurrency(r.price_monthly, r.currency, displayCurrency, exchangeRates),
+    }))
+  }, [data?.ranking, displayCurrency, exchangeRates])
+
   const filteredRanking = useMemo(() => {
-    return filterData(data?.ranking, filters)
-  }, [data?.ranking, filters])
+    return filterData(pricedRanking, filters)
+  }, [pricedRanking, filters])
 
   const effectiveRanking = useMemo(() => {
     return (filteredRanking || []).map(r => ({
@@ -216,33 +239,18 @@ function App() {
     setSelectedHistoryInstance(null)
   }, [])
 
-  const nativeCurrency = data?.metadata?.currency || 'USD'
-  const exchangeRates = data?.metadata?.exchange_rates
-
-  const convertAmount = (amount) => {
-    if (displayCurrency === nativeCurrency || !exchangeRates) {
-      return amount
-    }
-    if (nativeCurrency === 'EUR' && displayCurrency === 'USD') {
-      return amount * (exchangeRates.eur_to_usd || 1)
-    }
-    if (nativeCurrency === 'USD' && displayCurrency === 'EUR') {
-      return amount * (exchangeRates.usd_to_eur || 1)
-    }
-    return amount
-  }
-
   const currencyProps = {
     displayCurrency,
-    nativeCurrency,
-    exchangeRates,
-    formatPrice: (amount) => {
-      const converted = convertAmount(amount)
+    formatPrice: (amount, fromCurrency = displayCurrency) => {
+      const converted = convertCurrency(amount, fromCurrency, displayCurrency, exchangeRates)
       const symbol = displayCurrency === 'EUR' ? '\u20AC' : '$'
       return `${symbol}${converted.toFixed(2)}`
     },
-    formatPriceRaw: (amount) => convertAmount(amount),
+    formatPriceRaw: (amount, fromCurrency = displayCurrency) =>
+      convertCurrency(amount, fromCurrency, displayCurrency, exchangeRates),
   }
+
+  const pricedData = data ? { ...data, ranking: pricedRanking } : data
 
   if (loading && !data) {
     return (
@@ -265,10 +273,10 @@ function App() {
           </div>
         )}
 
-        <StatsOverview data={data} currency={currencyProps} />
+        <StatsOverview data={pricedData} currency={currencyProps} />
 
         <InstanceFilter
-          ranking={data?.ranking}
+          ranking={pricedRanking}
           filters={filters}
           onFilterChange={setFilters}
           currency={currencyProps}

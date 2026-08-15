@@ -36,13 +36,12 @@ def load_detail(detail_path: str) -> dict | None:
         return None
 
 
-def extract_instance_data(
-    detail: dict, run_meta: dict, eur_to_usd: float
-) -> dict[str, dict]:
+def extract_instance_data(detail: dict, run_meta: dict) -> dict[str, dict]:
     """Extract per-instance data from a detail.json file.
 
     Returns a dict mapping instance_id -> {scores, metrics, pricing, specs}.
-    Pricing is normalized to USD.
+    Pricing is kept in its native currency; conversion happens only when the
+    frontend displays it, using the current exchange rate.
     """
     metadata = detail.get("metadata", {})
     currency = metadata.get("currency", "USD")
@@ -54,13 +53,11 @@ def extract_instance_data(
             continue
 
         pricing = dict(inst.get("pricing", {}))
-        if currency == "EUR" and eur_to_usd != 1.0:
-            pricing["hourly"] = round(pricing.get("hourly", 0) * eur_to_usd, 4)
-            pricing["monthly"] = round(pricing.get("monthly", 0) * eur_to_usd, 2)
 
         instances_data[inst_id] = {
             "timestamp": run_meta.get("timestamp", ""),
             "region": run_meta.get("region", ""),
+            "currency": currency,
             "scores": inst.get("scores", {}),
             "metrics": {
                 "cpu_single_raw": inst.get("metrics", {}).get(
@@ -113,9 +110,7 @@ def build_history(data_dir: str) -> dict:
             continue
 
         provider = run.get("provider", "unknown")
-        meta = detail.get("metadata", {})
-        eur_to_usd = meta.get("exchange_rates", {}).get("eur_to_usd", 1.0)
-        instance_data = extract_instance_data(detail, run, eur_to_usd)
+        instance_data = extract_instance_data(detail, run)
 
         for inst_id, run_data in instance_data.items():
             if inst_id not in history:
