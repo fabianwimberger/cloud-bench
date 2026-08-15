@@ -27,13 +27,18 @@ def estimate_cost(
     # 20 minutes runtime (conservative)
     RUNTIME_HOURS = 0.33
 
+    # Providers that round any partial hour up to a full hour's charge.
+    # Everyone else bills per-second/per-minute, so the actual runtime applies.
+    HOURLY_ROUNDED_PROVIDERS = {"hetzner"}
+    billing_hours = 1.0 if provider in HOURLY_ROUNDED_PROVIDERS else RUNTIME_HOURS
+
     # Get exchange rates from config
     exchange = config.get("exchange_rates", {})
     eur_to_usd = exchange.get("eur_to_usd", 1.087)
     usd_to_eur = exchange.get("usd_to_eur", 0.92)
 
     total_cost_native = sum(
-        i.get("pricing", {}).get("hourly", 0) * RUNTIME_HOURS for i in to_benchmark
+        i.get("pricing", {}).get("hourly", 0) * billing_hours for i in to_benchmark
     )
 
     # Convert to both EUR and USD
