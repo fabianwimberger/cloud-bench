@@ -17,6 +17,9 @@ jobs:
     name: Terraform
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      matrix:
+        provider: [hetzner, aws, ovhcloud, oci, gcp, azure]
     steps:
       - uses: actions/checkout@v7
 
@@ -26,15 +29,16 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform Format Check
+        if: matrix.provider == 'hetzner'
         working-directory: terraform
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: terraform/providers/${{ matrix.provider }}
         run: terraform init -backend=false
 
       - name: Terraform Validate
-        working-directory: terraform
+        working-directory: terraform/providers/${{ matrix.provider }}
         run: terraform validate
 
   ansible:
