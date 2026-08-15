@@ -44,7 +44,10 @@ class TestWorkflows(unittest.TestCase):
 
         self.assertIn("if-no-files-found: ignore", workflow)
         self.assertIn("continue-on-error: true", workflow)
-        self.assertIn("hashFiles('terraform/terraform.tfstate')", workflow)
+        self.assertIn(
+            "hashFiles(format('terraform/providers/{0}/terraform.tfstate', github.event.inputs.provider))",
+            workflow,
+        )
 
     def test_benchmark_workflow_checks_azure_core_quota_before_apply(self):
         workflow = pathlib.Path(".github/workflows/benchmark.yml").read_text()

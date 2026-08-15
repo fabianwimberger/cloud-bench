@@ -1,8 +1,8 @@
 output "ansible_inventory" {
   description = "Ansible inventory file content"
-  value = templatefile("${path.module}/inventory.tmpl", {
+  value = templatefile("${path.module}/../../inventory.tmpl", {
     instances = local.all_instances
-    provider  = var.cloud_provider
+    provider  = "ovhcloud"
     region    = local.effective_region
   })
 }

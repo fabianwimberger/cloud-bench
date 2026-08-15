@@ -13,6 +13,9 @@ env:
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        provider: [hetzner, aws, ovhcloud, oci, gcp, azure]
     steps:
       - uses: actions/checkout@v7
 
@@ -23,42 +26,73 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform Format Check
+        if: matrix.provider == 'hetzner'
         working-directory: terraform
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        working-directory: terraform
+        working-directory: terraform/providers/${{ matrix.provider }}
         run: terraform init
 
       - name: Terraform Validate
-        working-directory: terraform
+        working-directory: terraform/providers/${{ matrix.provider }}
         run: terraform validate
 
       - name: Terraform Plan (Dry Run)
         id: plan
-        working-directory: terraform
+        working-directory: terraform/providers/${{ matrix.provider }}
         run: |
-          # Run plan with dummy token - validates config structure, provider schema
-          # Provider will fail auth but that's expected; we catch actual config errors
+          # Run plan with dummy credentials - validates config structure, provider schema.
+          # Provider auth will fail but that's expected; we catch actual config errors.
+          # OCI and Google validate credential *format* even for a dry-run plan, so those
+          # two legs get a syntactically-real (but meaningless) key pair / service account.
+          case "${{ matrix.provider }}" in
+            hetzner)
+              EXTRA_VARS=(-var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000")
+              ;;
+            aws)
+              EXTRA_VARS=(-var="aws_access_key_id=unused" -var="aws_secret_access_key=unused")
+              ;;
+            ovhcloud)
+              EXTRA_VARS=(-var="ovh_openstack_username=unused" -var="ovh_openstack_password=unused" -var="ovh_cloud_project_id=unused")
+              ;;
+            oci)
+              DUMMY_PEM=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:1024 2>/dev/null)
+              EXTRA_VARS=(-var="oci_tenancy_ocid=unused" -var="oci_user_ocid=unused" -var="oci_fingerprint=unused" -var="oci_compartment_id=unused" -var="oci_private_key=$DUMMY_PEM")
+              ;;
+            gcp)
+              DUMMY_PEM=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:1024 2>/dev/null)
+              DUMMY_GCP_JSON=$(jq -n --arg pem "$DUMMY_PEM" '{
+                type: "service_account",
+                project_id: "dummy",
+                private_key_id: "0000000000000000000000000000000000000000",
+                private_key: $pem,
+                client_email: "dummy@dummy.iam.gserviceaccount.com",
+                client_id: "0",
+                auth_uri: "https://accounts.google.com/o/oauth2/auth",
+                token_uri: "https://oauth2.googleapis.com/token",
+                auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+                client_x509_cert_url: "https://www.googleapis.com/robot/v1/metadata/x509/dummy"
+              }')
+              EXTRA_VARS=(-var="gcp_project_id=unused" -var="gcp_credentials=$DUMMY_GCP_JSON")
+              ;;
+            azure)
+              EXTRA_VARS=(-var="azure_subscription_id=00000000-0000-0000-0000-000000000000" -var="azure_client_id=00000000-0000-0000-0000-000000000000" -var="azure_client_secret=unused" -var="azure_tenant_id=00000000-0000-0000-0000-000000000000")
+              ;;
+          esac
+
           set -o pipefail
           terraform plan \
             -var="run_id=pr-${{ github.event.pull_request.number }}" \
-            -var="hcloud_token=0000000000000000000000000000000000000000000000000000000000000000" \
-            -var="aws_access_key_id=unused" \
-            -var="aws_secret_access_key=unused" \
-            -var="ovh_openstack_username=unused" \
-            -var="ovh_openstack_password=unused" \
-            -var="ovh_cloud_project_id=unused" \
-            -var="gcp_project_id=unused" \
             -var='allowed_ssh_ips=["10.0.0.1/32"]' \
+            "${EXTRA_VARS[@]}" \
             -input=false 2>&1 | tee plan_output.txt || {
-            # Exit code 1 is expected (invalid token), exit code >1 indicates real errors
+            # Exit code 1 is expected (invalid credentials); exit code >1 indicates real errors
             exit_code=$?
             if [ $exit_code -gt 1 ]; then
               echo "::error::Terraform plan failed with unexpected error (exit code: $exit_code)"
               cat plan_output.txt
               exit $exit_code
             fi
-            echo "::warning::Provider authentication failed (expected for dummy token). Plan validated otherwise."
+            echo "::warning::Provider authentication failed (expected for dummy credentials). Plan validated otherwise."
           }
-
