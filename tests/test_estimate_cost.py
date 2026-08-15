@@ -78,10 +78,22 @@ class TestEstimateCost(unittest.TestCase):
         self.assertIn("cpx11", result["instances"])
         self.assertIn("cax11", result["instances"])
 
-        # Cost calculation: 0.33 hours * sum of hourly rates
-        # (0.0048 + 0.0066 + 0.0048) * 0.33 = 0.0056436 EUR
+        # Hetzner rounds any partial hour up to a full hour's charge:
+        # (0.0048 + 0.0066 + 0.0048) * 1.0 = 0.0162 EUR
         self.assertGreater(result["cost_eur"], 0)
         self.assertEqual(result["cost_usd"], round(result["cost_eur"] * 1.087, 4))
+
+    def test_hetzner_bills_full_hour_even_for_short_runtime(self):
+        """Hetzner rounds any partial hour up to a full hour's charge."""
+        result = ec.estimate_cost("hetzner", "cx11", self.config_path)
+
+        self.assertEqual(result["cost_eur"], round(0.0048 * 1.0, 4))
+
+    def test_aws_bills_actual_runtime_not_full_hour(self):
+        """AWS bills per-second, so only the actual runtime applies."""
+        result = ec.estimate_cost("aws", "t3.micro", self.config_path)
+
+        self.assertEqual(result["cost_usd"], round(0.0104 * 0.33, 4))
 
     def test_estimate_specific_instances(self):
         """Test estimating cost for specific instances."""
