@@ -1015,22 +1015,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Post Results Summary
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v9
-        env:
-          BENCHMARK_SUMMARY: ${{ needs.process.outputs.summary }}
-        with:
-          script: |
-            const summary = process.env.BENCHMARK_SUMMARY || "";
-
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## Benchmark Results\n\n**Provider**: ${{ github.event.inputs.provider }}\n**Region**: ${{ needs.provision.outputs.region }}\n\n${summary}`
-            });
-
       - name: Job Summary
         run: |
           echo "## Benchmark Results" >> $GITHUB_STEP_SUMMARY
