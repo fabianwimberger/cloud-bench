@@ -108,6 +108,7 @@ See [data-format.md](data-format.md) for full schemas.
 | `cost-guard.yml` | Called | Reusable cost estimation (blocks >$5 or >15 instances) |
 | `deploy-ui.yml` | Manual | Rebuild and deploy frontend to GitHub Pages |
 | `update-pricing.yml` | Manual | Fetch live pricing from provider APIs + ECB exchange rates |
+| `cleanup-hetzner.yml` | Manual | Delete orphaned Hetzner servers older than 2 hours |
 | `cleanup-aws.yml` | Manual | Terminate orphaned AWS instances older than 2 hours |
 | `cleanup-ovhcloud.yml` | Manual | Terminate orphaned OVHcloud instances older than 2 hours |
 | `cleanup-oci.yml` | Manual | Terminate orphaned OCI instances older than 2 hours |

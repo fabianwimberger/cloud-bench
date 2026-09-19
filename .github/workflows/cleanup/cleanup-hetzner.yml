@@ -1,0 +1,64 @@
+name: Cleanup Hetzner Orphans
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Find and delete orphaned servers
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          if [ -z "$HCLOUD_TOKEN" ]; then
+            echo "Hetzner credentials not configured, skipping"
+            exit 0
+          fi
+
+          # Same pinned CLI build as the benchmark workflow.
+          HCLOUD_VERSION="1.61.0"
+          HCLOUD_SHA256="86da8a0bbff6d56ca39041e4594c2af3b50baf0971526a67669639a213b51936"
+          HCLOUD_URL="https://github.com/hetznercloud/cli/releases/download/v${HCLOUD_VERSION}/hcloud-linux-amd64.tar.gz"
+          curl -fsSL "$HCLOUD_URL" -o hcloud-linux-amd64.tar.gz
+          echo "${HCLOUD_SHA256}  hcloud-linux-amd64.tar.gz" | sha256sum -c -
+          tar -xzf hcloud-linux-amd64.tar.gz
+          rm -f hcloud-linux-amd64.tar.gz
+
+          echo "Checking for orphaned cloud-bench servers..."
+
+          SERVERS=$(./hcloud server list -l project=cloud-bench -o json)
+
+          if [ -z "$SERVERS" ] || [ "$SERVERS" = "[]" ]; then
+            echo "[OK] No cloud-bench servers found"
+            exit 0
+          fi
+
+          echo "Found servers:"
+          echo "$SERVERS" | jq -r '.[] | "\(.name) (#\(.id), created \(.created))"'
+
+          # Delete servers older than 2 hours
+          CUTOFF=$(date -u -d '2 hours ago' +%s)
+          DELETED=0
+
+          while IFS=$'\t' read -r id name created; do
+            CREATED_EPOCH=$(date -u -d "$created" +%s)
+            if [ "$CREATED_EPOCH" -lt "$CUTOFF" ]; then
+              echo "Deleting orphaned server: $name (#$id, created $created)"
+              ./hcloud server delete "$id"
+              DELETED=$((DELETED + 1))
+            else
+              echo "Keeping recent server: $name (#$id, created $created)"
+            fi
+          done < <(echo "$SERVERS" | jq -r '.[] | [.id, .name, .created] | @tsv')
+
+          echo ""
+          echo "Summary: Deleted $DELETED orphaned server(s)"
+
+          if [ "$DELETED" -gt 0 ]; then
+            {
+              echo "## Hetzner Orphan Cleanup"
+              echo "Deleted **$DELETED** orphaned server(s) older than 2 hours."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
