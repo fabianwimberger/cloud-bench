@@ -1,4 +1,4 @@
-boto3==1.43.97
+boto3==1.43.102
 google-cloud-billing==1.20.0
 numpy==2.5.3
 pandas==3.0.6
