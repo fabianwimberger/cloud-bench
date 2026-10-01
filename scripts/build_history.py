@@ -25,7 +25,6 @@ def parse_args():
 
 
 def load_detail(detail_path: str) -> dict | None:
-    """Load a run's detail.json file."""
     if not os.path.exists(detail_path):
         return None
     try:
@@ -82,7 +81,6 @@ def extract_instance_data(detail: dict, run_meta: dict) -> dict[str, dict]:
 
 
 def build_history(data_dir: str) -> dict:
-    """Build the consolidated history from all runs."""
     manifest_path = os.path.join(data_dir, "manifest.json")
     if not os.path.exists(manifest_path):
         print(f"Warning: No manifest.json found at {manifest_path}", file=sys.stderr)
@@ -95,7 +93,6 @@ def build_history(data_dir: str) -> dict:
     with open(manifest_path, "r") as f:
         manifest = json.load(f)
 
-    # Collect per-instance history across all runs
     history: dict[str, dict] = {}
 
     for run in manifest.get("runs", []):
@@ -114,7 +111,6 @@ def build_history(data_dir: str) -> dict:
 
         for inst_id, run_data in instance_data.items():
             if inst_id not in history:
-                # Find specs from the detail instances
                 inst_detail: dict = next(
                     (i for i in detail.get("instances", []) if i.get("id") == inst_id),
                     {},
@@ -127,7 +123,6 @@ def build_history(data_dir: str) -> dict:
 
             history[inst_id]["runs"].append(run_data)
 
-    # Sort each instance's runs chronologically
     for inst_id in history:
         history[inst_id]["runs"].sort(key=lambda r: r.get("timestamp", ""))
 

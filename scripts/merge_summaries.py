@@ -46,7 +46,6 @@ def main():
         print("[WARN] No runs in manifest", file=sys.stderr)
         sys.exit(0)
 
-    # Group runs by provider
     runs_by_provider: dict[str, list[dict]] = {}
     for run in runs:
         provider = run.get("provider", "unknown")
@@ -68,7 +67,6 @@ def main():
     ]
 
     for provider, provider_runs in runs_by_provider.items():
-        # Collect all instances across all runs for this provider
         # instance_id -> list of instance dicts (one per run)
         instance_runs: dict[str, list[dict]] = {}
         latest_meta: dict = {}
@@ -108,7 +106,6 @@ def main():
             # Start from the first run's data as the base (runs are newest-first)
             inst = json.loads(json.dumps(inst_list[0]))
 
-            # Average raw metrics across all runs for this instance
             if len(inst_list) > 1:
                 metrics = inst.get("metrics", {})
                 for mk in metrics_keys:
@@ -178,7 +175,6 @@ def rescale_scores(
     ]
     score_keys = ["single_core", "multi_core", "memory", "disk"]
 
-    # Get raw metric values
     raw_values: dict[str, list[float]] = {k: [] for k in metrics_keys}
     for inst in instances:
         metrics = inst.get("metrics", {})
@@ -187,10 +183,8 @@ def rescale_scores(
             if val:
                 raw_values[k].append(val)
 
-    # Calculate max for each metric
     max_values = {k: max(vals) if vals else 1 for k, vals in raw_values.items()}
 
-    # Rescale scores as percentage of max
     for inst in instances:
         metrics = inst.get("metrics", {})
         scores = inst.get("scores", {})
@@ -206,7 +200,6 @@ def rescale_scores(
             1,
         )
 
-        # overall_no_disk: average of CPU + memory (excludes disk)
         no_disk_keys = ["single_core", "multi_core", "memory"]
         no_disk_scores = [scores.get(k, 0) for k in no_disk_keys]
         scores["overall_no_disk"] = (

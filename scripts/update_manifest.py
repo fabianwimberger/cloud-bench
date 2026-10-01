@@ -28,7 +28,6 @@ def parse_args():
 
 
 def load_manifest(path: str) -> dict:
-    """Load existing manifest or create a new one."""
     if os.path.exists(path):
         try:
             with open(path, "r") as f:
@@ -47,7 +46,6 @@ def load_manifest(path: str) -> dict:
 
 
 def extract_instances_from_run(run_dir: str) -> list[str]:
-    """Scan run directory for summary.json to extract instance list."""
     summary_path = os.path.join(run_dir, "summary.json")
     if os.path.exists(summary_path):
         try:
@@ -92,10 +90,8 @@ def main():
     manifest = load_manifest(args.manifest)
     manifest["schema_version"] = SCHEMA_VERSION
 
-    # Extract instance list from run data
     instances = extract_instances_from_run(args.run_dir)
 
-    # Build relative file paths
     run_id = f"{args.timestamp}-{args.provider}-{args.region}"
     run_dir_rel = args.run_dir
 
@@ -112,7 +108,6 @@ def main():
         },
     }
 
-    # Update or append
     existing_idx = next(
         (i for i, r in enumerate(manifest["runs"]) if r["id"] == run_id), None
     )
@@ -121,13 +116,10 @@ def main():
     else:
         manifest["runs"].append(run_entry)
 
-    # Sort by timestamp descending
     manifest["runs"].sort(key=lambda x: x.get("timestamp", ""), reverse=True)
 
-    # Rebuild instance index
     manifest["instance_index"] = build_instance_index(manifest["runs"])
 
-    # Write manifest
     os.makedirs(os.path.dirname(args.manifest) or ".", exist_ok=True)
     with open(args.manifest, "w") as f:
         json.dump(manifest, f, indent=2)
