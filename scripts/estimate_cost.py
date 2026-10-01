@@ -10,7 +10,6 @@ import yaml
 def estimate_cost(
     provider: str, instances_input: str, config_path: str = "config/instances.yaml"
 ) -> dict:
-    """Calculate estimated cost for a benchmark run."""
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
@@ -32,7 +31,6 @@ def estimate_cost(
     HOURLY_ROUNDED_PROVIDERS = {"hetzner"}
     billing_hours = 1.0 if provider in HOURLY_ROUNDED_PROVIDERS else RUNTIME_HOURS
 
-    # Get exchange rates from config
     exchange = config.get("exchange_rates", {})
     eur_to_usd = exchange.get("eur_to_usd", 1.087)
     usd_to_eur = exchange.get("usd_to_eur", 0.92)
@@ -41,7 +39,6 @@ def estimate_cost(
         i.get("pricing", {}).get("hourly", 0) * billing_hours for i in to_benchmark
     )
 
-    # Convert to both EUR and USD
     if currency == "USD":
         total_cost_usd = total_cost_native
         total_cost_eur = total_cost_native * usd_to_eur

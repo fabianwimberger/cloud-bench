@@ -43,7 +43,6 @@ def run_command(cmd, cwd=None, capture_output=True):
 
 
 def check_prerequisites():
-    """Check that required tools are installed."""
     print_header("Checking Prerequisites")
 
     tools = {
@@ -72,7 +71,6 @@ def check_prerequisites():
 
 
 def validate_terraform():
-    """Validate Terraform configuration."""
     print_header("Validating Terraform")
 
     terraform_dir = Path("terraform")
@@ -135,7 +133,6 @@ def validate_terraform():
 
 
 def validate_ansible():
-    """Validate Ansible configuration."""
     print_header("Validating Ansible")
 
     ansible_dir = Path("ansible")
@@ -145,7 +142,6 @@ def validate_ansible():
 
     all_valid = True
 
-    # Check ansible-playbook syntax
     playbook_path = ansible_dir / "playbooks" / "benchmark.yml"
     if playbook_path.exists():
         success, stdout, stderr = run_command(
@@ -174,7 +170,6 @@ def validate_ansible():
         print_error(f"Playbook not found: {playbook_path}")
         all_valid = False
 
-    # Check for required files
     required_files = ["ansible.cfg", "playbooks/benchmark.yml"]
     for file in required_files:
         if (ansible_dir / file).exists():
@@ -187,12 +182,10 @@ def validate_ansible():
 
 
 def validate_python():
-    """Validate Python scripts."""
     print_header("Validating Python Scripts")
 
     all_valid = True
 
-    # Check process_results.py syntax
     script_path = Path("scripts/process_results.py")
     if script_path.exists():
         success, stdout, stderr = run_command(
@@ -207,7 +200,6 @@ def validate_python():
         print_error("process_results.py not found")
         all_valid = False
 
-    # Check if we can import the module
     scripts_dir = Path("scripts").absolute()
     if scripts_dir.exists():
         sys.path.insert(0, str(scripts_dir))
@@ -219,7 +211,6 @@ def validate_python():
             print_error(f"Cannot import process_results.py: {e}")
             all_valid = False
 
-    # Run unit tests if pytest is available
     success, _, _ = run_command(["python3", "-c", "import pytest"])
     if success:
         print_header("Running Python Unit Tests")
@@ -241,7 +232,6 @@ def validate_python():
 
 
 def validate_frontend():
-    """Validate frontend configuration."""
     print_header("Validating Frontend")
 
     frontend_dir = Path("frontend")
@@ -251,7 +241,6 @@ def validate_frontend():
 
     all_valid = True
 
-    # Check for required files
     required_files = ["package.json", "vite.config.js", "index.html"]
     for file in required_files:
         if (frontend_dir / file).exists():
@@ -260,7 +249,6 @@ def validate_frontend():
             print_error(f"Missing required file: {file}")
             all_valid = False
 
-    # Validate package.json
     package_json_path = frontend_dir / "package.json"
     if package_json_path.exists():
         try:
@@ -275,7 +263,6 @@ def validate_frontend():
                     print_error(f"package.json missing {field}")
                     all_valid = False
 
-            # Check for required scripts
             if "build" in package.get("scripts", {}):
                 print_success("package.json has build script")
             else:
@@ -284,7 +271,6 @@ def validate_frontend():
             print_error(f"package.json is invalid JSON: {e}")
             all_valid = False
 
-    # Try to build the frontend
     print_header("Building Frontend")
     success, stdout, stderr = run_command(["npm", "ci"], cwd=frontend_dir)
     if success:
@@ -303,12 +289,10 @@ def validate_frontend():
 
 
 def validate_documentation():
-    """Validate documentation consistency."""
     print_header("Validating Documentation")
 
     all_valid = True
 
-    # Check for required documentation files
     required_docs = ["README.md", "docs/architecture.md", "docs/setup-guide.md"]
     for doc in required_docs:
         if Path(doc).exists():
@@ -317,7 +301,6 @@ def validate_documentation():
             print_error(f"Missing documentation: {doc}")
             all_valid = False
 
-    # Check README for required sections
     readme_path = Path("README.md")
     if readme_path.exists():
         content = readme_path.read_text()
@@ -328,7 +311,6 @@ def validate_documentation():
             else:
                 print_warning(f"README missing {section} section")
 
-    # Check for configuration file
     config_path = Path("config/instances.yaml")
     if config_path.exists():
         try:
@@ -350,7 +332,6 @@ def validate_documentation():
 
 
 def validate_github_actions():
-    """Validate GitHub Actions workflows."""
     print_header("Validating GitHub Actions")
 
     workflows_dir = Path(".github/workflows")
@@ -360,7 +341,6 @@ def validate_github_actions():
 
     all_valid = True
 
-    # Check workflow files exist
     workflow_files = list(workflows_dir.glob("*.yml"))
     if workflow_files:
         print_success(f"Found {len(workflow_files)} workflow files")
@@ -368,7 +348,6 @@ def validate_github_actions():
         print_error("No workflow files found")
         all_valid = False
 
-    # Basic YAML validation
     for workflow_file in workflow_files:
         try:
             import yaml
@@ -410,10 +389,8 @@ def main():
     print("Cloud-Bench Validation")
     print(f"Working directory: {os.getcwd()}")
 
-    # Check prerequisites first
     check_prerequisites()
 
-    # Run validation steps
     validation_steps = {
         "terraform": validate_terraform,
         "ansible": validate_ansible,
@@ -432,7 +409,6 @@ def main():
 
         results[name] = validator()
 
-    # Summary
     print_header("Validation Summary")
 
     all_passed = all(results.values())

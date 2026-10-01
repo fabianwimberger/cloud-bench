@@ -39,7 +39,6 @@ def fetch_server_types(token: str) -> list[dict]:
 
 
 def parse_pricing(server_type: dict) -> Optional[dict]:
-    """Extract pricing info from Hetzner server type."""
     prices = server_type.get("prices", [])
     if not prices:
         return None
@@ -62,7 +61,6 @@ def parse_pricing(server_type: dict) -> Optional[dict]:
 
 
 def get_architecture(server_type: dict) -> str:
-    """Determine architecture from server type."""
     name = server_type.get("name", "").lower()
     if "cax" in name:
         return "ARM64"
@@ -645,43 +643,35 @@ def update_config(
     aws_region: str = "eu-central-1",
     azure_region: str = "northeurope",
 ) -> dict:
-    """Update instances.yaml with fetched pricing."""
     with open(config_path) as f:
         config = yaml.safe_load(f)
 
     total_updated = 0
 
-    # Update Hetzner pricing
     if provider in ("all", "hetzner") and server_types:
         print("\nUpdating Hetzner pricing...")
         total_updated += update_hetzner_pricing(config, server_types, dry_run)
 
-    # Update AWS pricing
     if provider in ("all", "aws"):
         print("\nUpdating AWS pricing...")
         total_updated += fetch_aws_pricing(config, aws_region)
 
-    # Update OVHcloud pricing
     if provider in ("all", "ovhcloud"):
         print("\nUpdating OVHcloud pricing...")
         total_updated += fetch_ovhcloud_pricing(config)
 
-    # Update OCI pricing
     if provider in ("all", "oci"):
         print("\nUpdating OCI pricing...")
         total_updated += fetch_oci_pricing(config)
 
-    # Update GCP pricing
     if provider in ("all", "gcp"):
         print("\nUpdating GCP pricing...")
         total_updated += fetch_gcp_pricing(config)
 
-    # Update Azure pricing
     if provider in ("all", "azure"):
         print("\nUpdating Azure pricing...")
         total_updated += fetch_azure_pricing(config, azure_region)
 
-    # Update exchange rates
     print("\nFetching exchange rates...")
     exchange_rates = fetch_exchange_rates()
     if exchange_rates:
