@@ -211,11 +211,11 @@ def validate_python():
             print_error(f"Cannot import process_results.py: {e}")
             all_valid = False
 
-    success, _, _ = run_command(["python3", "-c", "import pytest"])
+    success, _, _ = run_command([sys.executable, "-c", "import pytest"])
     if success:
         print_header("Running Python Unit Tests")
         test_success, stdout, stderr = run_command(
-            ["python3", "-m", "pytest", "tests/", "-v"], capture_output=True
+            [sys.executable, "-m", "pytest", "tests/", "-v"], capture_output=True
         )
         if test_success:
             print_success("All unit tests passed")
@@ -226,7 +226,7 @@ def validate_python():
             all_valid = False
     else:
         print_warning("pytest not installed, skipping unit tests")
-        print("Install with: pip install pytest")
+        print("Install with: .venv/bin/pip install '.[dev]'")
 
     return all_valid
 
