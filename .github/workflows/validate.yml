@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 env:
@@ -72,10 +72,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - run: |
-          pip install -r scripts/requirements.txt
-          pip install -r tests/requirements-test.txt
-          pip install ruff==0.15.22 mypy types-PyYAML types-requests
+      - run: pip install '.[dev]'
 
       - name: Lint with ruff
         run: ruff check scripts/ tests/
@@ -123,6 +120,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -143,8 +144,9 @@ jobs:
 
       - name: Check Python dependencies
         run: |
-          pip install pip-audit
-          pip-audit -r scripts/requirements.txt -r tests/requirements-test.txt || {
+          pip install '.[dev]'
+          python -c "from pathlib import Path; import tomllib; project = tomllib.loads(Path('pyproject.toml').read_text())['project']; Path('/tmp/cloud-bench-dependencies.txt').write_text('\n'.join(project['dependencies'] + project['optional-dependencies']['dev']) + '\n')"
+          pip-audit -r /tmp/cloud-bench-dependencies.txt || {
             echo "::error::Python security vulnerabilities detected. Review and update dependencies."
             exit 1
           }
@@ -170,8 +172,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - run: |
-          pip install -r scripts/requirements.txt
-          pip install -r tests/requirements-test.txt
+          pip install '.[dev]'
           cd frontend && npm ci && cd ..
 
       - name: Create Mock Results (Hetzner)

@@ -222,6 +222,9 @@ main() {
     check_ssh_key
     validate_credentials
 
+    python3 -m venv "$PROJECT_DIR/.venv"
+    "$PROJECT_DIR/.venv/bin/pip" install -q "$PROJECT_DIR"
+
     # Terraform apply
     echo "[INFO] Provisioning infrastructure..."
     cd terraform
@@ -271,9 +274,8 @@ main() {
 
     # Process results
     echo "[INFO] Processing results..."
-    pip install -q -r scripts/requirements.txt 2>/dev/null || true
 
-    python3 scripts/process_results.py \
+    "$PROJECT_DIR/.venv/bin/python" scripts/process_results.py \
         --input ansible/results/ \
         --output frontend/public/data/ \
         --config config/instances.yaml \

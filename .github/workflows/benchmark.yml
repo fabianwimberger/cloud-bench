@@ -620,7 +620,7 @@ jobs:
 
       - name: Process Results
         run: |
-          pip install -r scripts/requirements.txt
+          pip install .
           python scripts/process_results.py \
             --input results/ \
             --output frontend/public/data/ \
@@ -686,7 +686,6 @@ jobs:
           fi
 
           # Update manifest
-          pip install pyyaml
           python /tmp/update_manifest.py \
             --manifest data/manifest.json \
             --run-dir "$RUN_DIR" \
@@ -976,7 +975,7 @@ jobs:
 
       - name: Build combined data
         run: |
-          pip install -r scripts/requirements.txt
+          pip install .
           if [ -f frontend/public/data/manifest.json ]; then
             python scripts/merge_summaries.py \
               --manifest frontend/public/data/manifest.json \

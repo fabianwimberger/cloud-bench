@@ -263,7 +263,7 @@ jobs:
 
       - name: Process Results (${{ matrix.provider }})
         run: |
-          pip install -r scripts/requirements.txt
+          pip install .
           mkdir -p results/${{ matrix.provider }}
           cp ansible/results/*.json results/${{ matrix.provider }}/ 2>/dev/null || true
           python scripts/process_results.py \
@@ -477,7 +477,7 @@ jobs:
 
       - name: Merge Results to Data Branch
         run: |
-          pip install pyyaml
+          pip install .
 
           TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S)
           git config user.name "github-actions[bot]"
@@ -575,7 +575,7 @@ jobs:
 
       - name: Build Combined Data
         run: |
-          pip install -r scripts/requirements.txt
+          pip install .
           if [ -f frontend/public/data/manifest.json ]; then
             python scripts/merge_summaries.py \
               --manifest frontend/public/data/manifest.json \

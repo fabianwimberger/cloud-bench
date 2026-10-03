@@ -39,7 +39,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install .
 
       - name: Calculate Estimated Cost
         id: calculate

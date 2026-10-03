@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cloud-bench"
+version = "2.3.2"
+description = "Cloud instance benchmarks with cost analysis"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3==1.43.108",
+    "google-cloud-billing==1.21.0",
+    "numpy==2.5.3",
+    "pandas==3.0.6",
+    "pyyaml==6.0.3",
+    "requests==2.34.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+    "ruff==0.15.22",
+    "mypy==2.4.0",
+    "types-PyYAML==6.0.12.20260906",
+    "types-requests==2.33.0.20260906",
+    "pip-audit==2.10.1",
+]
+
+[tool.setuptools]
+package-dir = { "" = "scripts" }
+py-modules = [
+    "build_history",
+    "estimate_cost",
+    "merge_summaries",
+    "process_results",
+    "update_manifest",
+    "update_pricing",
+    "validate",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["scripts"]
+
+[tool.coverage.report]
+show_missing = true
