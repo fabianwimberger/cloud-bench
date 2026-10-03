@@ -1,5 +1,5 @@
-boto3==1.43.102
-google-cloud-billing==1.20.0
+boto3==1.43.108
+google-cloud-billing==1.21.0
 numpy==2.5.3
 pandas==3.0.6
 pyyaml==6.0.3
