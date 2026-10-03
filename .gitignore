@@ -15,6 +15,7 @@ ansible/inventory.ini
 ansible/results/*.json
 
 # Python
+*.egg-info/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -58,6 +59,7 @@ secrets/
 
 # Coverage
 .coverage
+coverage.xml
 htmlcov/
 .tox/
 .nox/

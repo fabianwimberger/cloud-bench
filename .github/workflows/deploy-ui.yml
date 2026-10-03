@@ -28,7 +28,7 @@ jobs:
           python-version: '${{ env.PYTHON_VERSION }}'
 
       - name: Install Python dependencies
-        run: pip install -r scripts/requirements.txt
+        run: pip install .
 
       - name: Fetch benchmark data from data branch
         run: |

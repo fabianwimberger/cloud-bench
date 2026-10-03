@@ -75,6 +75,59 @@ class TestValidateTerraform(unittest.TestCase):
             self.assertFalse(validate.validate_terraform())
 
 
+class TestValidatePython(unittest.TestCase):
+    def setUp(self):
+        self.original_cwd = os.getcwd()
+        self.original_path = sys.path.copy()
+        self.tmpdir = tempfile.TemporaryDirectory()
+        os.chdir(self.tmpdir.name)
+        Path("scripts").mkdir()
+        Path("scripts/process_results.py").write_text("")
+
+    def tearDown(self):
+        os.chdir(self.original_cwd)
+        sys.path[:] = self.original_path
+        self.tmpdir.cleanup()
+
+    def test_tests_use_active_interpreter(self):
+        interpreter = "/project/.venv/bin/python"
+        with (
+            mock.patch("validate.sys.executable", interpreter),
+            mock.patch.dict(sys.modules, {"process_results": mock.Mock()}),
+            mock.patch("validate.run_command", return_value=(True, "", "")) as run,
+        ):
+            self.assertTrue(validate.validate_python())
+
+        run.assert_any_call([interpreter, "-c", "import pytest"])
+        run.assert_any_call(
+            [interpreter, "-m", "pytest", "tests/", "-v"], capture_output=True
+        )
+
+    def test_failed_tests_fail_validation(self):
+        with (
+            mock.patch.dict(sys.modules, {"process_results": mock.Mock()}),
+            mock.patch(
+                "validate.run_command",
+                side_effect=[(True, "", ""), (True, "", ""), (False, "", "failed")],
+            ),
+        ):
+            self.assertFalse(validate.validate_python())
+
+    def test_missing_pytest_reports_project_install(self):
+        with (
+            mock.patch.dict(sys.modules, {"process_results": mock.Mock()}),
+            mock.patch(
+                "validate.run_command",
+                side_effect=[(True, "", ""), (False, "", "missing")],
+            ) as run,
+            mock.patch("builtins.print") as output,
+        ):
+            self.assertTrue(validate.validate_python())
+
+        self.assertEqual(run.call_count, 2)
+        output.assert_any_call("Install with: .venv/bin/pip install '.[dev]'")
+
+
 class TestValidateFrontend(unittest.TestCase):
     def setUp(self):
         self.original_cwd = os.getcwd()

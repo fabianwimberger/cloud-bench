@@ -26,7 +26,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
-        run: pip install requests pyyaml boto3 google-cloud-billing
+        run: pip install .
 
       - name: Check pricing
         id: check
