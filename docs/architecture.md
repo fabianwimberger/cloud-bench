@@ -90,8 +90,9 @@ See [data-format.md](data-format.md) for full schemas.
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
-- Firewall/security group/NSG allows SSH from runner IP only (Hetzner, AWS, UpCloud, OCI, GCP, Azure)
+- Firewall/security group/NSG allows SSH from runner IP only (Hetzner, AWS, OCI, GCP, Azure)
 - OVHcloud does not support security groups — SSH key auth only
+- UpCloud's firewall accepts SSH from any address — SSH key auth only
 - `if: always()` cleanup in CI ensures infrastructure destruction
 - Verify Cleanup step confirms resources are gone via provider APIs after destroy
 - Provider secrets passed via `TF_VAR_` environment variables, never on command line
