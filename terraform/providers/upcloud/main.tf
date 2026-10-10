@@ -45,7 +45,6 @@ module "upcloud_instances" {
   instance_name   = "cloud-bench-upcloud-${each.value.id}-${var.run_id}"
   instance_type   = each.value.id
   zone            = lookup(var.instance_regions, each.value.id, local.effective_region)
-  os_image        = var.os_image
   disk_gb         = each.value.disk_gb
   ssh_public_key  = local.ssh_public_key
   allowed_ssh_ips = var.allowed_ssh_ips
