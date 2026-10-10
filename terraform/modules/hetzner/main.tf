@@ -31,17 +31,19 @@ resource "hcloud_firewall" "benchmark" {
   count = var.enable_firewall ? 1 : 0
   name  = "${var.instance_name}-firewall"
 
+  # The benchmark job runs from another runner address and adds it to both
+  # rules through the API before it connects.
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "22"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = var.allowed_ssh_ips
   }
 
   rule {
     direction  = "in"
     protocol   = "icmp"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = var.allowed_ssh_ips
   }
 }
 
