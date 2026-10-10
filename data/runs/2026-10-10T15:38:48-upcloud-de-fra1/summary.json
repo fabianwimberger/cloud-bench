@@ -1,0 +1,70 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-10-10T15:38:47.697110",
+    "run_count": 1,
+    "currency": "EUR",
+    "provider": "upcloud",
+    "region": "de-fra1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1206,
+      "usd_to_eur": 0.8924,
+      "last_updated": "2026-10-09",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "STARTER-2XCPU-4GB"
+    ],
+    "instances": [
+      {
+        "id": "STARTER-2XCPU-4GB",
+        "name": "STARTER-2XCPU-4GB (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 100.0,
+          "memory": 100.0,
+          "disk": 100.0,
+          "overall": 100.0,
+          "overall_no_disk": 100.0
+        },
+        "value": 8.33,
+        "value_no_disk": 8.33,
+        "metrics": {
+          "cpu_single_events": 628.72,
+          "cpu_multi_events": 1256.26,
+          "memory_mib_per_sec": 19366.93,
+          "disk_iops": 10072.389149
+        },
+        "pricing": {
+          "hourly": 0.0179,
+          "monthly": 12.0
+        },
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 30,
+          "arch": "X86"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        100.0
+      ],
+      "multi_core": [
+        100.0
+      ],
+      "memory": [
+        100.0
+      ],
+      "disk": [
+        100.0
+      ],
+      "value": [
+        8.33
+      ]
+    }
+  }
+}
