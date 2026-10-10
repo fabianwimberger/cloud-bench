@@ -2,6 +2,23 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-10-10T10:36:26-upcloud-de-fra1",
+      "timestamp": "2026-10-10T10:36:26",
+      "provider": "upcloud",
+      "region": "de-fra1",
+      "instance_count": 4,
+      "instances": [
+        "PREMIUM-4XCPU-8GB",
+        "PREMIUM-2XCPU-4GB",
+        "STARTER-4XCPU-8GB",
+        "STARTER-2XCPU-4GB"
+      ],
+      "files": {
+        "summary": "data/runs/2026-10-10T10:36:26-upcloud-de-fra1/summary.json",
+        "detail": "data/runs/2026-10-10T10:36:26-upcloud-de-fra1/detail.json"
+      }
+    },
+    {
       "id": "2026-08-15T19:05:23-ovhcloud-DE1",
       "timestamp": "2026-08-15T19:05:23",
       "provider": "ovhcloud",
@@ -1453,6 +1470,18 @@
     }
   ],
   "instance_index": {
+    "PREMIUM-4XCPU-8GB": [
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
+    "PREMIUM-2XCPU-4GB": [
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
+    "STARTER-4XCPU-8GB": [
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
+    "STARTER-2XCPU-4GB": [
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
     "C3-8": [
       "2026-08-15T19:05:23-ovhcloud-DE1",
       "2026-05-30T19:27:43-ovhcloud-DE1",
