@@ -54,9 +54,14 @@ variable "allowed_ssh_ips" {
 }
 
 variable "os_image" {
-  description = "OS template for the servers (UpCloud template title)"
+  description = "OS image for the servers"
   type        = string
-  default     = "Ubuntu Server 24.04 LTS (Noble Numbat)"
+  default     = "ubuntu-24.04"
+
+  validation {
+    condition     = can(regex("^(ubuntu-[0-9]{2}\\.[0-9]{2}|debian-[0-9]{2}|fedora-[0-9]+|ami-[a-z0-9]+)$", var.os_image))
+    error_message = "OS image must be a valid Hetzner image (e.g., ubuntu-24.04) or AWS AMI ID (e.g., ami-12345678)."
+  }
 }
 
 variable "upcloud_username" {
