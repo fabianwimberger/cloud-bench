@@ -30,6 +30,11 @@ variable "ssh_public_key" {
   type        = string
 }
 
+variable "allowed_ssh_ips" {
+  description = "IPv4 CIDRs allowed to reach SSH"
+  type        = list(string)
+}
+
 variable "labels" {
   description = "Labels applied to the server"
   type        = map(string)

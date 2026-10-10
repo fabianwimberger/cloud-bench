@@ -9,7 +9,7 @@ on:
         default: false
 
 env:
-  TF_VERSION: "1.10.5"
+  TF_VERSION: "1.16.5"
   ANSIBLE_VERSION: "13.5.0"
   NODE_VERSION: "22.14.0"
   PYTHON_VERSION: "3.13"
@@ -250,7 +250,7 @@ jobs:
             echo "Attempt $i: Checking SSH connectivity..."
             if ansible all -i ansible/inventory_${{ matrix.provider }}.ini -m raw -a "echo ready" \
               --private-key ~/.ssh/cloud_bench_${{ matrix.provider }} \
-              --ssh-common-args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 2>/dev/null | grep -q "ready"; then
+              --ssh-common-args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >/dev/null 2>&1; then
               echo "All instances are ready!"
               exit 0
             fi

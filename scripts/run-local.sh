@@ -7,6 +7,7 @@ RUN_ID="local-$(date +%Y%m%d-%H%M%S)"
 PROVIDER="${PROVIDER:-hetzner}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+TF_DIR="$PROJECT_DIR/terraform/providers/$PROVIDER"
 
 # Auto-detect region based on provider
 if [ -z "$REGION" ]; then
@@ -179,51 +180,37 @@ validate_credentials() {
     fi
 }
 
-# Pass every credential var on every run — the OCI and Google provider blocks
-# validate their config at plan time even when no resources of that kind exist.
-build_tf_vars() {
-    local action="$1"
-    shift
-    local common_vars=(
-        -var="run_id=$RUN_ID"
-        -var="cloud_provider=$PROVIDER"
-        -var="default_region=$REGION"
-        -var="ssh_public_key_path=$SSH_PUB_KEY_PATH"
-        -var="allowed_ssh_ips=[\"$ALLOWED_SSH_IPS\"]"
-        -var="hcloud_token=${HCLOUD_TOKEN:-0000000000000000000000000000000000000000000000000000000000000000}"
-        -var="aws_access_key_id=${AWS_ACCESS_KEY_ID:-unused}"
-        -var="aws_secret_access_key=${AWS_SECRET_ACCESS_KEY:-unused}"
-        -var="ovh_openstack_username=${OVH_OPENSTACK_USERNAME:-unused}"
-        -var="ovh_openstack_password=${OVH_OPENSTACK_PASSWORD:-unused}"
-        -var="ovh_cloud_project_id=${OVH_CLOUD_PROJECT_ID:-unused}"
-        -var="upcloud_username=${UPCLOUD_USERNAME:-unused}"
-        -var="upcloud_password=${UPCLOUD_PASSWORD:-unused}"
-        -var="oci_tenancy_ocid=${OCI_TENANCY_OCID:-unused}"
-        -var="oci_user_ocid=${OCI_USER_OCID:-unused}"
-        -var="oci_fingerprint=${OCI_FINGERPRINT:-unused}"
-        -var="oci_private_key=${OCI_PRIVATE_KEY:-unused}"
-        -var="oci_compartment_id=${OCI_COMPARTMENT_ID:-unused}"
-        -var="gcp_project_id=${GCP_PROJECT_ID:-unused}"
-        -var="gcp_credentials=${GCP_CREDENTIALS:-}"
-        -var="azure_subscription_id=${AZURE_SUBSCRIPTION_ID:-}"
-        -var="azure_client_id=${AZURE_CLIENT_ID:-}"
-        -var="azure_client_secret=${AZURE_CLIENT_SECRET:-}"
-        -var="azure_tenant_id=${AZURE_TENANT_ID:-}"
-    )
-
-    common_vars+=("$@")
-    printf '%s\n' "${common_vars[@]}"
+# Each provider has its own Terraform root. Credentials reach it as TF_VAR_*
+# environment variables, which Terraform ignores when the root does not
+# declare them.
+export_tf_credentials() {
+    export TF_VAR_hcloud_token="${HCLOUD_TOKEN:-}"
+    export TF_VAR_aws_access_key_id="${AWS_ACCESS_KEY_ID:-}"
+    export TF_VAR_aws_secret_access_key="${AWS_SECRET_ACCESS_KEY:-}"
+    export TF_VAR_ovh_openstack_username="${OVH_OPENSTACK_USERNAME:-}"
+    export TF_VAR_ovh_openstack_password="${OVH_OPENSTACK_PASSWORD:-}"
+    export TF_VAR_ovh_cloud_project_id="${OVH_CLOUD_PROJECT_ID:-}"
+    export TF_VAR_upcloud_username="${UPCLOUD_USERNAME:-}"
+    export TF_VAR_upcloud_password="${UPCLOUD_PASSWORD:-}"
+    export TF_VAR_oci_tenancy_ocid="${OCI_TENANCY_OCID:-}"
+    export TF_VAR_oci_user_ocid="${OCI_USER_OCID:-}"
+    export TF_VAR_oci_fingerprint="${OCI_FINGERPRINT:-}"
+    export TF_VAR_oci_private_key="${OCI_PRIVATE_KEY:-}"
+    export TF_VAR_oci_compartment_id="${OCI_COMPARTMENT_ID:-}"
+    export TF_VAR_gcp_project_id="${GCP_PROJECT_ID:-}"
+    export TF_VAR_gcp_credentials="${GCP_CREDENTIALS:-}"
+    export TF_VAR_azure_subscription_id="${AZURE_SUBSCRIPTION_ID:-}"
+    export TF_VAR_azure_client_id="${AZURE_CLIENT_ID:-}"
+    export TF_VAR_azure_client_secret="${AZURE_CLIENT_SECRET:-}"
+    export TF_VAR_azure_tenant_id="${AZURE_TENANT_ID:-}"
 }
 
-# Run terraform with provider-specific vars
 run_terraform() {
-    local action="$1"
-    shift
-    local vars=()
-    while IFS= read -r line; do
-        vars+=("$line")
-    done < <(build_tf_vars "$action" "$@")
-    terraform "$action" -auto-approve "${vars[@]}"
+    terraform "$1" -auto-approve \
+        -var="run_id=$RUN_ID" \
+        -var="default_region=$REGION" \
+        -var="ssh_public_key_path=$SSH_PUB_KEY_PATH" \
+        -var="allowed_ssh_ips=[\"$ALLOWED_SSH_IPS\"]"
 }
 
 # Main execution
@@ -233,13 +220,14 @@ main() {
     check_prereqs
     check_ssh_key
     validate_credentials
+    export_tf_credentials
 
     python3 -m venv "$PROJECT_DIR/.venv"
     "$PROJECT_DIR/.venv/bin/pip" install -q "$PROJECT_DIR"
 
     # Terraform apply
     echo "[INFO] Provisioning infrastructure..."
-    cd terraform
+    cd "$TF_DIR"
 
     terraform init
 
@@ -250,9 +238,9 @@ main() {
         }
 
     # Generate Ansible inventory from Terraform output
-    terraform output -raw ansible_inventory > ../ansible/inventory.ini
+    terraform output -raw ansible_inventory > "$PROJECT_DIR/ansible/inventory.ini"
 
-    cd ..
+    cd "$PROJECT_DIR"
 
     # Wait for instances to be ready via SSH
     echo "[INFO] Waiting for instances to be ready..."
@@ -260,7 +248,7 @@ main() {
       if ansible all -i ansible/inventory.ini -m raw -a "echo ready" \
         --private-key "$SSH_KEY_PATH" \
         -e "ansible_python_interpreter=auto" \
-        --ssh-common-args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" 2>/dev/null | grep -q "ready"; then
+        --ssh-common-args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >/dev/null 2>&1; then
         echo "[OK] All instances are ready!"
         break
       fi
@@ -313,12 +301,12 @@ main() {
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo "[INFO] Destroying infrastructure..."
-        cd terraform
+        cd "$TF_DIR"
         run_terraform destroy
         echo "[OK] Cleanup complete!"
     else
         echo "[WARN] Infrastructure left running. Don't forget to clean up!"
-        echo "Run 'cd terraform && terraform destroy' when done."
+        echo "Run 'terraform destroy' in terraform/providers/$PROVIDER with the same variables when done."
     fi
 }
 

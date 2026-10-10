@@ -128,7 +128,7 @@ No code changes needed — Terraform, Ansible, and the frontend all pick up conf
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
-- Firewall/security group allows SSH from the runner IP only (UpCloud: SSH is open to any address)
+- Firewall/security group allows SSH from runner IP only
 - Auto-cleanup via `if: always()` — infrastructure destroyed even if benchmarks fail
 - Orphan cleanup workflows as safety net (manual trigger for all providers)
 
