@@ -640,6 +640,7 @@ jobs:
           import base64
           import json
           import os
+          import time
           import urllib.request
 
           API = "https://api.upcloud.com/1.3"
@@ -657,30 +658,49 @@ jobs:
                   data=json.dumps(body).encode() if body else None,
                   headers={"Authorization": f"Basic {token}", "Content-Type": "application/json"},
               )
-              with urllib.request.urlopen(request, timeout=30) as response:
+              with urllib.request.urlopen(request, timeout=90) as response:
                   return json.load(response)
 
+
+          def has_rule(uuid):
+              rules = call("GET", f"/server/{uuid}/firewall_rule")["firewall_rules"]["firewall_rule"]
+              return any(rule.get("source_address_start") == new_ip for rule in rules)
+
+
+          def allow(uuid):
+              # A firewall change can take longer than the request; the rule may
+              # exist even though the call timed out, so look before adding again.
+              for attempt in range(4):
+                  try:
+                      if not has_rule(uuid):
+                          call("POST", f"/server/{uuid}/firewall_rule", {"firewall_rule": RULE})
+                      return
+                  except OSError as error:
+                      print(f"  attempt {attempt + 1} failed: {error}")
+                      time.sleep(10)
+              raise SystemExit(f"Could not add the firewall rule to {uuid}")
+
+
+          RULE = {
+              "position": "1",
+              "action": "accept",
+              "comment": "SSH benchmark runner",
+              "direction": "in",
+              "family": "IPv4",
+              "protocol": "tcp",
+              "source_address_start": new_ip,
+              "source_address_end": new_ip,
+              "destination_port_start": "22",
+              "destination_port_end": "22",
+          }
 
           servers = [
               s for s in call("GET", "/server")["servers"]["server"]
               if s["title"].startswith("cloud-bench-upcloud-") and s["title"].endswith(f"-{run_id}")
           ]
           for server in servers:
-              call("POST", f"/server/{server['uuid']}/firewall_rule", {
-                  "firewall_rule": {
-                      "position": "1",
-                      "action": "accept",
-                      "comment": "SSH benchmark runner",
-                      "direction": "in",
-                      "family": "IPv4",
-                      "protocol": "tcp",
-                      "source_address_start": new_ip,
-                      "source_address_end": new_ip,
-                      "destination_port_start": "22",
-                      "destination_port_end": "22",
-                  }
-              })
-              print(f"  Added {new_ip} to {server['title']}")
+              allow(server["uuid"])
+              print(f"  Added {new_ip} to {server['title']}", flush=True)
 
           print(f"Updated {len(servers)} server(s)")
           PYSCRIPT
