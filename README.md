@@ -28,17 +28,6 @@ View the latest results at **[fabianwimberger.github.io/cloud-bench](https://fab
 
 Scores shown are averaged across all benchmark runs for each instance type, not just the latest run.
 
-## Pipeline
-
-```mermaid
-flowchart LR
-    TF[Terraform<br/>provision] --> AN[Ansible<br/>sysbench, fio]
-    AN --> R[Collect JSON]
-    R --> TFD[Terraform<br/>destroy]
-    R --> P[Process<br/>normalize, price]
-    P --> D[GitHub Pages<br/>dashboard]
-```
-
 ## Quick Start
 
 ### Local
@@ -97,9 +86,16 @@ PROVIDER=azure ./scripts/run-local.sh
 
 ## How It Works
 
+```mermaid
+flowchart LR
+    TF[Terraform<br/>provision] --> AN[Ansible<br/>sysbench, fio]
+    AN --> R[Collect JSON]
+    R --> TFD[Terraform<br/>destroy]
+    R --> P[Process<br/>normalize, price]
+    P --> D[GitHub Pages<br/>dashboard]
 ```
-config/instances.yaml → Terraform → Ansible (sysbench/fio) → Python (scoring) → React Dashboard
-```
+
+Instance types and prices come from `config/instances.yaml`; a Python step scores the collected results for the React dashboard.
 
 **Methodology:**
 - 5 runs per test, median value used for consistency
