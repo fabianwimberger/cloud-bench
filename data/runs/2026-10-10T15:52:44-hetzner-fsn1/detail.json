@@ -1,0 +1,57 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-10-10T15:52:43.823451",
+    "run_count": 1,
+    "currency": "EUR",
+    "provider": "hetzner",
+    "region": "fsn1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1206,
+      "usd_to_eur": 0.8924,
+      "last_updated": "2026-10-09",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "instances": [
+    {
+      "id": "CX23",
+      "name": "CX23 (X86)",
+      "scores": {
+        "single_core": 100.0,
+        "multi_core": 100.0,
+        "memory": 100.0,
+        "disk": 100.0,
+        "overall": 100.0,
+        "overall_no_disk": 100.0
+      },
+      "value": 18.21,
+      "value_no_disk": 18.21,
+      "metrics": {
+        "cpu_single_raw": 578.6,
+        "cpu_multi_raw": 1135.99,
+        "mem_read_raw": 5230.86,
+        "mem_write_raw": 2846.8,
+        "mem_throughput_raw": 8077.66,
+        "disk_iops_raw": 27970.977379
+      },
+      "pricing": {
+        "hourly": 0.0088,
+        "monthly": 5.49
+      },
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 40,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    }
+  ]
+}
