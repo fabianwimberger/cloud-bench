@@ -57,19 +57,16 @@ resource "upcloud_server" "benchmark" {
 resource "upcloud_firewall_rules" "benchmark" {
   server_id = upcloud_server.benchmark.id
 
-  dynamic "firewall_rule" {
-    for_each = var.allowed_ssh_ips
-    content {
-      action                 = "accept"
-      comment                = "SSH from the benchmark runner"
-      direction              = "in"
-      family                 = "IPv4"
-      protocol               = "tcp"
-      source_address_start   = cidrhost(firewall_rule.value, 0)
-      source_address_end     = cidrhost(firewall_rule.value, -1)
-      destination_port_start = "22"
-      destination_port_end   = "22"
-    }
+  # Provisioning, benchmark and cleanup run as separate jobs from different
+  # runner addresses, so SSH is not tied to one of them. Login is key-only.
+  firewall_rule {
+    action                 = "accept"
+    comment                = "SSH"
+    direction              = "in"
+    family                 = "IPv4"
+    protocol               = "tcp"
+    destination_port_start = "22"
+    destination_port_end   = "22"
   }
 
   # Replies to outbound connections are let back in, so package installs
