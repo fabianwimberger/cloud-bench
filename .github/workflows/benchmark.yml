@@ -563,6 +563,63 @@ jobs:
           print(f"Updated {len(sls)} security list(s)")
           PYSCRIPT
 
+      - name: Update Hetzner Firewalls with Runner IP
+        if: ${{ github.event.inputs.provider == 'hetzner' }}
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+        run: |
+          RUNNER_IP=$(curl -s --retry 3 https://ifconfig.me || curl -s --retry 3 https://api.ipify.org)
+          export RUNNER_IP
+          echo "Benchmark runner IP: $RUNNER_IP"
+          PREV_IP="${{ needs.provision.outputs.runner_ip }}"
+          echo "Provision runner IP: $PREV_IP"
+          if [ "$RUNNER_IP" = "$PREV_IP" ]; then
+            echo "Same IP, no update needed"
+            exit 0
+          fi
+
+          python3 - <<'PYSCRIPT'
+          import json
+          import os
+          import urllib.request
+
+          API = "https://api.hetzner.cloud/v1"
+          run_id = "${{ env.RUN_ID }}"
+          new_ip = f"{os.environ['RUNNER_IP']}/32"
+
+
+          def call(method, path, body=None):
+              request = urllib.request.Request(
+                  f"{API}{path}",
+                  method=method,
+                  data=json.dumps(body).encode() if body else None,
+                  headers={
+                      "Authorization": f"Bearer {os.environ['HCLOUD_TOKEN']}",
+                      "Content-Type": "application/json",
+                  },
+              )
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  return json.load(response)
+
+
+          firewalls = [
+              fw for fw in call("GET", "/firewalls?per_page=50")["firewalls"]
+              if fw["name"].startswith("cloud-bench-") and fw["name"].endswith(f"-{run_id}-firewall")
+          ]
+          for fw in firewalls:
+              # set_rules replaces the whole list, so the existing rules go back in.
+              rules = []
+              for rule in fw["rules"]:
+                  rule = {key: value for key, value in rule.items() if value not in (None, [])}
+                  if rule["direction"] == "in" and new_ip not in rule.get("source_ips", []):
+                      rule["source_ips"] = rule.get("source_ips", []) + [new_ip]
+                  rules.append(rule)
+              call("POST", f"/firewalls/{fw['id']}/actions/set_rules", {"rules": rules})
+              print(f"  Added {new_ip} to {fw['name']}")
+
+          print(f"Updated {len(firewalls)} firewall(s)")
+          PYSCRIPT
+
       - name: Update UpCloud Firewall with Runner IP
         if: ${{ github.event.inputs.provider == 'upcloud' }}
         env:

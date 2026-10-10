@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixes
 
-- UpCloud servers accept SSH only from the runner addresses instead of from any address; the benchmark job adds its own address before connecting.
+- Hetzner and UpCloud servers accept SSH only from the runner addresses instead of from any address; the benchmark job adds its own address before connecting.
 - The benchmark workflows wait until every instance answers over SSH. The check used to pass while hosts were still unreachable.
 - `run-local.sh` runs Terraform in the selected provider's directory and passes only the variables it declares.
 
