@@ -18,15 +18,12 @@ A €20 instance can mean very different things between providers. This runs the
 - **Cost analysis** — performance per dollar with EUR/USD toggle
 - **Interactive dashboard** — filtering, comparison, per-instance history charts
 - **Automated pricing** — live pricing from provider APIs + ECB exchange rates
-- **Security-first** — fresh SSH keys per run, firewall whitelisting, automatic cleanup
 - **Cost guards** — pre-run estimation blocks expensive configurations ($5 / 15 instance limit)
 - **Local benchmarking** — standalone script for users to compare their own hardware
 
 ## Live Dashboard
 
 View the latest results at **[fabianwimberger.github.io/cloud-bench](https://fabianwimberger.github.io/cloud-bench/)**
-
-Scores shown are averaged across all benchmark runs for each instance type, not just the latest run.
 
 ## Quick Start
 
@@ -131,7 +128,7 @@ No code changes needed — Terraform, Ansible, and the frontend all pick up conf
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
-- Firewall/security group allows SSH from runner IP only
+- Firewall/security group allows SSH from the runner IP only (UpCloud: SSH is open to any address)
 - Auto-cleanup via `if: always()` — infrastructure destroyed even if benchmarks fail
 - Orphan cleanup workflows as safety net (manual trigger for all providers)
 
