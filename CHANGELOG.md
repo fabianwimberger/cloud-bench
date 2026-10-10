@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixes
+
+- UpCloud servers accept SSH only from the runner addresses instead of from any address; the benchmark job adds its own address before connecting.
+- The benchmark workflows wait until every instance answers over SSH. The check used to pass while hosts were still unreachable.
+- `run-local.sh` runs Terraform in the selected provider's directory and passes only the variables it declares.
+
+### Dependencies
+
+- Terraform 1.10.5 → 1.16.5 in the workflows.
+
 ## [v2.4.0] - 2026-10-10
 
 Adds UpCloud as a seventh provider, with four Starter and Premium plans in Frankfurt.
