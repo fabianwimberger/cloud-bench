@@ -28,7 +28,7 @@ def estimate_cost(
 
     # Providers that round any partial hour up to a full hour's charge.
     # Everyone else bills per-second/per-minute, so the actual runtime applies.
-    HOURLY_ROUNDED_PROVIDERS = {"hetzner"}
+    HOURLY_ROUNDED_PROVIDERS = {"hetzner", "upcloud"}
     billing_hours = 1.0 if provider in HOURLY_ROUNDED_PROVIDERS else RUNTIME_HOURS
 
     exchange = config.get("exchange_rates", {})

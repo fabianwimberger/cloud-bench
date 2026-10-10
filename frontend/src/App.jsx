@@ -81,7 +81,7 @@ function transformData(data) {
       value_no_disk: (inst.value_no_disk ?? inst.value) || 0,
       provider: inst.provider || data.metadata?.provider || '',
       region: inst.region || data.metadata?.region || '',
-      storage_included: ['hetzner', 'ovhcloud'].includes(inst.provider || data.metadata?.provider || ''),
+      storage_included: ['hetzner', 'ovhcloud', 'upcloud'].includes(inst.provider || data.metadata?.provider || ''),
       metrics: inst.metrics || {
         cpu_single_events: 0,
         cpu_multi_events: 0,

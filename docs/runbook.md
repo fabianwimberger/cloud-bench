@@ -157,6 +157,7 @@ If you need to stop everything immediately:
 2. **Hetzner**: Hetzner Console → delete all `cloud-bench-*` servers, SSH keys, firewalls
 3. **AWS**: EC2 Console (eu-central-1) → terminate all `cloud-bench` tagged instances, delete security groups and key pairs
 4. **OVHcloud**: Horizon Dashboard (DE1) → delete all `cloud-bench-*` instances and key pairs
+   **UpCloud**: Control Panel → Servers → stop and delete all `cloud-bench-upcloud-*` servers together with their storage
 5. **OCI**: OCI Console → Compute → Instances → terminate all `cloud-bench-*` instances in your compartment, delete VCNs and security lists
 6. **GCP**: GCP Console → Compute Engine → VM instances → delete all `cloud-bench-*` instances, delete firewall rules tagged `cloud-bench`
 7. **Azure**: Azure Portal → Resource groups → delete all resource groups named `cloud-bench-azure-*`
@@ -165,5 +166,5 @@ If you need to stop everything immediately:
 
 - Always wait for the cleanup job to finish (green checkmark)
 - Don't run multiple benchmarks simultaneously (concurrency group prevents this in CI)
-- Set billing alerts: €10 in Hetzner, $10 in AWS, €10 in OVHcloud, $10 in OCI, $10 in GCP, $10 in Azure
+- Set billing alerts: €10 in Hetzner, $10 in AWS, €10 in OVHcloud, €10 in UpCloud, $10 in OCI, $10 in GCP, $10 in Azure
 - Keep pricing updated — stale prices affect value calculations

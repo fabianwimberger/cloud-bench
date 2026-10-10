@@ -138,6 +138,49 @@ providers:
       pricing:
         hourly: 0.0663
         monthly: 47.74
+  upcloud:
+    currency: EUR
+    default_region: de-fra1
+    regions:
+      de-fra1:
+        name: Frankfurt
+    instances:
+    - id: STARTER-2xCPU-4GB
+      name: Starter 2xCPU-4GB
+      arch: X86
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 30
+      pricing:
+        hourly: 0.0179
+        monthly: 12.0
+    - id: STARTER-4xCPU-8GB
+      name: Starter 4xCPU-8GB
+      arch: X86
+      vcpu: 4
+      ram_gb: 8
+      disk_gb: 40
+      pricing:
+        hourly: 0.0298
+        monthly: 20.0
+    - id: PREMIUM-2xCPU-4GB
+      name: Premium 2xCPU-4GB
+      arch: X86
+      vcpu: 2
+      ram_gb: 4
+      disk_gb: 50
+      pricing:
+        hourly: 0.0387
+        monthly: 26.0
+    - id: PREMIUM-4xCPU-8GB
+      name: Premium 4xCPU-8GB
+      arch: X86
+      vcpu: 4
+      ram_gb: 8
+      disk_gb: 100
+      pricing:
+        hourly: 0.0774
+        monthly: 52.0
   aws:
     currency: USD
     default_region: eu-central-1

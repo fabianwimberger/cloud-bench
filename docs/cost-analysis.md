@@ -9,6 +9,7 @@ A benchmark run provisions all configured instances for a single provider for ~1
 | Hetzner  | 8         | ~€0.05      |
 | AWS      | 6         | ~$0.15      |
 | OVHcloud | 5         | ~€0.15      |
+| UpCloud  | 4         | ~€0.16      |
 | OCI      | 3         | ~$0.10      |
 | GCP      | 5         | ~$0.15      |
 | Azure    | 7         | ~$0.15      |
@@ -24,6 +25,7 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
 | Hetzner  | €0.1537             | €95.92               |
 | AWS      | $0.2763             | $198.91              |
 | OVHcloud | €0.2751             | €198.07              |
+| UpCloud  | €0.1638             | €110.00              |
 | OCI      | $0.1200             | $86.40               |
 | GCP      | $0.5420             | $390.25              |
 | Azure    | $0.8082             | $581.90              |
@@ -37,6 +39,7 @@ If cleanup fails and instances keep running, the maximum hourly cost is the sum 
    - Hetzner: manual trigger
    - AWS: manual trigger
    - OVHcloud: manual trigger
+   - UpCloud: manual trigger
    - OCI: manual trigger
    - GCP: manual trigger
    - Azure: manual trigger
