@@ -108,7 +108,7 @@ UpCloud is prepaid: only the credit on the account can be spent, which already c
 
 Go to **Actions > Run Benchmarks > Run workflow**. Select provider `upcloud` and region `de-fra1`.
 
-Note: Starter and Premium plans are billed per hour whether the server is running or stopped, so a run costs a full hour per server. The firewall accepts SSH from any address, so the servers are protected by SSH key authentication only. The account behind the credentials has to be billed in EUR, because the price list comes in the account currency.
+Note: Starter and Premium plans are billed per hour whether the server is running or stopped, so a run costs a full hour per server. The account behind the credentials has to be billed in EUR, because the price list comes in the account currency.
 
 ## OCI (Oracle Cloud) Setup
 
