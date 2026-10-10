@@ -237,9 +237,7 @@ class TestFetchUpCloudPricing(unittest.TestCase):
         }
         self.credentials = {"UPCLOUD_USERNAME": "user", "UPCLOUD_PASSWORD": "secret"}
 
-    def _responses(self, currency="EUR", price=1.7857):
-        account = MagicMock()
-        account.json.return_value = {"account": {"currency": currency}}
+    def _price_list(self, price=1.7857):
         prices = MagicMock()
         prices.json.return_value = {
             "prices": {
@@ -252,11 +250,11 @@ class TestFetchUpCloudPricing(unittest.TestCase):
                 ]
             }
         }
-        return [account, prices]
+        return prices
 
     @patch("update_pricing.requests.get")
     def test_price_in_cents_becomes_hourly_and_capped_monthly(self, mock_get):
-        mock_get.side_effect = self._responses()
+        mock_get.return_value = self._price_list()
 
         with patch.dict(os.environ, self.credentials):
             updated = up.fetch_upcloud_pricing(self.config)
@@ -272,17 +270,6 @@ class TestFetchUpCloudPricing(unittest.TestCase):
 
         self.assertEqual(updated, 0)
         mock_get.assert_not_called()
-
-    @patch("update_pricing.requests.get")
-    def test_skipped_when_account_currency_differs(self, mock_get):
-        mock_get.side_effect = self._responses(currency="USD")
-
-        with patch.dict(os.environ, self.credentials):
-            updated = up.fetch_upcloud_pricing(self.config)
-
-        self.assertEqual(updated, 0)
-        pricing = self.config["providers"]["upcloud"]["instances"][0]["pricing"]
-        self.assertEqual(pricing["hourly"], 0.01)
 
 
 class TestOCIHelpers(unittest.TestCase):

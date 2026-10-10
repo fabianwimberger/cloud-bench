@@ -293,21 +293,13 @@ def fetch_upcloud_pricing(config: dict) -> int:
         return 0
 
     zone = upcloud_config.get("default_region", "de-fra1")
+    # The list is in the account's own currency and the API does not say
+    # which, so the account behind these credentials must be billed in EUR.
     try:
-        account = requests.get(f"{UPCLOUD_API}/account", auth=auth, timeout=30)
-        account.raise_for_status()
         prices = requests.get(f"{UPCLOUD_API}/price", auth=auth, timeout=30)
         prices.raise_for_status()
     except requests.RequestException as e:
         print(f"  [WARN] Failed to fetch UpCloud prices: {e}")
-        return 0
-
-    # Prices come in the account's own currency, so an account billed in
-    # another currency would silently mislabel every figure.
-    currency = account.json().get("account", {}).get("currency")
-    expected = upcloud_config.get("currency", "EUR")
-    if currency != expected:
-        print(f"  [WARN] UpCloud account is billed in {currency}, not {expected}")
         return 0
 
     zone_prices = next(

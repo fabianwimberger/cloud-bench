@@ -10,7 +10,7 @@ config/instances.yaml            # Single source of truth for instances & pricin
 │  modules/hetzner/          │   Provisions servers, SSH keys, firewalls
 │  modules/aws/              │   EC2 instances, security groups, key pairs
 │  modules/ovhcloud/         │   OpenStack instances, key pairs (no security groups)
-│  modules/upcloud/          │   Cloud Servers with their plan storage (no firewall)
+│  modules/upcloud/          │   Cloud Servers with their plan storage, firewall rules
 │  modules/oci/              │   OCI instances, VCN, subnets, security lists
 │  modules/gcp/              │   GCE instances, firewall rules, service accounts
 │  modules/azure/            │   VMs, resource groups, NSGs, public IPs
@@ -90,9 +90,8 @@ See [data-format.md](data-format.md) for full schemas.
 ## Security
 
 - Fresh Ed25519 SSH key generated per run, never reused
-- Firewall/security group/NSG allows SSH from runner IP only (Hetzner, AWS, OCI, GCP, Azure)
+- Firewall/security group/NSG allows SSH from runner IP only (Hetzner, AWS, UpCloud, OCI, GCP, Azure)
 - OVHcloud does not support security groups — SSH key auth only
-- UpCloud servers run without the paid firewall add-on — SSH key auth only
 - `if: always()` cleanup in CI ensures infrastructure destruction
 - Verify Cleanup step confirms resources are gone via provider APIs after destroy
 - Provider secrets passed via `TF_VAR_` environment variables, never on command line

@@ -35,3 +35,8 @@ variable "labels" {
   type        = map(string)
   default     = {}
 }
+
+variable "allowed_ssh_ips" {
+  description = "Allowed IPs for SSH access (CIDR notation)"
+  type        = list(string)
+}
