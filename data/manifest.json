@@ -2,6 +2,23 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-10-10T15:12:17-upcloud-de-fra1",
+      "timestamp": "2026-10-10T15:12:17",
+      "provider": "upcloud",
+      "region": "de-fra1",
+      "instance_count": 4,
+      "instances": [
+        "PREMIUM-4XCPU-8GB",
+        "PREMIUM-2XCPU-4GB",
+        "STARTER-4XCPU-8GB",
+        "STARTER-2XCPU-4GB"
+      ],
+      "files": {
+        "summary": "data/runs/2026-10-10T15:12:17-upcloud-de-fra1/summary.json",
+        "detail": "data/runs/2026-10-10T15:12:17-upcloud-de-fra1/detail.json"
+      }
+    },
+    {
       "id": "2026-10-10T13:04:53-upcloud-de-fra1",
       "timestamp": "2026-10-10T13:04:53",
       "provider": "upcloud",
@@ -1509,18 +1526,22 @@
   ],
   "instance_index": {
     "PREMIUM-4XCPU-8GB": [
+      "2026-10-10T15:12:17-upcloud-de-fra1",
       "2026-10-10T13:04:53-upcloud-de-fra1",
       "2026-10-10T10:36:26-upcloud-de-fra1"
     ],
     "PREMIUM-2XCPU-4GB": [
-      "2026-10-10T13:04:53-upcloud-de-fra1",
-      "2026-10-10T10:36:26-upcloud-de-fra1"
-    ],
-    "STARTER-2XCPU-4GB": [
+      "2026-10-10T15:12:17-upcloud-de-fra1",
       "2026-10-10T13:04:53-upcloud-de-fra1",
       "2026-10-10T10:36:26-upcloud-de-fra1"
     ],
     "STARTER-4XCPU-8GB": [
+      "2026-10-10T15:12:17-upcloud-de-fra1",
+      "2026-10-10T13:04:53-upcloud-de-fra1",
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
+    "STARTER-2XCPU-4GB": [
+      "2026-10-10T15:12:17-upcloud-de-fra1",
       "2026-10-10T13:04:53-upcloud-de-fra1",
       "2026-10-10T10:36:26-upcloud-de-fra1"
     ],
