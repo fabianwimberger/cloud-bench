@@ -2,6 +2,23 @@
   "schema_version": "3.0",
   "runs": [
     {
+      "id": "2026-10-10T13:04:53-upcloud-de-fra1",
+      "timestamp": "2026-10-10T13:04:53",
+      "provider": "upcloud",
+      "region": "de-fra1",
+      "instance_count": 4,
+      "instances": [
+        "PREMIUM-4XCPU-8GB",
+        "PREMIUM-2XCPU-4GB",
+        "STARTER-2XCPU-4GB",
+        "STARTER-4XCPU-8GB"
+      ],
+      "files": {
+        "summary": "data/runs/2026-10-10T13:04:53-upcloud-de-fra1/summary.json",
+        "detail": "data/runs/2026-10-10T13:04:53-upcloud-de-fra1/detail.json"
+      }
+    },
+    {
       "id": "2026-10-10T12:54:25-hetzner-fsn1",
       "timestamp": "2026-10-10T12:54:25",
       "provider": "hetzner",
@@ -1491,6 +1508,22 @@
     }
   ],
   "instance_index": {
+    "PREMIUM-4XCPU-8GB": [
+      "2026-10-10T13:04:53-upcloud-de-fra1",
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
+    "PREMIUM-2XCPU-4GB": [
+      "2026-10-10T13:04:53-upcloud-de-fra1",
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
+    "STARTER-2XCPU-4GB": [
+      "2026-10-10T13:04:53-upcloud-de-fra1",
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
+    "STARTER-4XCPU-8GB": [
+      "2026-10-10T13:04:53-upcloud-de-fra1",
+      "2026-10-10T10:36:26-upcloud-de-fra1"
+    ],
     "CCX23": [
       "2026-10-10T12:54:25-hetzner-fsn1",
       "2026-05-30T20:36:34-hetzner-fsn1",
@@ -1675,18 +1708,6 @@
       "2026-03-15T12:55:25-hetzner-fsn1",
       "2026-03-15T11:36:46-hetzner-fsn1",
       "2026-03-15T11:11:03-hetzner-fsn1"
-    ],
-    "PREMIUM-4XCPU-8GB": [
-      "2026-10-10T10:36:26-upcloud-de-fra1"
-    ],
-    "PREMIUM-2XCPU-4GB": [
-      "2026-10-10T10:36:26-upcloud-de-fra1"
-    ],
-    "STARTER-4XCPU-8GB": [
-      "2026-10-10T10:36:26-upcloud-de-fra1"
-    ],
-    "STARTER-2XCPU-4GB": [
-      "2026-10-10T10:36:26-upcloud-de-fra1"
     ],
     "C3-8": [
       "2026-08-15T19:05:23-ovhcloud-DE1",
