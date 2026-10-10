@@ -219,6 +219,59 @@ class TestFetchExchangeRates(unittest.TestCase):
         self.assertEqual(result, {})
 
 
+class TestFetchUpCloudPricing(unittest.TestCase):
+    def setUp(self):
+        self.config = {
+            "providers": {
+                "upcloud": {
+                    "currency": "EUR",
+                    "default_region": "de-fra1",
+                    "instances": [
+                        {
+                            "id": "STARTER-2xCPU-4GB",
+                            "pricing": {"hourly": 0.01, "monthly": 6.72},
+                        }
+                    ],
+                }
+            }
+        }
+        self.credentials = {"UPCLOUD_USERNAME": "user", "UPCLOUD_PASSWORD": "secret"}
+
+    def _price_list(self, price=1.7857):
+        prices = MagicMock()
+        prices.json.return_value = {
+            "prices": {
+                "zone": [
+                    {"name": "fi-hel1", "server_plan_STARTER-2xCPU-4GB": {"price": 9}},
+                    {
+                        "name": "de-fra1",
+                        "server_plan_STARTER-2xCPU-4GB": {"amount": 1, "price": price},
+                    },
+                ]
+            }
+        }
+        return prices
+
+    @patch("update_pricing.requests.get")
+    def test_price_in_cents_becomes_hourly_and_capped_monthly(self, mock_get):
+        mock_get.return_value = self._price_list()
+
+        with patch.dict(os.environ, self.credentials):
+            updated = up.fetch_upcloud_pricing(self.config)
+
+        self.assertEqual(updated, 1)
+        pricing = self.config["providers"]["upcloud"]["instances"][0]["pricing"]
+        self.assertEqual(pricing, {"hourly": 0.0179, "monthly": 12.0})
+
+    @patch("update_pricing.requests.get")
+    def test_skipped_without_credentials(self, mock_get):
+        with patch.dict(os.environ, {"UPCLOUD_USERNAME": "", "UPCLOUD_PASSWORD": ""}):
+            updated = up.fetch_upcloud_pricing(self.config)
+
+        self.assertEqual(updated, 0)
+        mock_get.assert_not_called()
+
+
 class TestOCIHelpers(unittest.TestCase):
     def test_oci_shape_family_map(self):
         """Test OCI shape family mappings exist."""

@@ -17,6 +17,12 @@ const providerStyles = {
     label: 'OVH',
     fullName: 'OVHcloud',
   },
+  upcloud: {
+    background: 'rgba(123, 0, 255, 0.2)',
+    color: '#a78bfa',
+    label: 'UpCloud',
+    fullName: 'UpCloud',
+  },
   oci: {
     background: 'rgba(147, 51, 234, 0.2)',
     color: '#c084fc',

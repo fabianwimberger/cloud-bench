@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        provider: [hetzner, aws, ovhcloud, oci, gcp, azure]
+        provider: [hetzner, aws, ovhcloud, upcloud, oci, gcp, azure]
     steps:
       - uses: actions/checkout@v7
 

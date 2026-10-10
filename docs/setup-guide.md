@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - GitHub account (for Actions-based benchmarking)
-- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud, Oracle Cloud (OCI), Google Cloud Platform (GCP), Microsoft Azure
+- Account with one or more providers: Hetzner Cloud, AWS, OVHcloud, UpCloud, Oracle Cloud (OCI), Google Cloud Platform (GCP), Microsoft Azure
 
 ## Hetzner Setup
 
@@ -85,6 +85,30 @@ In OVHcloud Control Panel, set a budget alert as a safety net.
 Go to **Actions > Run Benchmarks > Run workflow**. Select provider `ovhcloud` and region `DE1`.
 
 Note: OVHcloud uses the OpenStack API and does not support security groups. Instances are protected by SSH key authentication only.
+
+## UpCloud Setup
+
+### 1. Create an API user
+
+In the [UpCloud Control Panel](https://hub.upcloud.com/), go to **People** and create a subaccount with **API connections** allowed. The main account works too, but a subaccount keeps the benchmark credentials separate.
+
+### 2. Add secrets to GitHub
+
+**Repository Settings > Secrets and variables > Actions** — add:
+- `UPCLOUD_USERNAME`
+- `UPCLOUD_PASSWORD`
+
+The same two secrets let the pricing update read UpCloud's price list.
+
+### 3. Limit the spend
+
+UpCloud is prepaid: only the credit on the account can be spent, which already caps the cost of a failed cleanup.
+
+### 4. Run
+
+Go to **Actions > Run Benchmarks > Run workflow**. Select provider `upcloud` and region `de-fra1`.
+
+Note: Starter and Premium plans are billed per hour whether the server is running or stopped, so a run costs a full hour per server. The firewall accepts SSH from any address, so the servers are protected by SSH key authentication only. The account behind the credentials has to be billed in EUR, because the price list comes in the account currency.
 
 ## OCI (Oracle Cloud) Setup
 
@@ -261,6 +285,11 @@ export OVH_OPENSTACK_USERNAME="user-xxxxx"
 export OVH_OPENSTACK_PASSWORD="your-password"
 export OVH_CLOUD_PROJECT_ID="your-project-id"
 PROVIDER=ovhcloud ./scripts/run-local.sh
+
+# UpCloud
+export UPCLOUD_USERNAME="your-api-user"
+export UPCLOUD_PASSWORD="your-password"
+PROVIDER=upcloud ./scripts/run-local.sh
 
 # OCI
 export OCI_TENANCY_OCID="ocid1.tenancy.oc1..xxx"

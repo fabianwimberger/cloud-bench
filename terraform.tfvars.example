@@ -16,6 +16,11 @@ ovh_openstack_username = "user-xxxxx"
 ovh_openstack_password = "your-password"
 ovh_cloud_project_id = "your-project-id"
 
+# UpCloud
+# Create an API subaccount in the Control Panel under People
+upcloud_username = "your-api-user"
+upcloud_password = "your-password"
+
 # Oracle Cloud (OCI)
 # See docs/setup-guide.md for how to generate API keys
 oci_tenancy_ocid = "ocid1.tenancy.oc1..xxx"

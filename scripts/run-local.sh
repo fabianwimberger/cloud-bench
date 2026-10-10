@@ -1,5 +1,5 @@
 #!/bin/bash
-# Local benchmark runner script (supports Hetzner, AWS, OVHcloud, OCI, and GCP)
+# Local benchmark runner script (supports Hetzner, AWS, OVHcloud, UpCloud, OCI, and GCP)
 set -e
 
 # Configuration
@@ -14,6 +14,7 @@ if [ -z "$REGION" ]; then
         hetzner)  REGION="fsn1" ;;
         aws)      REGION="eu-central-1" ;;
         ovhcloud) REGION="DE1" ;;
+        upcloud)  REGION="de-fra1" ;;
         oci)      REGION="eu-frankfurt-1" ;;
         gcp)      REGION="europe-west3" ;;
         azure)    REGION="northeurope" ;;
@@ -89,6 +90,15 @@ validate_credentials() {
                 echo "  export OVH_OPENSTACK_USERNAME=user-xxxxxxxxxxxxxxxx"
                 echo "  export OVH_OPENSTACK_PASSWORD=your-password"
                 echo "  export OVH_CLOUD_PROJECT_ID=your-project-id"
+                exit 1
+            fi
+            ;;
+        upcloud)
+            if [ -z "$UPCLOUD_USERNAME" ] || [ -z "$UPCLOUD_PASSWORD" ]; then
+                echo "[ERROR] UpCloud credentials not set!"
+                echo "Set them with:"
+                echo "  export UPCLOUD_USERNAME=your-api-user"
+                echo "  export UPCLOUD_PASSWORD=your-password"
                 exit 1
             fi
             ;;
@@ -186,6 +196,8 @@ build_tf_vars() {
         -var="ovh_openstack_username=${OVH_OPENSTACK_USERNAME:-unused}"
         -var="ovh_openstack_password=${OVH_OPENSTACK_PASSWORD:-unused}"
         -var="ovh_cloud_project_id=${OVH_CLOUD_PROJECT_ID:-unused}"
+        -var="upcloud_username=${UPCLOUD_USERNAME:-unused}"
+        -var="upcloud_password=${UPCLOUD_PASSWORD:-unused}"
         -var="oci_tenancy_ocid=${OCI_TENANCY_OCID:-unused}"
         -var="oci_user_ocid=${OCI_USER_OCID:-unused}"
         -var="oci_fingerprint=${OCI_FINGERPRINT:-unused}"

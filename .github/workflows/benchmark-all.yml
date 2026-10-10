@@ -53,6 +53,7 @@ jobs:
               ('hetzner', 'EUR'),
               ('aws', 'USD'),
               ('ovhcloud', 'EUR'),
+              ('upcloud', 'EUR'),
               ('oci', 'USD'),
               ('gcp', 'USD'),
               ('azure', 'USD'),
@@ -108,6 +109,9 @@ jobs:
             instances: all
           - provider: ovhcloud
             region: DE1
+            instances: all
+          - provider: upcloud
+            region: de-fra1
             instances: all
           - provider: oci
             region: eu-frankfurt-1
@@ -194,6 +198,8 @@ jobs:
           TF_VAR_ovh_openstack_username: ${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}
           TF_VAR_ovh_openstack_password: ${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}
           TF_VAR_ovh_cloud_project_id: ${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}
+          TF_VAR_upcloud_username: ${{ secrets.UPCLOUD_USERNAME || 'unused' }}
+          TF_VAR_upcloud_password: ${{ secrets.UPCLOUD_PASSWORD || 'unused' }}
           TF_VAR_oci_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID || 'unused' }}
           TF_VAR_oci_user_ocid: ${{ secrets.OCI_USER_OCID || 'unused' }}
           TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
@@ -294,6 +300,8 @@ jobs:
           TF_VAR_ovh_openstack_username: ${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}
           TF_VAR_ovh_openstack_password: ${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}
           TF_VAR_ovh_cloud_project_id: ${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}
+          TF_VAR_upcloud_username: ${{ secrets.UPCLOUD_USERNAME || 'unused' }}
+          TF_VAR_upcloud_password: ${{ secrets.UPCLOUD_PASSWORD || 'unused' }}
           TF_VAR_oci_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID || 'unused' }}
           TF_VAR_oci_user_ocid: ${{ secrets.OCI_USER_OCID || 'unused' }}
           TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
@@ -392,6 +400,18 @@ jobs:
               exit 1
             else
               echo "[OK] OVH resources cleaned up successfully"
+            fi
+
+          elif [ "${{ matrix.provider }}" = "upcloud" ]; then
+            cd terraform/providers/upcloud
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "upcloud_server" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: UpCloud servers still in Terraform state after cleanup!"
+              terraform state list | grep "upcloud_server"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] UpCloud resources cleaned up successfully"
             fi
 
           elif [ "${{ matrix.provider }}" = "oci" ]; then
@@ -497,10 +517,10 @@ jobs:
           fi
 
           # Region mapping (must match matrix above)
-          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [oci]=eu-frankfurt-1 [gcp]=europe-west3 [azure]=northeurope )
+          declare -A REGIONS=( [hetzner]=fsn1 [aws]=eu-central-1 [ovhcloud]=DE1 [upcloud]=de-fra1 [oci]=eu-frankfurt-1 [gcp]=europe-west3 [azure]=northeurope )
 
           # Process each provider's results
-          for provider in hetzner aws ovhcloud oci gcp azure; do
+          for provider in hetzner aws ovhcloud upcloud oci gcp azure; do
             PROVIDER_DIR="artifacts/results-$provider"
             if [ -d "$PROVIDER_DIR" ]; then
               REGION="${REGIONS[$provider]}"

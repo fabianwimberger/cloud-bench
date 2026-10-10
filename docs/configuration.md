@@ -37,6 +37,7 @@ exchange_rates:
 | Hetzner  | EUR | fsn1 (Falkenstein) | 8 (cx23, cx33, cax11, cax21, cpx22, cpx32, ccx13, ccx23) |
 | AWS      | USD | eu-central-1 (Frankfurt) | 6 (t3.micro, t3.small, t4g.micro, t4g.small, c7i-flex.large, m7i-flex.large) |
 | OVHcloud | EUR | DE1 (Frankfurt) | 5 (d2-4, b3-8, c3-4, c3-8, r3-16) |
+| UpCloud  | EUR | de-fra1 (Frankfurt) | 4 (STARTER-2xCPU-4GB, STARTER-4xCPU-8GB, PREMIUM-2xCPU-4GB, PREMIUM-4xCPU-8GB) |
 | OCI      | USD | eu-frankfurt-1 (Frankfurt) | 3 (e5-flex-1-4, std3-flex-1-4, a2-flex-2-4) |
 | GCP      | USD | europe-west3 (Frankfurt) | 5 (e2-standard-2, n2-standard-2, n2d-standard-2, t2d-standard-2, c4a-standard-2) |
 | Azure    | USD | northeurope (Dublin) | 7 (Standard_B2ls_v2, Standard_B2s_v2, Standard_D2as_v7, Standard_D4as_v7, Standard_E2as_v7, Standard_D2ps_v6, Standard_D4ps_v6) |
@@ -130,6 +131,7 @@ APIs used:
 - **Hetzner**: `api.hetzner.cloud/v1/pricing` (public, no auth)
 - **AWS**: `api.pricing.us-east-1.amazonaws.com` (requires AWS credentials)
 - **OVHcloud**: `api.ovh.com/v1/order/catalog/public/cloud` (public, no auth)
+- **UpCloud**: `api.upcloud.com/1.3/price` (requires `UPCLOUD_USERNAME` and `UPCLOUD_PASSWORD`; skipped without them)
 - **OCI**: `apex.oracle.com/pricing` (public, no auth, via APEX API)
 - **GCP**: Cloud Billing API (requires GCP credentials with `billing.resourceCosts.get`)
 - **Azure**: `prices.azure.com/api/retail/prices` (public, no auth)

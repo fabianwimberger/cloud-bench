@@ -14,6 +14,8 @@ import requests
 import yaml
 
 HCLOUD_API = "https://api.hetzner.cloud/v1"
+UPCLOUD_API = "https://api.upcloud.com/1.3"
+UPCLOUD_HOURS_PER_MONTH = 672
 MAX_RETRIES = 3
 RETRY_DELAY = 2
 
@@ -271,6 +273,66 @@ def fetch_ovhcloud_pricing(config: dict) -> int:
             print(f"  [UPDATED] {inst_id}: \u20ac{monthly}/mo")
         else:
             print(f"  [OK] {inst_id}: \u20ac{monthly}/mo (unchanged)")
+
+    return updated
+
+
+def fetch_upcloud_pricing(config: dict) -> int:
+    """Fetch UpCloud plan pricing from the account's price list.
+    Returns count of updated instances."""
+    upcloud_config = config.get("providers", {}).get("upcloud", {})
+    instances = upcloud_config.get("instances", [])
+    if not instances:
+        print("  [WARN] No UpCloud instances in config")
+        return 0
+
+    # Unlike the other price lists, this one is only served to an API user.
+    auth = (os.getenv("UPCLOUD_USERNAME", ""), os.getenv("UPCLOUD_PASSWORD", ""))
+    if not all(auth):
+        print("  [WARN] UPCLOUD_USERNAME/UPCLOUD_PASSWORD not set, skipping")
+        return 0
+
+    zone = upcloud_config.get("default_region", "de-fra1")
+    # The list is in the account's own currency and the API does not say
+    # which, so the account behind these credentials must be billed in EUR.
+    try:
+        prices = requests.get(f"{UPCLOUD_API}/price", auth=auth, timeout=30)
+        prices.raise_for_status()
+    except requests.RequestException as e:
+        print(f"  [WARN] Failed to fetch UpCloud prices: {e}")
+        return 0
+
+    zone_prices = next(
+        (
+            z
+            for z in prices.json().get("prices", {}).get("zone", [])
+            if z.get("name") == zone
+        ),
+        None,
+    )
+    if zone_prices is None:
+        print(f"  [WARN] No UpCloud prices for zone {zone}")
+        return 0
+
+    updated = 0
+    for inst in instances:
+        inst_id = inst.get("id", "")
+        plan = zone_prices.get(f"server_plan_{inst_id}")
+        if not plan or not plan.get("price"):
+            print(f"  [WARN] No pricing found for {inst_id} in zone {zone}")
+            continue
+
+        # Listed in cents per hour; a month is capped at 672 billed hours.
+        hourly = round(plan["price"] / 100, 4)
+        monthly = round(plan["price"] / 100 * UPCLOUD_HOURS_PER_MONTH, 2)
+
+        old_pricing = inst.get("pricing", {})
+        if old_pricing.get("hourly") != hourly or old_pricing.get("monthly") != monthly:
+            inst["pricing"] = {"hourly": hourly, "monthly": monthly}
+            updated += 1
+            print(f"  [UPDATED] {inst_id}: €{monthly}/mo")
+        else:
+            print(f"  [OK] {inst_id}: €{monthly}/mo (unchanged)")
 
     return updated
 
@@ -660,6 +722,10 @@ def update_config(
         print("\nUpdating OVHcloud pricing...")
         total_updated += fetch_ovhcloud_pricing(config)
 
+    if provider in ("all", "upcloud"):
+        print("\nUpdating UpCloud pricing...")
+        total_updated += fetch_upcloud_pricing(config)
+
     if provider in ("all", "oci"):
         print("\nUpdating OCI pricing...")
         total_updated += fetch_oci_pricing(config)
@@ -688,7 +754,7 @@ def update_config(
     if not dry_run and total_updated > 0:
         config["_metadata"] = {
             "last_pricing_update": datetime.now().isoformat(),
-            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API / OCI APEX Pricing API / GCP Cloud Billing API / Azure Retail Prices API",
+            "source": "Hetzner Cloud API / AWS Pricing API / OVH Catalog API / UpCloud API / OCI APEX Pricing API / GCP Cloud Billing API / Azure Retail Prices API",
         }
         with open(config_path, "w") as f:
             yaml.dump(
@@ -715,7 +781,7 @@ def main():
         "--provider",
         "-p",
         default="all",
-        choices=["hetzner", "aws", "ovhcloud", "oci", "gcp", "azure", "all"],
+        choices=["hetzner", "aws", "ovhcloud", "upcloud", "oci", "gcp", "azure", "all"],
         help="Provider to update pricing for",
     )
     parser.add_argument(
