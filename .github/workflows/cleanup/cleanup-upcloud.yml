@@ -1,0 +1,63 @@
+name: Cleanup UpCloud Orphans
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Find and delete orphaned UpCloud servers
+        env:
+          UPCLOUD_USERNAME: ${{ secrets.UPCLOUD_USERNAME }}
+          UPCLOUD_PASSWORD: ${{ secrets.UPCLOUD_PASSWORD }}
+        run: |
+          if [ -z "$UPCLOUD_USERNAME" ]; then
+            echo "UpCloud credentials not configured, skipping"
+            exit 0
+          fi
+
+          API="https://api.upcloud.com/1.3"
+          api() { curl -fsS -u "$UPCLOUD_USERNAME:$UPCLOUD_PASSWORD" -H "Content-Type: application/json" "$@"; }
+
+          echo "Checking for orphaned cloud-bench servers..."
+
+          # The server list carries no creation time, so every benchmark
+          # server is removed. Do not run this while a benchmark is in flight.
+          SERVERS=$(api "$API/server" | jq -r '
+            .servers.server[] | select(.hostname | startswith("cloud-bench-upcloud-")) |
+            [.uuid, .hostname, .state] | @tsv
+          ')
+
+          if [ -z "$SERVERS" ]; then
+            echo "[OK] No cloud-bench servers found"
+            exit 0
+          fi
+
+          echo "Found servers:"
+          echo "$SERVERS"
+
+          DELETED=0
+          while IFS=$'\t' read -r uuid hostname state; do
+            echo "Deleting orphaned server: $hostname ($uuid, $state)"
+            if [ "$state" != "stopped" ]; then
+              api -X POST "$API/server/$uuid/stop" \
+                -d '{"stop_server":{"stop_type":"hard","timeout":"60"}}' >/dev/null
+              for _ in $(seq 1 30); do
+                [ "$(api "$API/server/$uuid" | jq -r .server.state)" = "stopped" ] && break
+                sleep 5
+              done
+            fi
+            # Plans are billed for their storage too, so it goes with the server.
+            api -X DELETE "$API/server/$uuid?storages=1&backups=delete" || echo "Failed to delete $uuid"
+            DELETED=$((DELETED + 1))
+          done <<< "$SERVERS"
+
+          echo ""
+          echo "Summary: Deleted $DELETED orphaned server(s)"
+
+          if [ "$DELETED" -gt 0 ]; then
+            echo "## UpCloud Orphan Cleanup" >> $GITHUB_STEP_SUMMARY
+            echo "Deleted **$DELETED** orphaned server(s)." >> $GITHUB_STEP_SUMMARY
+          fi

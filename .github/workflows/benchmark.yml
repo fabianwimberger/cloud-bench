@@ -12,6 +12,7 @@ on:
           - hetzner
           - aws
           - ovhcloud
+          - upcloud
           - oci
           - gcp
           - azure
@@ -78,6 +79,7 @@ jobs:
               hetzner)  REGION="fsn1" ;;
               aws)      REGION="eu-central-1" ;;
               ovhcloud) REGION="DE1" ;;
+              upcloud)  REGION="de-fra1" ;;
               oci)      REGION="eu-frankfurt-1" ;;
               gcp)      REGION="europe-west3" ;;
               azure)    REGION="northeurope" ;;
@@ -91,6 +93,7 @@ jobs:
           TOKEN_SET: ${{ secrets.HCLOUD_TOKEN != '' }}
           AWS_KEY_SET: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
           OVH_KEY_SET: ${{ secrets.OVH_OPENSTACK_USERNAME != '' }}
+          UPCLOUD_KEY_SET: ${{ secrets.UPCLOUD_USERNAME != '' }}
           INSTANCE_REGIONS: ${{ github.event.inputs.instance_regions }}
         run: |
           if [ "${{ github.event.inputs.provider }}" = "hetzner" ] && [ "$TOKEN_SET" != "true" ]; then
@@ -103,6 +106,10 @@ jobs:
           fi
           if [ "${{ github.event.inputs.provider }}" = "ovhcloud" ] && [ "$OVH_KEY_SET" != "true" ]; then
             echo "::error::OVH_OPENSTACK_USERNAME, OVH_OPENSTACK_PASSWORD, and OVH_CLOUD_PROJECT_ID secrets are required for OVHcloud"
+            exit 1
+          fi
+          if [ "${{ github.event.inputs.provider }}" = "upcloud" ] && [ "$UPCLOUD_KEY_SET" != "true" ]; then
+            echo "::error::UPCLOUD_USERNAME and UPCLOUD_PASSWORD secrets are required for UpCloud"
             exit 1
           fi
           OCI_KEY_SET="${{ secrets.OCI_TENANCY_OCID != '' }}"
@@ -256,6 +263,8 @@ jobs:
           TF_VAR_ovh_openstack_username: ${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}
           TF_VAR_ovh_openstack_password: ${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}
           TF_VAR_ovh_cloud_project_id: ${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}
+          TF_VAR_upcloud_username: ${{ secrets.UPCLOUD_USERNAME || 'unused' }}
+          TF_VAR_upcloud_password: ${{ secrets.UPCLOUD_PASSWORD || 'unused' }}
           TF_VAR_oci_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID || 'unused' }}
           TF_VAR_oci_user_ocid: ${{ secrets.OCI_USER_OCID || 'unused' }}
           TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
@@ -766,6 +775,8 @@ jobs:
           TF_VAR_ovh_openstack_username: ${{ secrets.OVH_OPENSTACK_USERNAME || 'unused' }}
           TF_VAR_ovh_openstack_password: ${{ secrets.OVH_OPENSTACK_PASSWORD || 'unused' }}
           TF_VAR_ovh_cloud_project_id: ${{ secrets.OVH_CLOUD_PROJECT_ID || 'unused' }}
+          TF_VAR_upcloud_username: ${{ secrets.UPCLOUD_USERNAME || 'unused' }}
+          TF_VAR_upcloud_password: ${{ secrets.UPCLOUD_PASSWORD || 'unused' }}
           TF_VAR_oci_tenancy_ocid: ${{ secrets.OCI_TENANCY_OCID || 'unused' }}
           TF_VAR_oci_user_ocid: ${{ secrets.OCI_USER_OCID || 'unused' }}
           TF_VAR_oci_fingerprint: ${{ secrets.OCI_FINGERPRINT || 'unused' }}
@@ -883,6 +894,19 @@ jobs:
               exit 1
             else
               echo "[OK] OVH resources cleaned up successfully"
+            fi
+
+          elif [ "${{ github.event.inputs.provider }}" = "upcloud" ]; then
+            # Verify UpCloud servers are cleaned up by checking Terraform state
+            cd terraform/providers/upcloud
+            REMAINING=$(terraform state list 2>/dev/null | grep -c "upcloud_server" || true)
+            if [ "$REMAINING" -gt 0 ]; then
+              echo "::error::CRITICAL: UpCloud servers still in Terraform state after cleanup!"
+              terraform state list | grep "upcloud_server"
+              echo "Manual intervention required!"
+              exit 1
+            else
+              echo "[OK] UpCloud resources cleaned up successfully"
             fi
 
           elif [ "${{ github.event.inputs.provider }}" = "oci" ]; then

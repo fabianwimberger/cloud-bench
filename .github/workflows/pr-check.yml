@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        provider: [hetzner, aws, ovhcloud, oci, gcp, azure]
+        provider: [hetzner, aws, ovhcloud, upcloud, oci, gcp, azure]
     steps:
       - uses: actions/checkout@v7
 
@@ -55,6 +55,9 @@ jobs:
               ;;
             ovhcloud)
               EXTRA_VARS=(-var="ovh_openstack_username=unused" -var="ovh_openstack_password=unused" -var="ovh_cloud_project_id=unused")
+              ;;
+            upcloud)
+              EXTRA_VARS=(-var="upcloud_username=unused" -var="upcloud_password=unused")
               ;;
             oci)
               DUMMY_PEM=$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:1024 2>/dev/null)
