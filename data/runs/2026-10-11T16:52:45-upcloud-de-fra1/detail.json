@@ -1,0 +1,174 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-10-11T16:52:44.212145",
+    "run_count": 4,
+    "currency": "EUR",
+    "provider": "upcloud",
+    "region": "de-fra1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1206,
+      "usd_to_eur": 0.8924,
+      "last_updated": "2026-10-09",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "instances": [
+    {
+      "id": "PREMIUM-4XCPU-8GB",
+      "name": "PREMIUM-4XCPU-8GB (X86)",
+      "scores": {
+        "single_core": 90.0,
+        "multi_core": 96.7,
+        "memory": 100.0,
+        "disk": 98.9,
+        "overall": 97.1,
+        "overall_no_disk": 96.5
+      },
+      "value": 1.8,
+      "value_no_disk": 1.86,
+      "metrics": {
+        "cpu_single_raw": 2002.23,
+        "cpu_multi_raw": 8072.71,
+        "mem_read_raw": 31127.94,
+        "mem_write_raw": 22080.32,
+        "mem_throughput_raw": 53208.259999999995,
+        "disk_iops_raw": 99071.8065
+      },
+      "pricing": {
+        "hourly": 0.0774,
+        "monthly": 52.0
+      },
+      "specs": {
+        "vcpu": 4,
+        "ram_gb": 8,
+        "disk_gb": 100,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 4,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "PREMIUM-2XCPU-4GB",
+      "name": "PREMIUM-2XCPU-4GB (X86)",
+      "scores": {
+        "single_core": 100.0,
+        "multi_core": 52.6,
+        "memory": 54.9,
+        "disk": 100.0,
+        "overall": 74.7,
+        "overall_no_disk": 66.3
+      },
+      "value": 2.93,
+      "value_no_disk": 2.55,
+      "metrics": {
+        "cpu_single_raw": 2223.8,
+        "cpu_multi_raw": 4389.72,
+        "mem_read_raw": 17339.79,
+        "mem_write_raw": 11853.15,
+        "mem_throughput_raw": 29192.940000000002,
+        "disk_iops_raw": 100131.398014
+      },
+      "pricing": {
+        "hourly": 0.0387,
+        "monthly": 26.0
+      },
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 50,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    },
+    {
+      "id": "STARTER-4XCPU-8GB",
+      "name": "STARTER-4XCPU-8GB (X86)",
+      "scores": {
+        "single_core": 94.4,
+        "multi_core": 100.0,
+        "memory": 58.2,
+        "disk": 10.1,
+        "overall": 61.8,
+        "overall_no_disk": 79.0
+      },
+      "value": 4.86,
+      "value_no_disk": 3.95,
+      "metrics": {
+        "cpu_single_raw": 2098.75,
+        "cpu_multi_raw": 8344.98,
+        "mem_read_raw": 22020.69,
+        "mem_write_raw": 8930.29,
+        "mem_throughput_raw": 30950.98,
+        "disk_iops_raw": 10072.389149
+      },
+      "pricing": {
+        "hourly": 0.0298,
+        "monthly": 20.0
+      },
+      "specs": {
+        "vcpu": 4,
+        "ram_gb": 8,
+        "disk_gb": 40,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 4,
+        "memory_mb": 8192
+      }
+    },
+    {
+      "id": "STARTER-2XCPU-4GB",
+      "name": "STARTER-2XCPU-4GB (X86)",
+      "scores": {
+        "single_core": 25.5,
+        "multi_core": 13.7,
+        "memory": 18.0,
+        "disk": 10.1,
+        "overall": 16.7,
+        "overall_no_disk": 18.9
+      },
+      "value": 1.63,
+      "value_no_disk": 1.58,
+      "metrics": {
+        "cpu_single_raw": 567.24,
+        "cpu_multi_raw": 1139.35,
+        "mem_read_raw": 6839.3,
+        "mem_write_raw": 2725.5,
+        "mem_throughput_raw": 9564.8,
+        "disk_iops_raw": 10070.841337
+      },
+      "pricing": {
+        "hourly": 0.0179,
+        "monthly": 12.0
+      },
+      "specs": {
+        "vcpu": 2,
+        "ram_gb": 4,
+        "disk_gb": 30,
+        "arch": "X86"
+      },
+      "provider_attributes": {
+        "arch": "X86",
+        "os": "Unknown",
+        "kernel": null,
+        "vcpu": 2,
+        "memory_mb": 4096
+      }
+    }
+  ]
+}

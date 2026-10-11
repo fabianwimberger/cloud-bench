@@ -1,0 +1,178 @@
+{
+  "schema_version": "2.0",
+  "metadata": {
+    "generated_at": "2026-10-11T16:52:44.210698",
+    "run_count": 4,
+    "currency": "EUR",
+    "provider": "upcloud",
+    "region": "de-fra1",
+    "exchange_rates": {
+      "eur_to_usd": 1.1206,
+      "usd_to_eur": 0.8924,
+      "last_updated": "2026-10-09",
+      "source": "Frankfurter API (ECB data)"
+    }
+  },
+  "summary": {
+    "labels": [
+      "PREMIUM-4XCPU-8GB",
+      "PREMIUM-2XCPU-4GB",
+      "STARTER-4XCPU-8GB",
+      "STARTER-2XCPU-4GB"
+    ],
+    "instances": [
+      {
+        "id": "PREMIUM-4XCPU-8GB",
+        "name": "PREMIUM-4XCPU-8GB (X86)",
+        "scores": {
+          "single_core": 90.0,
+          "multi_core": 96.7,
+          "memory": 100.0,
+          "disk": 98.9,
+          "overall": 97.1,
+          "overall_no_disk": 96.5
+        },
+        "value": 1.8,
+        "value_no_disk": 1.86,
+        "metrics": {
+          "cpu_single_events": 2002.23,
+          "cpu_multi_events": 8072.71,
+          "memory_mib_per_sec": 53208.259999999995,
+          "disk_iops": 99071.8065
+        },
+        "pricing": {
+          "hourly": 0.0774,
+          "monthly": 52.0
+        },
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 8,
+          "disk_gb": 100,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "PREMIUM-2XCPU-4GB",
+        "name": "PREMIUM-2XCPU-4GB (X86)",
+        "scores": {
+          "single_core": 100.0,
+          "multi_core": 52.6,
+          "memory": 54.9,
+          "disk": 100.0,
+          "overall": 74.7,
+          "overall_no_disk": 66.3
+        },
+        "value": 2.93,
+        "value_no_disk": 2.55,
+        "metrics": {
+          "cpu_single_events": 2223.8,
+          "cpu_multi_events": 4389.72,
+          "memory_mib_per_sec": 29192.940000000002,
+          "disk_iops": 100131.398014
+        },
+        "pricing": {
+          "hourly": 0.0387,
+          "monthly": 26.0
+        },
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 50,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "STARTER-4XCPU-8GB",
+        "name": "STARTER-4XCPU-8GB (X86)",
+        "scores": {
+          "single_core": 94.4,
+          "multi_core": 100.0,
+          "memory": 58.2,
+          "disk": 10.1,
+          "overall": 61.8,
+          "overall_no_disk": 79.0
+        },
+        "value": 4.86,
+        "value_no_disk": 3.95,
+        "metrics": {
+          "cpu_single_events": 2098.75,
+          "cpu_multi_events": 8344.98,
+          "memory_mib_per_sec": 30950.98,
+          "disk_iops": 10072.389149
+        },
+        "pricing": {
+          "hourly": 0.0298,
+          "monthly": 20.0
+        },
+        "specs": {
+          "vcpu": 4,
+          "ram_gb": 8,
+          "disk_gb": 40,
+          "arch": "X86"
+        }
+      },
+      {
+        "id": "STARTER-2XCPU-4GB",
+        "name": "STARTER-2XCPU-4GB (X86)",
+        "scores": {
+          "single_core": 25.5,
+          "multi_core": 13.7,
+          "memory": 18.0,
+          "disk": 10.1,
+          "overall": 16.7,
+          "overall_no_disk": 18.9
+        },
+        "value": 1.63,
+        "value_no_disk": 1.58,
+        "metrics": {
+          "cpu_single_events": 567.24,
+          "cpu_multi_events": 1139.35,
+          "memory_mib_per_sec": 9564.8,
+          "disk_iops": 10070.841337
+        },
+        "pricing": {
+          "hourly": 0.0179,
+          "monthly": 12.0
+        },
+        "specs": {
+          "vcpu": 2,
+          "ram_gb": 4,
+          "disk_gb": 30,
+          "arch": "X86"
+        }
+      }
+    ],
+    "charts": {
+      "single_core": [
+        90.0,
+        100.0,
+        94.4,
+        25.5
+      ],
+      "multi_core": [
+        96.7,
+        52.6,
+        100.0,
+        13.7
+      ],
+      "memory": [
+        100.0,
+        54.9,
+        58.2,
+        18.0
+      ],
+      "disk": [
+        98.9,
+        100.0,
+        10.1,
+        10.1
+      ],
+      "value": [
+        1.8,
+        2.93,
+        4.86,
+        1.63
+      ]
+    }
+  }
+}
