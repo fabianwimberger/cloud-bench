@@ -34,6 +34,12 @@ function Footer({ metadata }) {
           </>
         )}
       </p>
+      <p style={{ marginTop: '0.5rem' }}>
+        by{' '}
+        <a href="https://fabianwimberger.at/" target="_blank" rel="noopener">
+          Fabian Wimberger
+        </a>
+      </p>
     </footer>
   )
 }
