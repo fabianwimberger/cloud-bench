@@ -35,3 +35,17 @@ updates:
     labels:
       - "dependencies"
       - "javascript"
+
+  # Terraform providers (every provider and module directory)
+  - package-ecosystem: "terraform"
+    directories:
+      - "/terraform/providers/*"
+      - "/terraform/modules/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "deps"
+    labels:
+      - "dependencies"
+      - "terraform"
