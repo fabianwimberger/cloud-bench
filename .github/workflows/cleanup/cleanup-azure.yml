@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Azure Login
-        uses: azure/login@v2
+        uses: azure/login@v3.1.0
         with:
           creds: |
             {
