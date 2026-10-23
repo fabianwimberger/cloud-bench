@@ -12,9 +12,7 @@ env:
   TF_VERSION: "1.17.0"
   ANSIBLE_VERSION: "14.5.0"
   NODE_VERSION: "24.22.1"
-  PYTHON_VERSION: "3.15"
-  # ansible-core 2.21 supports Python 3.12-3.14 only
-  ANSIBLE_PYTHON_VERSION: "3.14"
+  PYTHON_VERSION: "3.14"
 
 jobs:
   cost-guard:
@@ -136,7 +134,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
-          python-version: '${{ env.ANSIBLE_PYTHON_VERSION }}'
+          python-version: '${{ env.PYTHON_VERSION }}'
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
