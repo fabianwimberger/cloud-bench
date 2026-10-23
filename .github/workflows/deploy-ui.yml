@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: "22.23.4"
-  PYTHON_VERSION: "3.13"
+  NODE_VERSION: "24.22.1"
+  PYTHON_VERSION: "3.15"
 
 jobs:
   deploy:

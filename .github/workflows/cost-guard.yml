@@ -21,7 +21,7 @@ on:
         value: ${{ jobs.check.outputs.should_run }}
 
 env:
-  PYTHON_VERSION: "3.13"
+  PYTHON_VERSION: "3.15"
 
 jobs:
   check:
