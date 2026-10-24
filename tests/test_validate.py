@@ -125,7 +125,7 @@ class TestValidatePython(unittest.TestCase):
             self.assertTrue(validate.validate_python())
 
         self.assertEqual(run.call_count, 2)
-        output.assert_any_call("Install with: .venv/bin/pip install '.[dev]'")
+        output.assert_any_call("Install with: uv sync --extra dev")
 
 
 class TestValidateFrontend(unittest.TestCase):

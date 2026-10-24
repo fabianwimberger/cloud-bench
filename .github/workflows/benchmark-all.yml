@@ -136,6 +136,9 @@ jobs:
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
@@ -269,7 +272,7 @@ jobs:
 
       - name: Process Results (${{ matrix.provider }})
         run: |
-          pip install .
+          UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact
           mkdir -p results/${{ matrix.provider }}
           cp ansible/results/*.json results/${{ matrix.provider }}/ 2>/dev/null || true
           python scripts/process_results.py \
@@ -495,9 +498,12 @@ jobs:
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Merge Results to Data Branch
         run: |
-          pip install .
+          UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact
 
           TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%S)
           git config user.name "github-actions[bot]"
@@ -578,6 +584,9 @@ jobs:
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
@@ -595,7 +604,7 @@ jobs:
 
       - name: Build Combined Data
         run: |
-          pip install .
+          UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact
           if [ -f frontend/public/data/manifest.json ]; then
             python scripts/merge_summaries.py \
               --manifest frontend/public/data/manifest.json \

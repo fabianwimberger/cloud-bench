@@ -72,7 +72,10 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - run: pip install '.[dev]'
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
+      - run: UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact --extra dev
 
       - name: Lint with ruff
         run: ruff check scripts/ tests/
@@ -124,6 +127,9 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -144,8 +150,8 @@ jobs:
 
       - name: Check Python dependencies
         run: |
-          pip install '.[dev]'
-          python -c "from pathlib import Path; import tomllib; project = tomllib.loads(Path('pyproject.toml').read_text())['project']; Path('/tmp/cloud-bench-dependencies.txt').write_text('\n'.join(project['dependencies'] + project['optional-dependencies']['dev']) + '\n')"
+          UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact --extra dev
+          uv export --frozen --extra dev --no-emit-project --no-hashes -o /tmp/cloud-bench-dependencies.txt
           pip-audit -r /tmp/cloud-bench-dependencies.txt || {
             echo "::error::Python security vulnerabilities detected. Review and update dependencies."
             exit 1
@@ -167,12 +173,15 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - run: |
-          pip install '.[dev]'
+          UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact --extra dev
           cd frontend && npm ci && cd ..
 
       - name: Create Mock Results (Hetzner)

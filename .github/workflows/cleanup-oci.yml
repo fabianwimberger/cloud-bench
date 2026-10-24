@@ -6,6 +6,9 @@ on:
 env:
   PYTHON_VERSION: "3.13"
 
+permissions:
+  contents: read
+
 jobs:
   cleanup:
     runs-on: ubuntu-latest

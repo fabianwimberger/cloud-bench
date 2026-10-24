@@ -36,6 +36,7 @@ check_prereqs() {
     command -v terraform >/dev/null 2>&1 || missing+=("terraform")
     command -v ansible-playbook >/dev/null 2>&1 || missing+=("ansible")
     command -v python3 >/dev/null 2>&1 || missing+=("python3")
+    command -v uv >/dev/null 2>&1 || missing+=("uv")
 
     if [ ${#missing[@]} -ne 0 ]; then
         echo "[ERROR] Missing prerequisites: ${missing[*]}"
@@ -222,8 +223,7 @@ main() {
     validate_credentials
     export_tf_credentials
 
-    python3 -m venv "$PROJECT_DIR/.venv"
-    "$PROJECT_DIR/.venv/bin/pip" install -q "$PROJECT_DIR"
+    uv sync --frozen --quiet --project "$PROJECT_DIR"
 
     # Terraform apply
     echo "[INFO] Provisioning infrastructure..."

@@ -769,9 +769,12 @@ jobs:
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Process Results
         run: |
-          pip install .
+          UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact
           python scripts/process_results.py \
             --input results/ \
             --output frontend/public/data/ \
@@ -1129,6 +1132,9 @@ jobs:
         with:
           python-version: '${{ env.PYTHON_VERSION }}'
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Fetch benchmark data from data branch
         run: |
           git fetch origin benchmark-data || echo "No benchmark-data branch yet"
@@ -1141,7 +1147,7 @@ jobs:
 
       - name: Build combined data
         run: |
-          pip install .
+          UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact
           if [ -f frontend/public/data/manifest.json ]; then
             python scripts/merge_summaries.py \
               --manifest frontend/public/data/manifest.json \
