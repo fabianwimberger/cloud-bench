@@ -151,7 +151,7 @@ jobs:
       - name: Check Python dependencies
         run: |
           UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact --extra dev
-          python -c "from pathlib import Path; import tomllib; project = tomllib.loads(Path('pyproject.toml').read_text())['project']; Path('/tmp/cloud-bench-dependencies.txt').write_text('\n'.join(project['dependencies'] + project['optional-dependencies']['dev']) + '\n')"
+          uv export --frozen --extra dev --no-emit-project --no-hashes -o /tmp/cloud-bench-dependencies.txt
           pip-audit -r /tmp/cloud-bench-dependencies.txt || {
             echo "::error::Python security vulnerabilities detected. Review and update dependencies."
             exit 1
