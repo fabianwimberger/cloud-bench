@@ -10,6 +10,9 @@ on:
 env:
   TF_VERSION: "1.17.0"
 
+permissions:
+  contents: read
+
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
