@@ -7,8 +7,7 @@
 - **PRs:** Fork, branch from `develop`, keep the change focused, open against `develop`.
 
 ```bash
-python -m venv .venv
-.venv/bin/pip install '.[dev]'
+uv sync --extra dev
 make all
 .venv/bin/mypy scripts/ --ignore-missing-imports
 ```
