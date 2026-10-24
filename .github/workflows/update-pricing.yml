@@ -25,8 +25,11 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+
       - name: Install dependencies
-        run: pip install .
+        run: UV_PROJECT_ENVIRONMENT="$pythonLocation" uv sync --frozen --inexact
 
       - name: Check pricing
         id: check

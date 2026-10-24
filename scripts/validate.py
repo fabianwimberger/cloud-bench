@@ -226,7 +226,7 @@ def validate_python():
             all_valid = False
     else:
         print_warning("pytest not installed, skipping unit tests")
-        print("Install with: .venv/bin/pip install '.[dev]'")
+        print("Install with: uv sync --extra dev")
 
     return all_valid
 
