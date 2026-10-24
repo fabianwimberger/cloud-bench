@@ -23,6 +23,9 @@ on:
 env:
   PYTHON_VERSION: "3.14"
 
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
