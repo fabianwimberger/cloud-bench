@@ -288,6 +288,19 @@ def validate_frontend():
     return all_valid
 
 
+def unclassified_instances(config):
+    """Instances missing a shared/dedicated tenancy, as "provider/id" labels.
+
+    The dashboard shows and filters on that flag, so an instance without it
+    would silently disappear from a tenancy filter."""
+    return [
+        f"{provider}/{instance.get('id', '?')}"
+        for provider, provider_config in (config.get("providers") or {}).items()
+        for instance in provider_config.get("instances") or []
+        if instance.get("tenancy") not in ("shared", "dedicated")
+    ]
+
+
 def validate_documentation():
     print_header("Validating Documentation")
 
@@ -320,12 +333,7 @@ def validate_documentation():
                 config = yaml.safe_load(f)
             if config and "providers" in config:
                 print_success("Configuration file is valid YAML")
-                unclassified = [
-                    f"{name}/{inst.get('id', '?')}"
-                    for name, provider in config["providers"].items()
-                    for inst in provider.get("instances") or []
-                    if inst.get("tenancy") not in ("shared", "dedicated")
-                ]
+                unclassified = unclassified_instances(config)
                 if unclassified:
                     print_error(
                         "Instances without a shared/dedicated tenancy: "

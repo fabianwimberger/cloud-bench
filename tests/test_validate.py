@@ -8,6 +8,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+import yaml
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 import validate  # noqa: E402
@@ -202,6 +204,54 @@ class TestValidateDocumentation(unittest.TestCase):
         (Path("docs") / "setup-guide.md").write_text("# setup")
 
         self.assertTrue(validate.validate_documentation())
+
+    def write_config(self, instances):
+        Path("config").mkdir(exist_ok=True)
+        Path("config/instances.yaml").write_text(
+            yaml.safe_dump({"providers": {"hetzner": {"instances": instances}}})
+        )
+
+    def test_instances_without_tenancy_fail(self):
+        """The config check names every instance missing the flag."""
+        Path("README.md").write_text("# Project\n")
+        Path("docs").mkdir()
+        (Path("docs") / "architecture.md").write_text("# arch")
+        (Path("docs") / "setup-guide.md").write_text("# setup")
+        self.write_config(
+            [
+                {"id": "cx23", "tenancy": "shared"},
+                {"id": "ccx13"},
+                {"id": "ccx23", "tenancy": "sole-tenancy"},
+            ]
+        )
+
+        self.assertFalse(validate.validate_documentation())
+
+
+class TestUnclassifiedInstances(unittest.TestCase):
+    def test_reports_only_missing_or_unknown_values(self):
+        config = {
+            "providers": {
+                "hetzner": {
+                    "instances": [
+                        {"id": "cx23", "tenancy": "shared"},
+                        {"id": "ccx13", "tenancy": "dedicated"},
+                        {"id": "cx33"},
+                        {"id": "cax11", "tenancy": "burst"},
+                    ]
+                },
+                "aws": {"instances": [{"id": "t3.micro"}]},
+                "gcp": {},
+            }
+        }
+
+        self.assertEqual(
+            validate.unclassified_instances(config),
+            ["hetzner/cx33", "hetzner/cax11", "aws/t3.micro"],
+        )
+
+    def test_empty_config_is_clean(self):
+        self.assertEqual(validate.unclassified_instances({}), [])
 
 
 if __name__ == "__main__":
