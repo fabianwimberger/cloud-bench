@@ -49,9 +49,9 @@ exchange_rates:
 budget tier and one from a dedicated-core plan are not the same thing:
 
 - `shared` — oversubscribed vCPUs (Hetzner CX/CPX/CAX, AWS burstable and flex,
-  GCP E2, Azure B-series, OVHcloud, UpCloud)
+  GCP E2, Azure B-series, UpCloud, whose plan pages promise no CPU tenancy)
 - `dedicated` — guaranteed cores (Hetzner CCX, OCI flex shapes, GCP N2/N2D/T2D/C4A,
-  Azure D/E-series)
+  Azure D/E-series, OVHcloud B3/C3/D2/R3, the families it calls "dedicated resources")
 
 It travels into the published summary as `specs.tenancy`, where the dashboard shows
 it beside the architecture and filters on it. Set it from the provider's own

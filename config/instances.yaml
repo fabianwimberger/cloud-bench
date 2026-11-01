@@ -101,10 +101,13 @@ providers:
       DE1:
         name: Frankfurt
     instances:
+    # OVHcloud sells every family except Discovery as "dedicated resources with
+    # guaranteed availability"; Discovery is the shared-resource one. None of
+    # these five is Discovery (ovhcloud.com/en/public-cloud/virtual-instances).
     - id: d2-4
       name: D2-4
       arch: X86
-      tenancy: shared
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 4
       disk_gb: 50
@@ -114,7 +117,7 @@ providers:
     - id: b3-8
       name: B3-8
       arch: X86
-      tenancy: shared
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 50
@@ -124,7 +127,7 @@ providers:
     - id: c3-4
       name: C3-4
       arch: X86
-      tenancy: shared
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 4
       disk_gb: 50
@@ -134,7 +137,7 @@ providers:
     - id: c3-8
       name: C3-8
       arch: X86
-      tenancy: shared
+      tenancy: dedicated
       vcpu: 4
       ram_gb: 8
       disk_gb: 100
@@ -144,7 +147,7 @@ providers:
     - id: r3-16
       name: R3-16
       arch: X86
-      tenancy: shared
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 16
       disk_gb: 50
@@ -158,6 +161,8 @@ providers:
       de-fra1:
         name: Frankfurt
     instances:
+    # UpCloud documents no shared/dedicated CPU model on its plan pages, so the
+    # cores are not sold as guaranteed and stay shared.
     - id: STARTER-2xCPU-4GB
       name: Starter 2xCPU-4GB
       arch: X86
@@ -272,6 +277,8 @@ providers:
       eu-frankfurt-1:
         name: Frankfurt
     instances:
+    # OCI calls only its burstable shapes "oversubscribed compute resources";
+    # an OCPU is one physical core, so these shapes keep their cores.
     - id: e5-flex-1-4
       name: E5.Flex 1/4
       shape: VM.Standard.E5.Flex
