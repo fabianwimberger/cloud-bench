@@ -135,6 +135,14 @@ function InstanceHistory({ instanceType, historyEntry, historyError, onClose, cu
             borderColor: '#2a2a3c',
             borderWidth: 1,
             callbacks: {
+              title(items) {
+                const idx = items[0]?.dataIndex
+                if (idx == null) return ''
+                const run = runsWithRelativeScores[idx]
+                return run.profile && run.profile !== 'standard'
+                  ? `${labels[idx]} · ${run.profile}`
+                  : labels[idx]
+              },
               afterBody(items) {
                 const idx = items[0]?.dataIndex
                 if (idx == null) return ''
@@ -247,6 +255,11 @@ function InstanceHistory({ instanceType, historyEntry, historyError, onClose, cu
                     {new Date(run.timestamp).toLocaleDateString(undefined, {
                       year: 'numeric', month: 'short', day: 'numeric',
                     })}
+                    {run.profile && run.profile !== 'standard' && (
+                      <span className="profile-badge" title="Longer run, not part of the published scores">
+                        {run.profile}
+                      </span>
+                    )}
                   </td>
                   <td>
                     <span className="arch-badge">{run.region || '—'}</span>

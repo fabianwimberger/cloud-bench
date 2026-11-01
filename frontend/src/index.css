@@ -735,6 +735,19 @@ a:hover {
   border-color: var(--color-primary-dark);
 }
 
+/* Marks a history run recorded with a non-standard benchmark profile, since
+   that row is not comparable with the ones around it. */
+.profile-badge {
+  display: inline-block;
+  margin-left: 0.375rem;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-sm);
+  color: var(--color-warning);
+  text-transform: capitalize;
+}
+
 .price-cell {
   font-family: var(--font-mono);
   color: var(--color-text-secondary);
