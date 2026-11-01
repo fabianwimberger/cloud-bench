@@ -320,6 +320,22 @@ def validate_documentation():
                 config = yaml.safe_load(f)
             if config and "providers" in config:
                 print_success("Configuration file is valid YAML")
+                unclassified = [
+                    f"{name}/{inst.get('id', '?')}"
+                    for name, provider in config["providers"].items()
+                    for inst in provider.get("instances") or []
+                    if inst.get("tenancy") not in ("shared", "dedicated")
+                ]
+                if unclassified:
+                    print_error(
+                        "Instances without a shared/dedicated tenancy: "
+                        + ", ".join(unclassified)
+                    )
+                    all_valid = False
+                else:
+                    print_success(
+                        "Every instance declares a shared or dedicated tenancy"
+                    )
             else:
                 print_warning("Configuration file may be incomplete")
         except ImportError:
