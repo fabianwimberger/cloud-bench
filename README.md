@@ -16,7 +16,7 @@ A €20 instance can mean very different things between providers. This runs the
 - **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
 - **Metric averaging** — scores based on all historical runs, not just the latest
 - **Cost analysis** — performance per dollar with EUR/USD toggle
-- **Interactive dashboard** — filtering, comparison, per-instance history charts
+- **Interactive dashboard** — filtering, comparison, tabbed performance charts grouped by vCPU count, per-instance history charts
 - **Automated pricing** — live pricing from provider APIs + ECB exchange rates
 - **Cost guards** — pre-run estimation blocks expensive configurations ($5 / 15 instance limit)
 - **Local benchmarking** — standalone script for users to compare their own hardware
