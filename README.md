@@ -153,3 +153,4 @@ MIT License — see [LICENSE](LICENSE) file.
 |-----------|---------|--------|
 | sysbench | [GPL v2+](https://github.com/akopytov/sysbench/blob/master/COPYING) | https://github.com/akopytov/sysbench |
 | fio | [GPL v2](https://github.com/axboe/fio/blob/master/COPYING) | https://github.com/axboe/fio |
+| Inter (self-hosted webfont, `frontend/src/assets/fonts`) | [SIL OFL 1.1](https://github.com/rsms/inter/blob/master/LICENSE.txt) | https://github.com/rsms/inter |
