@@ -65,6 +65,7 @@ function transformData(data) {
       instance_type: inst.id,
       display_name: inst.name,
       arch: inst.specs?.arch || 'X86',
+      tenancy: inst.specs?.tenancy || 'shared',
       vcpu: inst.specs?.vcpu || 0,
       ram_gb: inst.specs?.ram_gb || 0,
       disk_gb: inst.specs?.disk_gb || 0,
@@ -97,6 +98,7 @@ function filterData(ranking, filters) {
 
   return ranking.filter(inst => {
     if (filters.arch?.length > 0 && !filters.arch.includes(inst.arch)) return false
+    if (filters.tenancy?.length > 0 && !filters.tenancy.includes(inst.tenancy)) return false
     if (filters.provider?.length > 0 && !filters.provider.includes(inst.provider)) return false
     if (!parseExprFilter(filters.vcpu, inst.vcpu)) return false
     if (!parseExprFilter(filters.ram, inst.ram_gb)) return false
@@ -127,6 +129,7 @@ function App() {
   const [filters, setFilters] = useState({
     arch: [],
     provider: [],
+    tenancy: [],
     vcpu: '',
     ram: '',
     disk: '',

@@ -129,6 +129,16 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                   </td>
                   <td>
                     <span className="arch-badge">{instance.arch}</span>
+                    <span
+                      className={`tenancy-badge tenancy-badge--${instance.tenancy}`}
+                      title={
+                        instance.tenancy === 'dedicated'
+                          ? 'Dedicated vCPUs'
+                          : 'Shared vCPUs'
+                      }
+                    >
+                      {instance.tenancy}
+                    </span>
                   </td>
                   <td className="cell-numeric">{instance.vcpu}</td>
                   <td className="cell-numeric">{instance.ram_gb} <span className="metric-unit">GB</span></td>

@@ -16,6 +16,7 @@ providers:
       - id: <instance_id>        # Must match the cloud provider's flavor/type ID
         name: "Display Name"
         arch: X86|ARM64
+        tenancy: shared|dedicated
         vcpu: <number>
         ram_gb: <number>
         disk_gb: <number>
@@ -42,6 +43,20 @@ exchange_rates:
 | GCP      | USD | europe-west3 (Frankfurt) | 5 (e2-standard-2, n2-standard-2, n2d-standard-2, t2d-standard-2, c4a-standard-2) |
 | Azure    | USD | northeurope (Dublin) | 7 (Standard_B2ls_v2, Standard_B2s_v2, Standard_D2as_v7, Standard_D4as_v7, Standard_E2as_v7, Standard_D2ps_v6, Standard_D4ps_v6) |
 
+## Tenancy
+
+`tenancy` records how the provider sells the vCPU, since a score from a shared-core
+budget tier and one from a dedicated-core plan are not the same thing:
+
+- `shared` — oversubscribed vCPUs (Hetzner CX/CPX/CAX, AWS burstable and flex,
+  GCP E2, Azure B-series, OVHcloud, UpCloud)
+- `dedicated` — guaranteed cores (Hetzner CCX, OCI flex shapes, GCP N2/N2D/T2D/C4A,
+  Azure D/E-series)
+
+It travels into the published summary as `specs.tenancy`, where the dashboard shows
+it beside the architecture and filters on it. Set it from the provider's own
+documentation; when a provider changes the model, change the value in the config.
+
 ## Adding Instances
 
 Add entries to the `instances` list. No code changes needed — everything picks them up automatically.
@@ -51,6 +66,7 @@ Add entries to the `instances` list. No code changes needed — everything picks
 - id: cx23
   name: CX23
   arch: X86
+  tenancy: shared
   vcpu: 2
   ram_gb: 4
   disk_gb: 40
@@ -62,6 +78,7 @@ Add entries to the `instances` list. No code changes needed — everything picks
 - id: t3.small
   name: t3.small
   arch: X86
+  tenancy: shared
   vcpu: 2
   ram_gb: 2
   disk_gb: 20
@@ -73,6 +90,7 @@ Add entries to the `instances` list. No code changes needed — everything picks
 - id: d2-4
   name: D2-4
   arch: X86
+  tenancy: shared
   vcpu: 2
   ram_gb: 4
   disk_gb: 50
