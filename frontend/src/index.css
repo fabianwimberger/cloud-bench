@@ -202,6 +202,54 @@ a:hover {
   overflow: hidden;
 }
 
+/* Chart controls: metric tabs on top, optional vCPU scope switch beside the
+   title. Both are plain buttons so the state is readable to screen readers. */
+.chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.chart-tabs,
+.chart-scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.chart-tabs {
+  margin-bottom: 1rem;
+}
+
+.chart-tab,
+.chart-scope-btn {
+  padding: 0.3rem 0.7rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chart-tab:hover,
+.chart-scope-btn:hover {
+  color: var(--color-text);
+  background: var(--color-surface-light);
+}
+
+.chart-tab[aria-selected="true"],
+.chart-scope-btn[aria-pressed="true"] {
+  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 @media (max-width: 1200px) {
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
