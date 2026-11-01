@@ -155,6 +155,33 @@ APIs used:
 - **Azure**: `prices.azure.com/api/retail/prices` (public, no auth)
 - **Exchange rates**: Frankfurter API (ECB data)
 
+## Benchmark Profiles
+
+The playbook runs one of two profiles, picked with `BENCH_PROFILE` (default `standard`):
+
+| Profile | CPU | Disk | Cost | Feeds |
+|---------|-----|------|------|-------|
+| `standard` | fixed workload (`--cpu-max-prime=20000`), 5 runs, median | `fio` 20 s | baseline | published scores |
+| `sustained` | timed 360 s run, so throttling and burst credits show up | `fio` 360 s | ~15x runtime | per-instance history only |
+
+Only `standard` runs are averaged into the published dashboard scores: a sustained
+measurement describes steady state, a standard one describes burst, and blending
+them would describe neither. `merge_summaries.py` skips non-standard profiles and
+logs it. Sustained runs still appear as points in the history view, marked
+`sustained` in the tooltip, which is where the same instance across odd hours can
+be compared.
+
+```bash
+# single provider, longer run, history only
+gh workflow run benchmark.yml -f provider=hetzner -f instances=all -f profile=sustained
+
+# all providers
+gh workflow run benchmark-all.yml -f profile=sustained
+```
+
+Because the sustained profile multiplies runtime, run it off-peak and on a
+handful of instance types rather than the whole catalogue.
+
 ## Validation
 
 ```bash

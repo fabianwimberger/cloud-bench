@@ -82,6 +82,17 @@ def main():
                 print(f"  [WARN] No summary for {provider} run {run['id']}")
                 continue
 
+            profile = (summary.get("metadata") or {}).get("profile", "standard")
+            if profile != "standard":
+                # A sustained run measures steady state, a standard one measures
+                # burst; averaging them would describe neither. They stay in the
+                # per-run history instead.
+                print(
+                    f"  [SKIP] {provider} run {run['id']}: {profile} profile "
+                    "is not part of the published scores"
+                )
+                continue
+
             meta = summary.get("metadata", {})
             if not latest_meta:
                 latest_meta = meta
@@ -142,6 +153,7 @@ def main():
             "run_count": len(all_instances),
             "providers": providers_seen,
             "exchange_rates": exchange_rates,
+            "benchmark_profile": "standard",
         },
         "summary": {
             "labels": all_labels,
