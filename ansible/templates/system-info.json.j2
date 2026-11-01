@@ -13,6 +13,9 @@
   },
   "benchmark_config": {
     "runs": {{ num_runs }},
-    "aggregation": "median"
+    "aggregation": "median",
+    "profile": "{{ bench_profile }}",
+    "cpu_time_seconds": {{ active_profile.sysbench_cpu_time }},
+    "disk_runtime_seconds": {{ active_profile.fio_runtime }}
   }
 }

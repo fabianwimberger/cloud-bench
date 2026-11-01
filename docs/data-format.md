@@ -28,6 +28,7 @@ frontend/public/data/                    # Built during deploy
   "schema_version": "2.0",
   "metadata": {
     "generated_at": "2026-03-21T18:37:52Z",
+    "profile": "standard",
     "run_count": 5,
     "currency": "EUR",
     "provider": "hetzner",
@@ -182,6 +183,7 @@ Pre-built per-instance history for the dashboard's history view. Built by `build
         {
           "timestamp": "2026-03-21T17:11:43",
           "region": "fsn1",
+          "profile": "standard",
           "scores": { "single_core": 21.2, "multi_core": 21.0, "memory": 50.3, "disk": 77.9, "overall": 40.5 },
           "metrics": { "cpu_single_raw": 876.43, "cpu_multi_raw": 1721.55, "mem_throughput_raw": 14892.30, "disk_iops_raw": 19306.27 },
           "pricing": { "hourly": 0.0048, "monthly": 2.99 }
@@ -191,6 +193,10 @@ Pre-built per-instance history for the dashboard's history view. Built by `build
   }
 }
 ```
+
+## `profile`
+
+`standard` or `sustained`; absent means `standard` (runs recorded before profiles existed). Written by the playbook, carried into per-run metadata, history entries and the published summary. `merge_summaries.py` averages only `standard` runs, so a sustained measurement never lands in the comparison table.
 
 ## `provider_attributes`
 

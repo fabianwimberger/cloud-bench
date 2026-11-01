@@ -38,6 +38,14 @@ on:
         type: boolean
         default: false
 
+      profile:
+        description: 'Benchmark profile: standard (published scores) or sustained (longer runs, history only)'
+        type: choice
+        default: standard
+        options:
+          - standard
+          - sustained
+
 concurrency:
   group: benchmark
   cancel-in-progress: true
@@ -734,6 +742,7 @@ jobs:
         working-directory: ansible
         run: |
           export RUN_ID="${{ env.RUN_ID }}"
+          export BENCH_PROFILE="${{ github.event.inputs.profile || 'standard' }}"
           export ANSIBLE_HOST_KEY_CHECKING=False
           ansible-playbook -i ../inventory.ini playbooks/benchmark.yml \
             --private-key ~/.ssh/cloud_bench \

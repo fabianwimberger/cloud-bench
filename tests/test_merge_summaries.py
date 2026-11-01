@@ -243,18 +243,22 @@ class TestMain(unittest.TestCase):
         with open(self.manifest_path, "w") as f:
             json.dump(manifest, f)
 
-    def create_summary(self, run_id, instances):
+    def create_summary(self, run_id, instances, profile=None):
         """Helper to create summary file."""
         run_dir = os.path.join(self.runs_dir, run_id)
         os.makedirs(run_dir, exist_ok=True)
 
+        metadata = {
+            "generated_at": "2024-01-01T00:00:00Z",
+            "currency": "EUR",
+            "exchange_rates": {"eur_to_usd": 1.087},
+        }
+        if profile:
+            metadata["profile"] = profile
+
         summary = {
             "schema_version": "2.0",
-            "metadata": {
-                "generated_at": "2024-01-01T00:00:00Z",
-                "currency": "EUR",
-                "exchange_rates": {"eur_to_usd": 1.087},
-            },
+            "metadata": metadata,
             "summary": {"instances": instances},
         }
 
@@ -330,6 +334,59 @@ class TestMain(unittest.TestCase):
             self.assertEqual(len(result["summary"]["instances"]), 1)
             self.assertEqual(result["summary"]["instances"][0]["id"], "cx11")
             self.assertEqual(result["summary"]["instances"][0]["provider"], "hetzner")
+        finally:
+            sys.argv = original_argv
+
+    def test_main_skips_non_standard_profiles(self):
+        """A sustained run must not be averaged into the published scores."""
+        instance = {
+            "id": "cx11",
+            "scores": {"overall": 50},
+            "metrics": {"cpu_single_events": 1000},
+            "pricing": {"hourly": 0.0048, "monthly": 3.49},
+        }
+        self.create_manifest(
+            [
+                {
+                    "id": "run-standard",
+                    "timestamp": "2024-01-01T00:00:00Z",
+                    "provider": "hetzner",
+                    "region": "nbg1",
+                    "files": {"summary": "runs/run-standard/summary.json"},
+                },
+                {
+                    "id": "run-sustained",
+                    "timestamp": "2024-01-02T00:00:00Z",
+                    "provider": "hetzner",
+                    "region": "nbg1",
+                    "files": {"summary": "runs/run-sustained/summary.json"},
+                },
+            ]
+        )
+        self.create_summary("run-standard", [instance])
+        self.create_summary(
+            "run-sustained", [dict(instance, id="ccx13")], profile="sustained"
+        )
+
+        original_argv = sys.argv
+        try:
+            sys.argv = [
+                "merge_summaries.py",
+                "--manifest",
+                self.manifest_path,
+                "--data-dir",
+                self.temp_dir,
+                "--output",
+                self.output_path,
+            ]
+            ms.main()
+
+            with open(self.output_path) as f:
+                result = json.load(f)
+
+            ids = [inst["id"] for inst in result["summary"]["instances"]]
+            self.assertEqual(ids, ["cx11"])
+            self.assertEqual(result["metadata"]["benchmark_profile"], "standard")
         finally:
             sys.argv = original_argv
 
