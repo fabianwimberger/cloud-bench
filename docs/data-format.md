@@ -55,7 +55,7 @@ frontend/public/data/                    # Built during deploy
         },
         "pricing": { "hourly": 0.0048, "monthly": 2.99 },
         "value": 13.5,
-        "specs": { "vcpu": 2, "ram_gb": 4, "disk_gb": 40, "arch": "X86" }
+        "specs": { "vcpu": 2, "ram_gb": 4, "disk_gb": 40, "arch": "X86", "tenancy": "shared" }
       }
     ],
     "charts": {
@@ -132,7 +132,7 @@ Cross-provider view built by `merge_summaries.py`. This is what the dashboard lo
         "metrics": { "cpu_single_events": 876.43, "cpu_multi_events": 1721.55, "memory_mib_per_sec": 14892.30, "disk_iops": 19306.27 },
         "pricing": { "hourly": 0.0055, "monthly": 3.45 },
         "value": 11.7,
-        "specs": { "vcpu": 2, "ram_gb": 4, "disk_gb": 40, "arch": "X86" }
+        "specs": { "vcpu": 2, "ram_gb": 4, "disk_gb": 40, "arch": "X86", "tenancy": "shared" }
       }
     ]
   }
@@ -177,7 +177,7 @@ Pre-built per-instance history for the dashboard's history view. Built by `build
   "instances": {
     "CX23": {
       "provider": "hetzner",
-      "specs": { "vcpu": 2, "ram_gb": 4, "arch": "X86" },
+      "specs": { "vcpu": 2, "ram_gb": 4, "arch": "X86", "tenancy": "shared" },
       "runs": [
         {
           "timestamp": "2026-03-21T17:11:43",

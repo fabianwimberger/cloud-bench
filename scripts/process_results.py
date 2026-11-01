@@ -171,6 +171,7 @@ def normalize_results(
                 "vcpu": inst_config.get("vcpu", attrs.get("vcpu", 0)),
                 "ram_gb": inst_config.get("ram_gb", 0),
                 "disk_gb": inst_config.get("disk_gb", 0),
+                "tenancy": inst_config.get("tenancy", "shared"),
                 "price_hourly": pricing.get("hourly", 0),
                 "price_monthly": pricing.get("monthly", 0),
                 "metrics": {
@@ -301,6 +302,7 @@ def create_instance_summary(row: pd.Series) -> dict:
             "ram_gb": row["ram_gb"],
             "disk_gb": row["disk_gb"],
             "arch": normalize_arch(provider_attrs.get("arch", "")),
+            "tenancy": row.get("tenancy", "shared"),
         },
     }
 

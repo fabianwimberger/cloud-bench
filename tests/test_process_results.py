@@ -235,6 +235,50 @@ class TestNormalizeResults(unittest.TestCase):
         self.assertIn("arch", attrs)
 
 
+class TestTenancy(unittest.TestCase):
+    """The shared/dedicated flag travels from the config into the summary."""
+
+    def setUp(self):
+        self.results = [
+            {
+                "_source_file": "hetzner-ccx13-test.json",
+                "_instance_key": "ccx13",
+                "system": {"provider": "hetzner", "instance_type": "ccx13"},
+                "provider_attributes": {"arch": "x86_64", "vcpu": 2, "memory_mb": 4096},
+                "cpu": {"single_thread_events": 1000, "multi_thread_events": 1000},
+                "memory": {"total_throughput_mib": 8000},
+                "disk": {"read_iops": 10000},
+                "timestamp": "2024-01-01T00:00:00Z",
+            }
+        ]
+        self.instance = {
+            "id": "ccx13",
+            "name": "CCX13",
+            "arch": "X86",
+            "vcpu": 2,
+            "ram_gb": 4,
+            "disk_gb": 40,
+            "pricing": {"hourly": 0.01, "monthly": 7.0},
+        }
+
+    def config(self, tenancy=None):
+        instance = dict(self.instance)
+        if tenancy:
+            instance["tenancy"] = tenancy
+        return {"providers": {"hetzner": {"instances": [instance]}}}
+
+    def summary(self, tenancy):
+        df = pr.normalize_results(self.results, self.config(tenancy), "hetzner", "fsn1")
+        return pr.create_instance_summary(pr.calculate_scores(df).iloc[0])
+
+    def test_tenancy_reaches_the_published_specs(self):
+        self.assertEqual(self.summary("dedicated")["specs"]["tenancy"], "dedicated")
+        self.assertEqual(self.summary("shared")["specs"]["tenancy"], "shared")
+
+    def test_missing_tenancy_defaults_to_shared(self):
+        self.assertEqual(self.summary(None)["specs"]["tenancy"], "shared")
+
+
 class TestCalculateScores(unittest.TestCase):
     def setUp(self):
         import pandas as pd

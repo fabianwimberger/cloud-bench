@@ -5,6 +5,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
 
   const arches = [...new Set(ranking.map(r => r.arch))].filter(Boolean).sort()
   const providers = [...new Set(ranking.map(r => r.provider))].filter(Boolean).sort()
+  const tenancies = [...new Set(ranking.map(r => r.tenancy))].filter(Boolean).sort()
 
   const maxPrice = Math.ceil(Math.max(...ranking.map(r => r.price_monthly)) * 1.2)
 
@@ -19,6 +20,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
     onFilterChange({
       arch: [],
       provider: [],
+      tenancy: [],
       vcpu: '',
       ram: '',
       disk: '',
@@ -32,6 +34,7 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
   const hasActiveFilters =
     filters.arch?.length > 0 ||
     filters.provider?.length > 0 ||
+    filters.tenancy?.length > 0 ||
     filters.vcpu ||
     filters.ram ||
     filters.disk ||
@@ -87,6 +90,15 @@ function InstanceFilter({ ranking, filters, onFilterChange, currency, currencyTo
             options={providers}
             value={filters.provider}
             onChange={(v) => handleChange('provider', v)}
+          />
+        )}
+
+        {tenancies.length > 1 && (
+          <MultiSelect
+            label="Tenancy"
+            options={tenancies}
+            value={filters.tenancy}
+            onChange={(v) => handleChange('tenancy', v)}
           />
         )}
 
