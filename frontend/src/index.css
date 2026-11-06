@@ -726,7 +726,9 @@ a:hover {
 }
 
 /* Tenancy sits beside the architecture: muted for shared vCPUs, highlighted
-   for dedicated ones, so the difference is visible without a second column. */
+   for dedicated ones, so the difference is visible without a second column.
+   Providers whose last run predates the field are marked as unknown rather
+   than passed off as shared. */
 .tenancy-badge {
   display: inline-block;
   margin-left: 0.25rem;
@@ -741,6 +743,11 @@ a:hover {
 .tenancy-badge--dedicated {
   color: var(--color-primary-light);
   border-color: var(--color-primary-dark);
+}
+
+.tenancy-badge--unknown {
+  border-style: dashed;
+  text-transform: none;
 }
 
 /* Marks a history run recorded with a non-standard benchmark profile, since

@@ -134,7 +134,9 @@ function ComparisonTable({ ranking, metadata, selectedForComparison, onToggleSel
                       title={
                         instance.tenancy === 'dedicated'
                           ? 'Dedicated vCPUs'
-                          : 'Shared vCPUs'
+                          : instance.tenancy === 'shared'
+                            ? 'Shared vCPUs'
+                            : 'No published tenancy data for this provider yet'
                       }
                     >
                       {instance.tenancy}

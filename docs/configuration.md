@@ -56,6 +56,8 @@ budget tier and one from a dedicated-core plan are not the same thing:
 It travels into the published summary as `specs.tenancy`, where the dashboard shows
 it beside the architecture and filters on it. Set it from the provider's own
 documentation; when a provider changes the model, change the value in the config.
+A provider whose published summary predates the field shows `unknown` until its
+next benchmark run rewrites it.
 
 ## Adding Instances
 
