@@ -65,7 +65,9 @@ function transformData(data) {
       instance_type: inst.id,
       display_name: inst.name,
       arch: inst.specs?.arch || 'X86',
-      tenancy: inst.specs?.tenancy || 'shared',
+      // Published summaries from before tenancy existed carry none; guessing
+      // here would label dedicated OVHcloud and OCI cores as shared.
+      tenancy: inst.specs?.tenancy || 'unknown',
       vcpu: inst.specs?.vcpu || 0,
       ram_gb: inst.specs?.ram_gb || 0,
       disk_gb: inst.specs?.disk_gb || 0,

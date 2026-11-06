@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v2.5.1] - 2026-11-06
+
+### Fixes
+
+- The dashboard marks instances from a provider whose published summary predates the tenancy field as `unknown`. They fell back to `shared`, which labelled OVHcloud and OCI dedicated cores wrong until their next benchmark run.
+
 ## [v2.5.0] - 2026-11-06
 
 Tells shared from dedicated vCPUs, groups the charts by instance size, and adds a sustained profile for longer runs.
