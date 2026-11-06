@@ -57,6 +57,7 @@ def extract_instance_data(detail: dict, run_meta: dict) -> dict[str, dict]:
             "timestamp": run_meta.get("timestamp", ""),
             "region": run_meta.get("region", ""),
             "currency": currency,
+            "profile": metadata.get("profile", "standard"),
             "scores": inst.get("scores", {}),
             "metrics": {
                 "cpu_single_raw": inst.get("metrics", {}).get(

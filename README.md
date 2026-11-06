@@ -14,9 +14,10 @@ A €20 instance can mean very different things between providers. This runs the
 
 - **Multi-provider** — Hetzner Cloud, AWS EC2, OVHcloud, UpCloud, OCI, GCP, Azure (38 instance types)
 - **Standardized benchmarks** — CPU (sysbench), Memory (sysbench), Disk I/O (fio)
+- **Two profiles** — `standard` for the published scores, `sustained` (360 s CPU and disk) to expose throttling and shared-core effects in the history view
 - **Metric averaging** — scores based on all historical runs, not just the latest
 - **Cost analysis** — performance per dollar with EUR/USD toggle
-- **Interactive dashboard** — filtering, comparison, per-instance history charts
+- **Interactive dashboard** — filtering, comparison, tabbed performance charts grouped by vCPU count, per-instance history charts
 - **Automated pricing** — live pricing from provider APIs + ECB exchange rates
 - **Cost guards** — pre-run estimation blocks expensive configurations ($5 / 15 instance limit)
 - **Local benchmarking** — standalone script for users to compare their own hardware
@@ -152,3 +153,4 @@ MIT License — see [LICENSE](LICENSE) file.
 |-----------|---------|--------|
 | sysbench | [GPL v2+](https://github.com/akopytov/sysbench/blob/master/COPYING) | https://github.com/akopytov/sysbench |
 | fio | [GPL v2](https://github.com/axboe/fio/blob/master/COPYING) | https://github.com/axboe/fio |
+| Inter (self-hosted webfont, `frontend/src/assets/fonts`) | [SIL OFL 1.1](https://github.com/rsms/inter/blob/master/LICENSE.txt) | https://github.com/rsms/inter |

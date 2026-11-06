@@ -18,9 +18,34 @@
     fio_size: 512M
     fio_block_size: 4k
     fio_iodepth: 32
-    fio_runtime: 20
+
+    # Profile "standard" keeps the historical fixed-work CPU/memory tests and
+    # a 20 s disk run. Profile "sustained" runs CPU and disk long enough to
+    # reach steady state, which is where shared hosts and burst credits show
+    # up; it costs ~15x the runtime and is excluded from the published scores.
+    bench_profile: "{{ lookup('env', 'BENCH_PROFILE') | default('standard', true) }}"
+    profile_settings:
+      standard:
+        fio_runtime: 20
+        sysbench_cpu_time: 0
+        task_timeout: 300
+      sustained:
+        fio_runtime: 360
+        sysbench_cpu_time: 360
+        task_timeout: 900
+    active_profile: "{{ profile_settings[bench_profile] }}"
+    # sysbench stops after its fixed workload unless --time is set; a timed run
+    # keeps the CPUs busy for the whole window and reports sustained events/s.
+    sysbench_cpu_time_arg: "{{ ('--time=' ~ active_profile.sysbench_cpu_time) if active_profile.sysbench_cpu_time > 0 else '' }}"
 
   pre_tasks:
+    - name: Validate benchmark profile
+      assert:
+        that:
+          - bench_profile in profile_settings
+        fail_msg: "Unknown BENCH_PROFILE '{{ bench_profile }}'; use standard or sustained"
+      changed_when: false
+
     - name: Ensure benchmark directory exists
       file:
         path: "{{ results_dir }}"
@@ -93,7 +118,7 @@
           shell: |
             set -eo pipefail
             for i in $(seq 1 {{ num_runs }}); do
-              timeout 300 sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} --threads=1 run \
+              timeout {{ active_profile.task_timeout }} sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} {{ sysbench_cpu_time_arg }} --threads=1 run \
                 | grep "events per second" | awk '{print $4}'
             done > "{{ results_dir }}/cpu-single-raw.txt"
           args:
@@ -127,7 +152,7 @@
           shell: |
             set -eo pipefail
             for i in $(seq 1 {{ num_runs }}); do
-              sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} --threads={{ ansible_processor_vcpus }} run \
+              timeout {{ active_profile.task_timeout }} sysbench cpu --cpu-max-prime={{ sysbench_cpu_prime }} {{ sysbench_cpu_time_arg }} --threads={{ ansible_processor_vcpus }} run \
                 | grep "events per second" | awk '{print $4}'
             done > "{{ results_dir }}/cpu-multi-raw.txt"
           args:
@@ -211,9 +236,9 @@
           shell: |
             set -eo pipefail
             for i in $(seq 1 {{ num_runs }}); do
-              timeout 120 fio --name=randread --ioengine=libaio --iodepth={{ fio_iodepth }} \
+              timeout {{ active_profile.task_timeout }} fio --name=randread --ioengine=libaio --iodepth={{ fio_iodepth }} \
                   --rw=randread --bs={{ fio_block_size }} --direct=1 --size={{ fio_size }} \
-                  --numjobs=1 --runtime={{ fio_runtime }} \
+                  --numjobs=1 --runtime={{ active_profile.fio_runtime }} \
                   --group_reporting --output-format=json \
                   | jq '.jobs[0].read.iops'
             done > "{{ results_dir }}/disk-iops-raw.txt"
@@ -279,6 +304,7 @@
                 timestamp: $timestamp,
                 benchmark_runs: $runs,
                 aggregation: "median",
+                profile: "{{ bench_profile }}",
                 system: $system[0],
                 cpu: $cpu[0],
                 memory: $memory[0],

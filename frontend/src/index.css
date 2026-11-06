@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('./assets/fonts/InterVariable.woff2') format('woff2');
+}
+
 :root {
   /* Dark professional theme - Vantage-inspired */
   --color-bg: #0a0a0f;
@@ -202,6 +210,54 @@ a:hover {
   overflow: hidden;
 }
 
+/* Chart controls: metric tabs on top, optional vCPU scope switch beside the
+   title. Both are plain buttons so the state is readable to screen readers. */
+.chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.chart-tabs,
+.chart-scope {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.chart-tabs {
+  margin-bottom: 1rem;
+}
+
+.chart-tab,
+.chart-scope-btn {
+  padding: 0.3rem 0.7rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chart-tab:hover,
+.chart-scope-btn:hover {
+  color: var(--color-text);
+  background: var(--color-surface-light);
+}
+
+.chart-tab[aria-selected="true"],
+.chart-scope-btn[aria-pressed="true"] {
+  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 @media (max-width: 1200px) {
   .grid-4 {
     grid-template-columns: repeat(2, 1fr);
@@ -297,7 +353,7 @@ a:hover {
 }
 
 .filter-primary {
-  grid-template-columns: minmax(240px, 1fr) repeat(3, minmax(140px, auto));
+  grid-template-columns: minmax(200px, 1fr) repeat(4, minmax(120px, auto));
 }
 
 .filter-advanced {
@@ -507,7 +563,7 @@ a:hover {
 
 @media (max-width: 1100px) {
   .filter-primary {
-    grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(140px, auto));
+    grid-template-columns: minmax(180px, 1fr) repeat(3, minmax(120px, auto));
   }
 
   .filter-group-currency {
@@ -667,6 +723,37 @@ a:hover {
   border-radius: var(--radius-sm);
   font-weight: 500;
   text-transform: uppercase;
+}
+
+/* Tenancy sits beside the architecture: muted for shared vCPUs, highlighted
+   for dedicated ones, so the difference is visible without a second column. */
+.tenancy-badge {
+  display: inline-block;
+  margin-left: 0.25rem;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  text-transform: capitalize;
+}
+
+.tenancy-badge--dedicated {
+  color: var(--color-primary-light);
+  border-color: var(--color-primary-dark);
+}
+
+/* Marks a history run recorded with a non-standard benchmark profile, since
+   that row is not comparable with the ones around it. */
+.profile-badge {
+  display: inline-block;
+  margin-left: 0.375rem;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-sm);
+  color: var(--color-warning);
+  text-transform: capitalize;
 }
 
 .price-cell {

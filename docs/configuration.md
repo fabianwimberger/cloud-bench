@@ -16,6 +16,7 @@ providers:
       - id: <instance_id>        # Must match the cloud provider's flavor/type ID
         name: "Display Name"
         arch: X86|ARM64
+        tenancy: shared|dedicated
         vcpu: <number>
         ram_gb: <number>
         disk_gb: <number>
@@ -42,6 +43,20 @@ exchange_rates:
 | GCP      | USD | europe-west3 (Frankfurt) | 5 (e2-standard-2, n2-standard-2, n2d-standard-2, t2d-standard-2, c4a-standard-2) |
 | Azure    | USD | northeurope (Dublin) | 7 (Standard_B2ls_v2, Standard_B2s_v2, Standard_D2as_v7, Standard_D4as_v7, Standard_E2as_v7, Standard_D2ps_v6, Standard_D4ps_v6) |
 
+## Tenancy
+
+`tenancy` records how the provider sells the vCPU, since a score from a shared-core
+budget tier and one from a dedicated-core plan are not the same thing:
+
+- `shared` — oversubscribed vCPUs (Hetzner CX/CPX/CAX, AWS burstable and flex,
+  GCP E2, Azure B-series, UpCloud, whose plan pages promise no CPU tenancy)
+- `dedicated` — guaranteed cores (Hetzner CCX, OCI flex shapes, GCP N2/N2D/T2D/C4A,
+  Azure D/E-series, OVHcloud B3/C3/D2/R3, the families it calls "dedicated resources")
+
+It travels into the published summary as `specs.tenancy`, where the dashboard shows
+it beside the architecture and filters on it. Set it from the provider's own
+documentation; when a provider changes the model, change the value in the config.
+
 ## Adding Instances
 
 Add entries to the `instances` list. No code changes needed — everything picks them up automatically.
@@ -51,6 +66,7 @@ Add entries to the `instances` list. No code changes needed — everything picks
 - id: cx23
   name: CX23
   arch: X86
+  tenancy: shared
   vcpu: 2
   ram_gb: 4
   disk_gb: 40
@@ -62,6 +78,7 @@ Add entries to the `instances` list. No code changes needed — everything picks
 - id: t3.small
   name: t3.small
   arch: X86
+  tenancy: shared
   vcpu: 2
   ram_gb: 2
   disk_gb: 20
@@ -73,6 +90,7 @@ Add entries to the `instances` list. No code changes needed — everything picks
 - id: d2-4
   name: D2-4
   arch: X86
+  tenancy: shared
   vcpu: 2
   ram_gb: 4
   disk_gb: 50
@@ -136,6 +154,33 @@ APIs used:
 - **GCP**: Cloud Billing API (requires GCP credentials with `billing.resourceCosts.get`)
 - **Azure**: `prices.azure.com/api/retail/prices` (public, no auth)
 - **Exchange rates**: Frankfurter API (ECB data)
+
+## Benchmark Profiles
+
+The playbook runs one of two profiles, picked with `BENCH_PROFILE` (default `standard`):
+
+| Profile | CPU | Disk | Cost | Feeds |
+|---------|-----|------|------|-------|
+| `standard` | fixed workload (`--cpu-max-prime=20000`), 5 runs, median | `fio` 20 s | baseline | published scores |
+| `sustained` | timed 360 s run, so throttling and burst credits show up | `fio` 360 s | ~15x runtime | per-instance history only |
+
+Only `standard` runs are averaged into the published dashboard scores: a sustained
+measurement describes steady state, a standard one describes burst, and blending
+them would describe neither. `merge_summaries.py` skips non-standard profiles and
+logs it. Sustained runs still appear as points in the history view, marked
+`sustained` in the tooltip, which is where the same instance across odd hours can
+be compared.
+
+```bash
+# single provider, longer run, history only
+gh workflow run benchmark.yml -f provider=hetzner -f instances=all -f profile=sustained
+
+# all providers
+gh workflow run benchmark-all.yml -f profile=sustained
+```
+
+Because the sustained profile multiplies runtime, run it off-peak and on a
+handful of instance types rather than the whole catalogue.
 
 ## Validation
 

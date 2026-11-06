@@ -8,6 +8,14 @@ on:
         type: boolean
         default: false
 
+      profile:
+        description: 'Benchmark profile: standard (published scores) or sustained (longer runs, history only)'
+        type: choice
+        default: standard
+        options:
+          - standard
+          - sustained
+
 env:
   TF_VERSION: "1.17.0"
   ANSIBLE_VERSION: "14.5.0"
@@ -265,6 +273,7 @@ jobs:
         working-directory: ansible
         run: |
           export RUN_ID="${{ github.run_id }}-${{ matrix.provider }}"
+          export BENCH_PROFILE="${{ github.event.inputs.profile || 'standard' }}"
           export ANSIBLE_HOST_KEY_CHECKING=False
           ansible-playbook -i inventory_${{ matrix.provider }}.ini playbooks/benchmark.yml \
             --private-key ~/.ssh/cloud_bench_${{ matrix.provider }} \

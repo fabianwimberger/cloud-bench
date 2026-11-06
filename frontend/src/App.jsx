@@ -65,6 +65,7 @@ function transformData(data) {
       instance_type: inst.id,
       display_name: inst.name,
       arch: inst.specs?.arch || 'X86',
+      tenancy: inst.specs?.tenancy || 'shared',
       vcpu: inst.specs?.vcpu || 0,
       ram_gb: inst.specs?.ram_gb || 0,
       disk_gb: inst.specs?.disk_gb || 0,
@@ -97,6 +98,7 @@ function filterData(ranking, filters) {
 
   return ranking.filter(inst => {
     if (filters.arch?.length > 0 && !filters.arch.includes(inst.arch)) return false
+    if (filters.tenancy?.length > 0 && !filters.tenancy.includes(inst.tenancy)) return false
     if (filters.provider?.length > 0 && !filters.provider.includes(inst.provider)) return false
     if (!parseExprFilter(filters.vcpu, inst.vcpu)) return false
     if (!parseExprFilter(filters.ram, inst.ram_gb)) return false
@@ -127,6 +129,7 @@ function App() {
   const [filters, setFilters] = useState({
     arch: [],
     provider: [],
+    tenancy: [],
     vcpu: '',
     ram: '',
     disk: '',
@@ -196,19 +199,32 @@ function App() {
   const filteredCharts = useMemo(() => {
     if (!effectiveRanking.length) return null
 
-    const sorted = [...effectiveRanking]
-    const buildChart = (scoreFn) => {
-      const pairs = sorted.map(r => [r.instance_type, scoreFn(r)])
+    const buildChart = (rows, scoreFn) => {
+      const pairs = rows.map(r => [r.instance_type, scoreFn(r)])
       pairs.sort((a, b) => b[1] - a[1])
       return { labels: pairs.map(p => p[0]), values: pairs.map(p => p[1]) }
     }
 
+    const buildGroup = (rows) => ({
+      single_core: buildChart(rows, r => r.single_core_score),
+      multi_core: buildChart(rows, r => r.multi_core_score),
+      memory: buildChart(rows, r => r.memory_score),
+      disk: buildChart(rows, r => r.disk_score),
+      value: buildChart(rows, r => r.effectiveValue ?? r.cpu_value_monthly),
+    })
+
+    const byVcpu = new Map()
+    for (const row of effectiveRanking) {
+      const vcpu = row.vcpu || 0
+      if (!byVcpu.has(vcpu)) byVcpu.set(vcpu, [])
+      byVcpu.get(vcpu).push(row)
+    }
+
     return {
-      single_core: buildChart(r => r.single_core_score),
-      multi_core: buildChart(r => r.multi_core_score),
-      memory: buildChart(r => r.memory_score),
-      disk: buildChart(r => r.disk_score),
-      value: buildChart(r => r.effectiveValue ?? r.cpu_value_monthly),
+      all: buildGroup(effectiveRanking),
+      byVcpu: [...byVcpu.entries()]
+        .sort((a, b) => a[0] - b[0])
+        .map(([vcpu, rows]) => ({ vcpu, count: rows.length, charts: buildGroup(rows) })),
     }
   }, [effectiveRanking])
 

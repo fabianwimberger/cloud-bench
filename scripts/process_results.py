@@ -171,6 +171,10 @@ def normalize_results(
                 "vcpu": inst_config.get("vcpu", attrs.get("vcpu", 0)),
                 "ram_gb": inst_config.get("ram_gb", 0),
                 "disk_gb": inst_config.get("disk_gb", 0),
+                "tenancy": inst_config.get("tenancy", "shared"),
+                "profile": (system.get("benchmark_config") or {}).get(
+                    "profile", "standard"
+                ),
                 "price_hourly": pricing.get("hourly", 0),
                 "price_monthly": pricing.get("monthly", 0),
                 "metrics": {
@@ -301,8 +305,17 @@ def create_instance_summary(row: pd.Series) -> dict:
             "ram_gb": row["ram_gb"],
             "disk_gb": row["disk_gb"],
             "arch": normalize_arch(provider_attrs.get("arch", "")),
+            "tenancy": row.get("tenancy", "shared"),
         },
     }
+
+
+def run_profile(df: pd.DataFrame) -> str:
+    """Benchmark profile the rows were measured with ("standard" for runs
+    recorded before profiles existed). Mixed profiles cannot be averaged into
+    one score, so they are reported as such rather than silently blended."""
+    profiles = {str(profile) for profile in df.get("profile", pd.Series(["standard"]))}
+    return profiles.pop() if len(profiles) == 1 else "mixed"
 
 
 def generate_summary_data(
@@ -324,6 +337,7 @@ def generate_summary_data(
         "currency": currency,
         "provider": provider,
         "region": region,
+        "profile": run_profile(df),
     }
     if config:
         exchange_rates = config.get("exchange_rates")
@@ -374,6 +388,7 @@ def generate_detail_data(
         "currency": currency,
         "provider": provider,
         "region": region,
+        "profile": run_profile(df),
     }
     if config:
         exchange_rates = config.get("exchange_rates")

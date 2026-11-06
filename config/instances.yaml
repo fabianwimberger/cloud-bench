@@ -17,6 +17,7 @@ providers:
     - id: cx23
       name: CX23
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 4
       disk_gb: 40
@@ -26,6 +27,7 @@ providers:
     - id: cx33
       name: CX33
       arch: X86
+      tenancy: shared
       vcpu: 4
       ram_gb: 8
       disk_gb: 80
@@ -35,6 +37,7 @@ providers:
     - id: cax11
       name: CAX11
       arch: ARM64
+      tenancy: shared
       vcpu: 2
       ram_gb: 4
       disk_gb: 40
@@ -44,6 +47,7 @@ providers:
     - id: cax21
       name: CAX21
       arch: ARM64
+      tenancy: shared
       vcpu: 4
       ram_gb: 8
       disk_gb: 80
@@ -53,6 +57,7 @@ providers:
     - id: cpx22
       name: CPX22
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 4
       disk_gb: 80
@@ -62,6 +67,7 @@ providers:
     - id: cpx32
       name: CPX32
       arch: X86
+      tenancy: shared
       vcpu: 4
       ram_gb: 8
       disk_gb: 160
@@ -71,6 +77,7 @@ providers:
     - id: ccx13
       name: CCX13
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 80
@@ -80,6 +87,7 @@ providers:
     - id: ccx23
       name: CCX23
       arch: X86
+      tenancy: dedicated
       vcpu: 4
       ram_gb: 16
       disk_gb: 160
@@ -93,9 +101,13 @@ providers:
       DE1:
         name: Frankfurt
     instances:
+    # OVHcloud sells every family except Discovery as "dedicated resources with
+    # guaranteed availability"; Discovery is the shared-resource one. None of
+    # these five is Discovery (ovhcloud.com/en/public-cloud/virtual-instances).
     - id: d2-4
       name: D2-4
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 4
       disk_gb: 50
@@ -105,6 +117,7 @@ providers:
     - id: b3-8
       name: B3-8
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 50
@@ -114,6 +127,7 @@ providers:
     - id: c3-4
       name: C3-4
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 4
       disk_gb: 50
@@ -123,6 +137,7 @@ providers:
     - id: c3-8
       name: C3-8
       arch: X86
+      tenancy: dedicated
       vcpu: 4
       ram_gb: 8
       disk_gb: 100
@@ -132,6 +147,7 @@ providers:
     - id: r3-16
       name: R3-16
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 16
       disk_gb: 50
@@ -145,9 +161,12 @@ providers:
       de-fra1:
         name: Frankfurt
     instances:
+    # UpCloud documents no shared/dedicated CPU model on its plan pages, so the
+    # cores are not sold as guaranteed and stay shared.
     - id: STARTER-2xCPU-4GB
       name: Starter 2xCPU-4GB
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 4
       disk_gb: 30
@@ -157,6 +176,7 @@ providers:
     - id: STARTER-4xCPU-8GB
       name: Starter 4xCPU-8GB
       arch: X86
+      tenancy: shared
       vcpu: 4
       ram_gb: 8
       disk_gb: 40
@@ -166,6 +186,7 @@ providers:
     - id: PREMIUM-2xCPU-4GB
       name: Premium 2xCPU-4GB
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 4
       disk_gb: 50
@@ -175,6 +196,7 @@ providers:
     - id: PREMIUM-4xCPU-8GB
       name: Premium 4xCPU-8GB
       arch: X86
+      tenancy: shared
       vcpu: 4
       ram_gb: 8
       disk_gb: 100
@@ -191,6 +213,7 @@ providers:
     - id: t3.micro
       name: t3.micro
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 1
       disk_gb: 20
@@ -200,6 +223,7 @@ providers:
     - id: t3.small
       name: t3.small
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 2
       disk_gb: 20
@@ -209,6 +233,7 @@ providers:
     - id: t4g.micro
       name: t4g.micro
       arch: ARM64
+      tenancy: shared
       vcpu: 2
       ram_gb: 1
       disk_gb: 20
@@ -218,6 +243,7 @@ providers:
     - id: t4g.small
       name: t4g.small
       arch: ARM64
+      tenancy: shared
       vcpu: 2
       ram_gb: 2
       disk_gb: 20
@@ -227,6 +253,7 @@ providers:
     - id: c7i-flex.large
       name: c7i-flex.large
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 4
       disk_gb: 20
@@ -236,6 +263,7 @@ providers:
     - id: m7i-flex.large
       name: m7i-flex.large
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 8
       disk_gb: 20
@@ -249,10 +277,13 @@ providers:
       eu-frankfurt-1:
         name: Frankfurt
     instances:
+    # OCI calls only its burstable shapes "oversubscribed compute resources";
+    # an OCPU is one physical core, so these shapes keep their cores.
     - id: e5-flex-1-4
       name: E5.Flex 1/4
       shape: VM.Standard.E5.Flex
       arch: X86
+      tenancy: dedicated
       ocpus: 1
       vcpu: 2
       ram_gb: 4
@@ -264,6 +295,7 @@ providers:
       name: Standard3.Flex 1/4
       shape: VM.Standard3.Flex
       arch: X86
+      tenancy: dedicated
       ocpus: 1
       vcpu: 2
       ram_gb: 4
@@ -275,6 +307,7 @@ providers:
       name: A2.Flex 2/4
       shape: VM.Standard.A2.Flex
       arch: ARM64
+      tenancy: dedicated
       ocpus: 2
       vcpu: 2
       ram_gb: 4
@@ -292,6 +325,7 @@ providers:
     - id: e2-standard-2
       name: E2 Standard 2
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 8
       disk_gb: 20
@@ -301,6 +335,7 @@ providers:
     - id: n2-standard-2
       name: N2 Standard 2
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 20
@@ -310,6 +345,7 @@ providers:
     - id: n2d-standard-2
       name: N2D Standard 2
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 20
@@ -319,6 +355,7 @@ providers:
     - id: t2d-standard-2
       name: T2D Standard 2
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 20
@@ -328,6 +365,7 @@ providers:
     - id: c4a-standard-2
       name: C4A Standard 2
       arch: ARM64
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 20
@@ -344,6 +382,7 @@ providers:
     - id: Standard_B2ls_v2
       name: B2ls v2
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 4
       disk_gb: 30
@@ -353,6 +392,7 @@ providers:
     - id: Standard_B2s_v2
       name: B2s v2
       arch: X86
+      tenancy: shared
       vcpu: 2
       ram_gb: 8
       disk_gb: 30
@@ -362,6 +402,7 @@ providers:
     - id: Standard_D2as_v7
       name: D2as v7
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 30
@@ -371,6 +412,7 @@ providers:
     - id: Standard_D4as_v7
       name: D4as v7
       arch: X86
+      tenancy: dedicated
       vcpu: 4
       ram_gb: 16
       disk_gb: 30
@@ -380,6 +422,7 @@ providers:
     - id: Standard_E2as_v7
       name: E2as v7
       arch: X86
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 16
       disk_gb: 30
@@ -389,6 +432,7 @@ providers:
     - id: Standard_D2ps_v6
       name: D2ps v6
       arch: ARM64
+      tenancy: dedicated
       vcpu: 2
       ram_gb: 8
       disk_gb: 30
@@ -398,6 +442,7 @@ providers:
     - id: Standard_D4ps_v6
       name: D4ps v6
       arch: ARM64
+      tenancy: dedicated
       vcpu: 4
       ram_gb: 16
       disk_gb: 30
