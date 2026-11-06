@@ -5,17 +5,32 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v2.5.0] - 2026-11-06
+
+Tells shared from dedicated vCPUs, groups the charts by instance size, and adds a sustained profile for longer runs.
+
+### Features
+
+- Each instance declares its vCPU tenancy in `config/instances.yaml`. It ships as `specs.tenancy`, the dashboard shows and filters on it, and `validate.py` fails when an instance has none.
+- The dashboard splits the chart grid into CPU, memory, disk and value tabs with horizontal bars, and a vCPU switch compares instances of the same size; the full filtered set stays the default view.
+- A sustained profile (360 s CPU and disk) runs next to the standard one. Every run records its profile and the history view marks it, and non-standard runs stay out of the published scores.
+- The dashboard serves the variable Inter font from the site instead of Google Fonts, with its OFL licence alongside.
 
 ### Fixes
 
+- OVHcloud instances are tagged as dedicated cores; UpCloud and OCI keep their tags, with a note on what each provider publishes.
 - Hetzner and UpCloud servers accept SSH only from the runner addresses instead of from any address; the benchmark job adds its own address before connecting.
 - The benchmark workflows wait until every instance answers over SSH. The check used to pass while hosts were still unreachable.
 - `run-local.sh` runs Terraform in the selected provider's directory and passes only the variables it declares.
 
+### Testing
+
+- The standard profile ran end to end on Hetzner; the other providers were not benchmarked.
+
 ### Dependencies
 
 - Terraform 1.10.5 → 1.16.5 in the workflows.
+- pyasn1 0.6.4 → 0.6.5.
 
 ## [v2.4.0] - 2026-10-10
 
