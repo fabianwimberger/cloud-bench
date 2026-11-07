@@ -997,8 +997,8 @@ jobs:
 
           if [ "${{ github.event.inputs.provider }}" = "hetzner" ]; then
             # Install hcloud CLI
-            HCLOUD_VERSION="1.61.0"
-            HCLOUD_SHA256="86da8a0bbff6d56ca39041e4594c2af3b50baf0971526a67669639a213b51936"
+            HCLOUD_VERSION="1.70.2"
+            HCLOUD_SHA256="b844bd28240112b0254183ba5266d0a0f59a6167c196636936459755efb88050"
             HCLOUD_URL="https://github.com/hetznercloud/cli/releases/download/v${HCLOUD_VERSION}/hcloud-linux-amd64.tar.gz"
             curl -fsSL "$HCLOUD_URL" -o hcloud-linux-amd64.tar.gz
             echo "${HCLOUD_SHA256}  hcloud-linux-amd64.tar.gz" | sha256sum -c -
