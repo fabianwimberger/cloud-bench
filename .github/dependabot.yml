@@ -6,6 +6,13 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+      time: "19:00"
+      timezone: "Europe/Vienna"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
     commit-message:
       prefix: "ci"
     labels:
@@ -18,6 +25,13 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+      time: "19:00"
+      timezone: "Europe/Vienna"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
     commit-message:
       prefix: "deps"
     labels:
@@ -30,6 +44,13 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+      time: "19:00"
+      timezone: "Europe/Vienna"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
     commit-message:
       prefix: "deps"
     labels:
@@ -44,6 +65,13 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+      time: "19:00"
+      timezone: "Europe/Vienna"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
     commit-message:
       prefix: "deps"
     labels:
