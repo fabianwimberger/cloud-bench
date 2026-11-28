@@ -9,7 +9,7 @@ description = "Cloud instance benchmarks with cost analysis"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "boto3==1.44.6",
+    "boto3==1.44.7",
     "google-cloud-billing==1.21.0",
     "numpy==2.5.5",
     "pandas==3.1.1",
@@ -21,7 +21,7 @@ dependencies = [
 dev = [
     "pytest==9.2.0",
     "pytest-cov==7.1.0",
-    "ruff==0.17.5",
+    "ruff==0.17.6",
     "mypy==2.4.1",
     "types-PyYAML==6.0.12.20261113",
     "types-requests==2.33.0.20261030",
